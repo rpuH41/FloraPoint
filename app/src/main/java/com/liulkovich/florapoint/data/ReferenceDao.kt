@@ -3,21 +3,26 @@ package com.liulkovich.florapoint.data
 import androidx.room.Dao
 import androidx.room.Query
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.UserPoints
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReferenceDao {
 
+    @Query("SELECT * FROM reference_table")
+    fun getAllSpecies(): Flow<List<Reference>>
+
     @Query("SELECT * FROM reference_table WHERE category = :category")
-    suspend fun getByCategory(category: String): List<Reference>
+    fun getByCategory(category: String): Flow<List<Reference>>
 
     @Query("SELECT * FROM reference_table WHERE category = :category AND name = :name")
-    suspend fun getByCategoryAndName(category: String, name: String): List<Reference>
+    fun getByCategoryAndName(category: String, name: String): Flow<List<Reference>>
 
     @Query("SELECT * FROM reference_table WHERE category = :category AND start_month = :startMonth")
-    suspend fun getByCategoryAndStartSeason(category: String, startMonth: Int): List<Reference>
+    fun getByCategoryAndStartSeason(category: String, startMonth: Int): Flow<List<Reference>>
 
-    @Query("SELECT * FROM reference_table WHERE id = :id")
-    suspend fun getById(id: Int): Reference?
+    @Query("SELECT * FROM reference_table WHERE name = :name")
+    fun getByName(name: String): Flow<List<Reference>>
 
 
 }

@@ -4,9 +4,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface FloraRepository {
 
-    suspend fun getSpeciesByCategory(category: String): List<Reference>
+     fun getAllSpecies(): Flow<List<Reference>>
+     fun getSpeciesByCategory(category: String): Flow<List<Reference>>
 
-    suspend fun getSpeciesById(speciesId: Int): Reference?
+     fun getSpeciesByName(speciesName: String): Flow<List<Reference>>
 
     suspend fun addNewPoint(point: UserPoints)
 

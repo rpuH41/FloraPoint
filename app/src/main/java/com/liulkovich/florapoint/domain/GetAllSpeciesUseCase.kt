@@ -3,10 +3,10 @@ package com.liulkovich.florapoint.domain
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAllUserPointsUseCase @Inject constructor(
+class GetAllSpeciesUseCase @Inject constructor (
     private val repository: FloraRepository
 ) {
-     operator fun invoke(): Flow<List<UserPoints>> {
-       return repository.getAllUserPoints()
+    operator fun invoke(): Flow<List<Reference>> {
+        return repository.getAllSpecies()
     }
 }

@@ -4,14 +4,20 @@ import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class FloraRepositoryImpl(
+class FloraRepositoryImpl @Inject constructor(
+
     private val referenceDao: ReferenceDao,
     private val userPointsDao: UserPointsDao
-): FloraRepository {
-    override suspend fun getSpeciesByCategory(category: String): List<Reference> = referenceDao.getByCategory(category)
 
-    override suspend fun getSpeciesById(speciesId: Int): Reference? = referenceDao.getById(speciesId)
+): FloraRepository {
+
+    override fun getAllSpecies(): Flow<List<Reference>> = referenceDao.getAllSpecies()
+
+    override fun getSpeciesByCategory(category: String): Flow<List<Reference>> = referenceDao.getByCategory(category)
+
+    override fun getSpeciesByName(speciesName: String): Flow<List<Reference>> = referenceDao.getByName(speciesName)
 
     override suspend fun addNewPoint(point: UserPoints) = userPointsDao.insert(point)
 

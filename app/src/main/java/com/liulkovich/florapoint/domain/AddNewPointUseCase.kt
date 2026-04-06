@@ -1,6 +1,8 @@
 package com.liulkovich.florapoint.domain
 
-class AddNewPointUseCase(
+import javax.inject.Inject
+
+class AddNewPointUseCase @Inject constructor(
     private val repository: FloraRepository
 ) {
     suspend operator fun invoke(point: UserPoints){

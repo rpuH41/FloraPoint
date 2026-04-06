@@ -1,9 +1,12 @@
 package com.liulkovich.florapoint.domain
 
-class GetSpeciesByCategoryUseCase(
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class GetSpeciesByCategoryUseCase @Inject constructor(
     private val repository: FloraRepository
 ) {
-    suspend operator fun invoke(category: String): List<Reference>{
+    operator fun invoke(category: String): Flow<List<Reference>> {
         return repository.getSpeciesByCategory(category)
     }
 }
