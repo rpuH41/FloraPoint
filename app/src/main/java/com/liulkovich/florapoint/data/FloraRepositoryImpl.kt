@@ -15,9 +15,13 @@ class FloraRepositoryImpl @Inject constructor(
 
     override fun getAllSpecies(): Flow<List<Reference>> = referenceDao.getAllSpecies()
 
-    override fun getSpeciesByCategory(category: String): Flow<List<Reference>> = referenceDao.getByCategory(category)
+    override fun getSpeciesByCategories(categories: Set<String>): Flow<List<Reference>> = referenceDao.getByCategories(categories)
+
+    override fun getByCategoriesAndName(categories: Set<String>, speciesName: String): Flow<List<Reference>> = referenceDao.getByCategoriesAndName(categories, speciesName)
 
     override fun getSpeciesByName(speciesName: String): Flow<List<Reference>> = referenceDao.getByName(speciesName)
+
+    override fun getById(referenceId: Int): Flow<List<Reference>> = referenceDao.getById(referenceId)
 
     override suspend fun addNewPoint(point: UserPoints) = userPointsDao.insert(point)
 
@@ -26,6 +30,9 @@ class FloraRepositoryImpl @Inject constructor(
     override suspend fun editPoint(point: UserPoints) = userPointsDao.updateUsers(point)
 
     override fun getAllUserPoints(): Flow<List<UserPoints>> = userPointsDao.getAll()
+
+    override suspend fun updateNotification(id: Int, isEnabled: Int) = referenceDao.updateNotification(id, isEnabled)
+
 
 
 }
