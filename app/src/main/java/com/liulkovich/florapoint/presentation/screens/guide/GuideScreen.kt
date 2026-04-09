@@ -1,4 +1,4 @@
-package com.liulkovich.florapoint.presentation.screens
+package com.liulkovich.florapoint.presentation.screens.guide
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -199,7 +199,7 @@ fun GuideCard(
                     } else {
                         painterResource(id = R.drawable.ic_launcher_background)
                     },
-                    contentDescription = null,
+                    contentDescription = "Фото гриба/ягоды/растения/ореха",
                     )
                 Column(
                     modifier = Modifier

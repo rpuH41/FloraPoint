@@ -1,4 +1,4 @@
-package com.liulkovich.florapoint.presentation.screens
+package com.liulkovich.florapoint.presentation.screens.guide
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

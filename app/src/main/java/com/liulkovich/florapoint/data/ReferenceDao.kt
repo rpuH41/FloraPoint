@@ -2,9 +2,7 @@ package com.liulkovich.florapoint.data
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Update
 import com.liulkovich.florapoint.domain.Reference
-import com.liulkovich.florapoint.domain.UserPoints
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,7 +24,7 @@ interface ReferenceDao {
     fun getByName(name: String): Flow<List<Reference>>
 
     @Query("SELECT * FROM reference_table WHERE id = :referenceId")
-    fun getById(referenceId: Int): Flow<List<Reference>>
+    fun getById(referenceId: Int): Flow<Reference?>
 
     @Query("UPDATE reference_table SET is_notif_enabled = :isEnabled WHERE id = :id")
     suspend fun updateNotification(id: Int, isEnabled: Int)

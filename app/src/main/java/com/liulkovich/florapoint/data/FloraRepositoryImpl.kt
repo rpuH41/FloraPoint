@@ -21,7 +21,7 @@ class FloraRepositoryImpl @Inject constructor(
 
     override fun getSpeciesByName(speciesName: String): Flow<List<Reference>> = referenceDao.getByName(speciesName)
 
-    override fun getById(referenceId: Int): Flow<List<Reference>> = referenceDao.getById(referenceId)
+    override fun getById(referenceId: Int): Flow<Reference?> = referenceDao.getById(referenceId)
 
     override suspend fun addNewPoint(point: UserPoints) = userPointsDao.insert(point)
 

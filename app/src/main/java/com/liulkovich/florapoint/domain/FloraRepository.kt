@@ -10,7 +10,7 @@ interface FloraRepository {
     fun getByCategoriesAndName(categories: Set<String>, speciesName: String): Flow<List<Reference>>
 
     fun getSpeciesByName(speciesName: String): Flow<List<Reference>>
-    fun getById(referenceId: Int): Flow<List<Reference>>
+    fun getById(referenceId: Int): Flow<Reference?>
     suspend fun addNewPoint(point: UserPoints)
 
     suspend fun deletePoint(pointId: Int)
