@@ -96,4 +96,5 @@ sealed interface GuideCommand {
 data class GuideScreenState(
     val query: String = "",
     val species: List<Reference> = listOf()
+
 )

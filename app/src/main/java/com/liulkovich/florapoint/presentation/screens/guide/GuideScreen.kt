@@ -47,12 +47,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.liulkovich.florapoint.R
+import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
 
 @Composable
 fun GuideScreen(
     modifier: Modifier = Modifier,
     viewModel: GuideViewModel = hiltViewModel(),
+    onClickDetail: (Reference) -> Unit
 ){
 
     val state by viewModel.state.collectAsState()
@@ -100,6 +102,7 @@ fun GuideScreen(
                     textName = speciesItem.name,
                     startMonth = speciesItem.startMonth,
                     endMonth = speciesItem.endMonth,
+                    reference = speciesItem,
                     onNatifChange = { isChecked ->
                         viewModel.processCommand(
                             GuideCommand.ToggleNotification(
@@ -107,7 +110,8 @@ fun GuideScreen(
                                 enabled = if (isChecked) 1 else 0
                             )
                         )
-                    }
+                    },
+                    onClickDetail = onClickDetail,
                 )
             }
         }
@@ -175,7 +179,9 @@ fun GuideCard(
     textName: String,
     startMonth: Int,
     endMonth: Int,
-    onNatifChange: (Boolean) -> Unit
+    reference: Reference,
+    onNatifChange: (Boolean) -> Unit,
+    onClickDetail:(Reference) -> Unit
 ){
     val context = LocalContext.current
     val imageId = context.resources.getIdentifier(
@@ -187,7 +193,12 @@ fun GuideCard(
             modifier = modifier
                 .fillMaxWidth(),
             shape = RoundedCornerShape(15.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            onClick = {
+                onClickDetail(
+                    reference
+                )
+            }
         ) {
             Row() {
                 Image(
@@ -221,7 +232,7 @@ fun GuideCard(
                         color = Color.Black,
                     )
                 }
-                var selectedNotif by remember { mutableStateOf(false) }
+                var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
 
                 IconToggleButton(
                     checked = selectedNotif,
@@ -233,7 +244,7 @@ fun GuideCard(
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Уведомления",
-                        tint = if (selectedNotif) MaterialTheme.colorScheme.primary
+                        tint = if (selectedNotif) Color.Green/*MaterialTheme.colorScheme.primary*/
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -305,13 +316,13 @@ fun GreetingPreview(){
     FloraPointTheme {
         Column {
             // Передаем реальную строку для картинки
-            GuideCard(
+            /*GuideCard(
                 textImage = "boletus",
                 textName = "Белый гриб",
                 startMonth = 6,
                 endMonth = 9,
                 onNatifChange = {}
-            )
+            )*/
         }
     }
 }

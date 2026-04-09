@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.liulkovich.florapoint.presentation.screens.detail.DetailScreen
+import com.liulkovich.florapoint.presentation.navigation.NavGraph
 import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FloraPointTheme {
-                DetailScreen()
+                NavGraph()
             }
         }
     }
