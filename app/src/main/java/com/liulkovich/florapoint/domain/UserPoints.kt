@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
 ])
 data class UserPoints(
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Int,
  @ColumnInfo(name = "species_id") val speciesId: Int,
  @ColumnInfo(name = "latitude") val latitude: Double,

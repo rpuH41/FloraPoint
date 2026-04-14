@@ -25,6 +25,7 @@ object DatabaseModule {
             "flora.db"
         )
             .createFromAsset("flora.db")
+            //.fallbackToDestructiveMigration()
             .build()
     }
 

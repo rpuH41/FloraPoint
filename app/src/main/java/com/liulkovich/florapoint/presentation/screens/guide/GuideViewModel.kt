@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.guide
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
@@ -25,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GuideViewModel @Inject constructor(
 
+    savedStateHandle: SavedStateHandle,
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
     private val getSpeciesByCategoryUseCase: GetSpeciesByCategoryUseCase,
     private val getSpeciesByNameUseCase: GetSpeciesByNameUseCase,
@@ -39,6 +41,13 @@ class GuideViewModel @Inject constructor(
 
 
     init {
+
+        val initialCategory = savedStateHandle.get<String>("category") ?: ""
+        if (initialCategory.isNotEmpty()) {
+            selectedCategories.update { setOf(initialCategory) }
+            _state.update { it.copy(selectedCategories = setOf(initialCategory)) }
+        }
+
         combine(query, selectedCategories) { input, categories ->
             input to categories
         }
@@ -76,6 +85,7 @@ class GuideViewModel @Inject constructor(
                         else
                             current + command.check
                     }
+                    _state.update { it.copy(selectedCategories = selectedCategories.value) }
                 }
                 is GuideCommand.ToggleNotification -> {
                     updateNotificationUseCase(command.id, command.enabled)
@@ -95,6 +105,7 @@ sealed interface GuideCommand {
 }
 data class GuideScreenState(
     val query: String = "",
-    val species: List<Reference> = listOf()
+    val species: List<Reference> = listOf(),
+    val selectedCategories: Set<String> = emptySet()
 
 )

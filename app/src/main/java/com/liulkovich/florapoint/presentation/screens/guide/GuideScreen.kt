@@ -32,7 +32,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,13 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
-import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
 
 @Composable
 fun GuideScreen(
@@ -65,7 +62,7 @@ fun GuideScreen(
                 modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
             ) {
-                    Spacer(modifier = Modifier.height(30.dp))
+                    //Spacer(modifier = Modifier.height(30.dp))
                     Title(
                         modifier = Modifier
                             .padding(horizontal = 24.dp),
@@ -81,6 +78,7 @@ fun GuideScreen(
                         }
                     )
                     PanelFilter(
+                        selectedCategories = state.selectedCategories,
                         onCategoryChange = { categoryName ->
                             viewModel.processCommand(GuideCommand.CheckCategory(categoryName))
                         }
@@ -221,7 +219,6 @@ fun GuideCard(
                             .padding(10.dp),
                         text = textName,
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.Black,
                         fontWeight = Bold
                     )
                     Text(
@@ -229,7 +226,6 @@ fun GuideCard(
                             .padding( start = 10.dp ),
                         text = "Период: c ${numberInString(startMonth).first} по ${numberInString(endMonth).second}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black,
                     )
                 }
                 var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
@@ -272,29 +268,22 @@ fun numberInString(number: Int): Pair<String, String>{
 }
 @Composable
 fun PanelFilter(
+    selectedCategories: Set<String>,
     onCategoryChange: (String) -> Unit
 ){
         val categories = listOf("Грибы", "Ягоды", "Растения", "Орехи")
-        val selectedFilters = remember { mutableStateListOf<String>() }
+        //val selectedFilters = remember { mutableStateListOf<String>() }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
         ) {
             categories.forEach { name ->
-                val isSelected = selectedFilters.contains(name)
+                val isSelected = selectedCategories.contains(name)
 
                 ElevatedFilterChip(
                     selected = isSelected,
-                    onClick = {
-                        if (isSelected) {
-                            selectedFilters.remove(name)
-                            onCategoryChange(name)
-                        } else {
-                            selectedFilters.add(name)
-                            onCategoryChange(name)
-                        }
-                    },
+                    onClick = { onCategoryChange(name) },
                     label = { Text(name) },
                     leadingIcon = if (isSelected) {
                         {
@@ -307,22 +296,5 @@ fun PanelFilter(
                     } else null
                 )
             }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview(){
-    FloraPointTheme {
-        Column {
-            // Передаем реальную строку для картинки
-            /*GuideCard(
-                textImage = "boletus",
-                textName = "Белый гриб",
-                startMonth = 6,
-                endMonth = 9,
-                onNatifChange = {}
-            )*/
-        }
     }
 }

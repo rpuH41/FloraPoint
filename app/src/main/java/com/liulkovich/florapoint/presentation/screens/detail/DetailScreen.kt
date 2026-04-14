@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -65,13 +66,16 @@ fun DetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     Scaffold(
+
         topBar = {
+
             TopAppBar(
+                windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
                 title = {
                     Text(
                         text = state.species?.name ?: "",
-                        color = Color.Black,
                         fontWeight = Bold,
+                        style = MaterialTheme.typography.titleLarge,
                         fontSize = 24.sp,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -89,7 +93,6 @@ fun DetailScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Назад",
-                            tint = Color.Black
                         )
                     }
                 },
@@ -108,7 +111,8 @@ fun DetailScreen(
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Уведомления",
-                            tint = if (notifEnabled) Color(0xFF66BB6A) else Color.Black
+                            tint = if (notifEnabled) Color(0xFF66BB6A)
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -143,30 +147,32 @@ fun HeroImage(imageName: String, name: String) {
         Image(
             painter = if (imageId != 0) painterResource(imageId)
             else painterResource(R.drawable.ic_launcher_background),
-            contentDescription = null,
+            contentDescription = "Изображения гриба, ягоды, растения, ореха",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                )
+                .clip(RoundedCornerShape(16.dp))
         )
-        // Градиент поверх картинки
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color(0xFF1B5E20)),
-                        startY = 100f
-                    )
-                )
+
         )
-        // Название поверх градиента
         Text(
             text = name,
-            fontSize = 28.sp,
-            fontWeight = Bold,
             color = Color.White,
+            fontSize = 25.sp,
+            fontWeight = Bold,
+
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(
+                    start = 26.dp,
+                    bottom = 16.dp
+                )
         )
     }
 }
@@ -193,7 +199,7 @@ fun InfoSection(species: Reference) {
         InfoBlock(
             icon = Icons.Default.DateRange,
             title = "Период сбора",
-            text = "с ${numberInString(species.startMonth).first} по ${numberInString(species.endMonth).second}"
+            text = "С ${numberInString(species.startMonth).first} по ${numberInString(species.endMonth).second}"
         )
     }
 }
@@ -216,15 +222,15 @@ fun InfoBlock(icon: ImageVector, title: String, text: String) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color(0xFF2E7D32),
+                //tint = Color(0xFF2E7D32),
                 modifier = Modifier.padding(end = 12.dp, top = 2.dp)
             )
             Column {
                 Text(
                     text = title,
                     fontWeight = Bold,
-                    fontSize = 14.sp,
-                    color = Color(0xFF2E7D32)
+                    style = MaterialTheme.typography.titleSmall,
+
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
