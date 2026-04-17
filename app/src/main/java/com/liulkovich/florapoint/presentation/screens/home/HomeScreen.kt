@@ -1,9 +1,9 @@
 package com.liulkovich.florapoint.presentation.screens.home
 
-import android.preference.PreferenceManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,7 +54,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
-import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -295,7 +295,7 @@ fun HomeSeasonCard(
             )
             Text(
                 modifier = Modifier.padding(start = 8.dp, bottom = 4.dp),
-                text = "Осталось ${countDay(endMonth)} дней",
+                text = "Осталось ~${countDay(endMonth)} дней",
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -331,25 +331,14 @@ fun MapPanel(
             .fillMaxWidth()
             .height(150.dp)
             .clip(RoundedCornerShape(16.dp))
-            .clickable { onClickMap() }
     ) {
-
         AndroidView(
             factory = {
-
-                Configuration.getInstance().load(
-                    context,
-                    PreferenceManager.getDefaultSharedPreferences(context)
-                )
-
                 MapView(context).apply {
                     setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(false)
-
-                    controller.setZoom(10.0)
-                    controller.setCenter(
-                        GeoPoint(55.751244, 37.618423)
-                    )
+                    controller.setZoom(12.0)
+                    controller.setCenter(GeoPoint(53.133562, 25.141006))
                 }
             },
             modifier = Modifier.matchParentSize()
@@ -358,12 +347,19 @@ fun MapPanel(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color.Black.copy(alpha = 0.2f)),
+                .background(Color.Black.copy(alpha = 0.35f))
+                .clickable(
+                    onClick = onClickMap,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Открыть карту",
-                color = Color.White
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }

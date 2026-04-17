@@ -18,6 +18,7 @@ import com.liulkovich.florapoint.presentation.screens.detail.DetailScreen
 import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
+import com.liulkovich.florapoint.presentation.screens.map.MapScreen
 
 @Composable
 fun NavGraph() {
@@ -85,7 +86,9 @@ fun NavGraph() {
             }
 
             composable(Screen.Map.rout) {
-                Box(modifier = Modifier.fillMaxSize())
+                MapScreen(
+
+                )
             }
 
             composable(Screen.Notifications.rout) {

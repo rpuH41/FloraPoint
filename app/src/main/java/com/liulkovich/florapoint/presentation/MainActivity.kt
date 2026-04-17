@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FloraPointTheme {
                 NavGraph()
+                //MapScreen()
             }
         }
     }
