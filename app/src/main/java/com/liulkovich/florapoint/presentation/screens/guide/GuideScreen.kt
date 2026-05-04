@@ -52,48 +52,38 @@ fun GuideScreen(
     modifier: Modifier = Modifier,
     viewModel: GuideViewModel = hiltViewModel(),
     onClickDetail: (Reference) -> Unit
-){
-
+) {
     val state by viewModel.state.collectAsState()
 
     Scaffold(
         topBar = {
             Column(
-                modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
             ) {
-                    //Spacer(modifier = Modifier.height(30.dp))
-                    Title(
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp),
-                        text = "Справочник"
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    SearchBar(
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp),
-                        query = state.query,
-                        onQueryChange = {
-                            viewModel.processCommand(GuideCommand.InputSearchQuery(it))
-                        }
-                    )
-                    PanelFilter(
-                        selectedCategories = state.selectedCategories,
-                        onCategoryChange = { categoryName ->
-                            viewModel.processCommand(GuideCommand.CheckCategory(categoryName))
-                        }
-                    )
-                }
+                Spacer(modifier = Modifier.height(24.dp))
+                SearchBar(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    query = state.query,
+                    onQueryChange = {
+                        viewModel.processCommand(GuideCommand.InputSearchQuery(it))
+                    }
+                )
+                PanelFilter(
+                    selectedCategories = state.selectedCategories,
+                    onCategoryChange = { categoryName ->
+                        viewModel.processCommand(GuideCommand.CheckCategory(categoryName))
+                    }
+                )
             }
-        ) { innerPadding ->
+        }
+    ) { innerPadding ->
         LazyColumn(
             contentPadding = innerPadding
         ) {
-
             item {
                 Spacer(modifier = Modifier.height(5.dp))
             }
-            items(state.species) {speciesItem ->
+            items(state.species) { speciesItem ->
                 GuideCard(
                     modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                     textImage = speciesItem.imageName,
@@ -101,7 +91,7 @@ fun GuideScreen(
                     startMonth = speciesItem.startMonth,
                     endMonth = speciesItem.endMonth,
                     reference = speciesItem,
-                    onNatifChange = { isChecked ->
+                    onNotifChange = { isChecked ->
                         viewModel.processCommand(
                             GuideCommand.ToggleNotification(
                                 id = speciesItem.id,
@@ -116,19 +106,6 @@ fun GuideScreen(
     }
 }
 
-@Composable
-private fun Title(
-    modifier: Modifier = Modifier,
-    text: String,
-) {
-    Text(
-        modifier = modifier,
-        text = text,
-        fontSize = 24.sp,
-        fontWeight = Bold,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-}
 @Composable
 private fun SearchBar(
     modifier: Modifier = Modifier,
@@ -148,7 +125,7 @@ private fun SearchBar(
         onValueChange = onQueryChange,
         placeholder = {
             Text(
-                text = "Ввидите название",
+                text = "Введите название", // исправлена опечатка
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -162,7 +139,7 @@ private fun SearchBar(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search notes",
+                contentDescription = "Поиск",
                 tint = MaterialTheme.colorScheme.onSurface
             )
         },
@@ -178,78 +155,71 @@ fun GuideCard(
     startMonth: Int,
     endMonth: Int,
     reference: Reference,
-    onNatifChange: (Boolean) -> Unit,
-    onClickDetail:(Reference) -> Unit
-){
+    onNotifChange: (Boolean) -> Unit, // исправлено название
+    onClickDetail: (Reference) -> Unit
+) {
     val context = LocalContext.current
     val imageId = context.resources.getIdentifier(
         textImage,
         "drawable",
         context.packageName
     )
-        Card(
-            modifier = modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(15.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            onClick = {
-                onClickDetail(
-                    reference
+
+    var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = { onClickDetail(reference) }
+    ) {
+        Row {
+            Image(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(10.dp),
+                painter = if (imageId != 0) {
+                    painterResource(id = imageId)
+                } else {
+                    painterResource(id = R.drawable.ic_launcher_background)
+                },
+                contentDescription = "Фото гриба/ягоды/растения/ореха",
+            )
+            Column(
+                modifier = Modifier.weight(2f)
+            ) {
+                Text(
+                    modifier = Modifier.padding(10.dp),
+                    text = textName,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = Bold
+                )
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    text = "Период: c ${numberInString(startMonth).first} по ${numberInString(endMonth).second}",
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
-        ) {
-            Row() {
-                Image(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(10.dp),
-                    painter = if (imageId != 0) {
-                        painterResource(id = imageId)
-                    } else {
-                        painterResource(id = R.drawable.ic_launcher_background)
-                    },
-                    contentDescription = "Фото гриба/ягоды/растения/ореха",
-                    )
-                Column(
-                    modifier = Modifier
-                        .weight(2f)
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(10.dp),
-                        text = textName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = Bold
-                    )
-                    Text(
-                        modifier = Modifier
-                            .padding( start = 10.dp ),
-                        text = "Период: c ${numberInString(startMonth).first} по ${numberInString(endMonth).second}",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+            IconToggleButton(
+                checked = selectedNotif,
+                onCheckedChange = { isChecked ->
+                    selectedNotif = isChecked
+                    onNotifChange(isChecked)
                 }
-                var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
-
-                IconToggleButton(
-                    checked = selectedNotif,
-                    onCheckedChange = { isChecked ->
-                        selectedNotif = isChecked
-                        onNatifChange(isChecked)
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Уведомления",
-                        tint = if (selectedNotif) Color.Green/*MaterialTheme.colorScheme.primary*/
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Уведомления",
+                    tint = if (selectedNotif) Color(0xFF1B5E20)
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
+    }
 }
 
-fun numberInString(number: Int): Pair<String, String>{
-    val month:Pair<String, String> = when(number){
+fun numberInString(number: Int): Pair<String, String> {
+    return when (number) {
         1 -> "января" to "январь"
         2 -> "февраля" to "февраль"
         3 -> "марта" to "март"
@@ -264,37 +234,35 @@ fun numberInString(number: Int): Pair<String, String>{
         12 -> "декабря" to "декабрь"
         else -> "Неизвестно" to "Неизвестно"
     }
-    return month
 }
+
 @Composable
 fun PanelFilter(
     selectedCategories: Set<String>,
     onCategoryChange: (String) -> Unit
-){
-        val categories = listOf("Грибы", "Ягоды", "Растения", "Орехи")
-        //val selectedFilters = remember { mutableStateListOf<String>() }
+) {
+    val categories = listOf("Грибы", "Ягоды", "Растения", "Орехи")
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
-        ) {
-            categories.forEach { name ->
-                val isSelected = selectedCategories.contains(name)
-
-                ElevatedFilterChip(
-                    selected = isSelected,
-                    onClick = { onCategoryChange(name) },
-                    label = { Text(name) },
-                    leadingIcon = if (isSelected) {
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = null,
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    } else null
-                )
-            }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+    ) {
+        categories.forEach { name ->
+            val isSelected = selectedCategories.contains(name)
+            ElevatedFilterChip(
+                selected = isSelected,
+                onClick = { onCategoryChange(name) },
+                label = { Text(name) },
+                leadingIcon = if (isSelected) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else null
+            )
+        }
     }
 }

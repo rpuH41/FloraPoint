@@ -1,6 +1,7 @@
 [versions]
 agp = "9.0.1"
 coreKtx = "1.18.0"
+datastorePreferences = "1.2.1"
 hiltAndroid = "2.59.2"
 hiltNavigationCompose = "1.3.0"
 junit = "4.13.2"
@@ -8,19 +9,22 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-kotlin = "2.3.20"
-composeBom = "2026.03.01"
-mapsCompose = "8.2.2"
-navigationCompose = " 2.9.7"
+kotlin = "2.3.21"
+composeBom = "2026.04.01"
+mapsCompose = "8.3.0"
+navigationCompose = "2.9.8"
 osmdroidAndroid = "6.1.20"
 playServicesLocation = "21.3.0"
 roomRuntime = "2.8.4"
 ksp = "2.3.4"
 hilt = "2.59.2"
+hiltWork = "1.3.0"
+workRuntime = "2.11.2"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
@@ -45,6 +49,9 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

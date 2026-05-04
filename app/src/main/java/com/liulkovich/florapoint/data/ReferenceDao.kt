@@ -29,4 +29,7 @@ interface ReferenceDao {
     @Query("UPDATE reference_table SET is_notif_enabled = :isEnabled WHERE id = :id")
     suspend fun updateNotification(id: Int, isEnabled: Int)
 
+    @Query("SELECT * FROM reference_table WHERE is_notif_enabled = 1")
+    suspend fun getNotificationEnabled(): List<Reference>
+
 }

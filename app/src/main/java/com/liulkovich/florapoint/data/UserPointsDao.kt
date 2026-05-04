@@ -1,7 +1,6 @@
 package com.liulkovich.florapoint.data
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -21,4 +20,7 @@ interface UserPointsDao {
 
     @Query("SELECT * FROM user_points_table")
      fun getAll(): Flow<List<UserPoints>>
+
+    @Query("SELECT COUNT(*) FROM user_points_table WHERE species_id = :speciesId")
+    suspend fun countBySpeciesId(speciesId: Int): Int
 }

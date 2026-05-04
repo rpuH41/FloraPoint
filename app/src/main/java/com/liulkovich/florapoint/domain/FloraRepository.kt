@@ -21,4 +21,7 @@ interface FloraRepository {
 
     suspend fun updateNotification(id: Int, isEnabled: Int)
 
+    suspend fun getNotificationEnabled(): List<Reference>
+
+    suspend fun hasPointsForSpecies(speciesId: Int): Boolean
 }

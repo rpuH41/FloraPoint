@@ -1,7 +1,5 @@
 package com.liulkovich.florapoint.presentation.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -19,6 +17,7 @@ import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
+import com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen
 
 @Composable
 fun NavGraph() {
@@ -92,7 +91,7 @@ fun NavGraph() {
             }
 
             composable(Screen.Notifications.rout) {
-                Box(modifier = Modifier.fillMaxSize())
+                NotificationScreen()
             }
 
             composable(

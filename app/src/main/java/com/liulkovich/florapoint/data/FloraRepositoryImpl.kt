@@ -33,6 +33,8 @@ class FloraRepositoryImpl @Inject constructor(
 
     override suspend fun updateNotification(id: Int, isEnabled: Int) = referenceDao.updateNotification(id, isEnabled)
 
+    override suspend fun getNotificationEnabled(): List<Reference> = referenceDao.getNotificationEnabled()
 
+    override suspend fun hasPointsForSpecies(speciesId: Int): Boolean = userPointsDao.countBySpeciesId(speciesId) > 0
 
 }
