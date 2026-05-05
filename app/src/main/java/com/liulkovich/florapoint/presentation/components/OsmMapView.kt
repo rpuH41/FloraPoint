@@ -1,7 +1,5 @@
 package com.liulkovich.florapoint.presentation.components
 
-import android.R.attr.category
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,6 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.drawable.toDrawable
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
 import com.liulkovich.florapoint.presentation.screens.map.utils.createShapeMarkerBitmap
@@ -32,6 +31,8 @@ fun OsmMapView(
     species: List<Reference>,
     selectedPointId: Int? = null,
     currentLocation: Pair<Double, Double>?,
+    shouldFollowLocation: Boolean = true,
+    forceCenter: GeoPoint? = null,
     onMapReady: (MapView, MyLocationNewOverlay) -> Unit,
     onMarkerClick: (UserPoints) -> Unit,
     onMarkerLongClick: (UserPoints) -> Unit,
@@ -39,6 +40,7 @@ fun OsmMapView(
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
     var isInitialized by remember { mutableStateOf(false) }
+    var locationOverlay by remember { mutableStateOf<MyLocationNewOverlay?>(null) }
 
     AndroidView(
         modifier = modifier.clip(RoundedCornerShape(16.dp)),
@@ -46,39 +48,47 @@ fun OsmMapView(
             mapView.apply {
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
+                setBuiltInZoomControls(false)
 
                 controller.setCenter(GeoPoint(53.133562, 25.141006))
                 controller.setZoom(13.0)
 
-                val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), this)
-                locationOverlay.enableMyLocation()
-                locationOverlay.enableFollowLocation()
-                overlays.add(locationOverlay)
+                val overlay = MyLocationNewOverlay(GpsMyLocationProvider(context), this)
+                overlay.enableMyLocation()
+                if (shouldFollowLocation) overlay.enableFollowLocation()
+                overlays.add(overlay)
+                locationOverlay = overlay
 
-                onMapReady(this, locationOverlay)
+                onMapReady(this, overlay)
             }
         },
         update = { mv ->
-            if (!isInitialized && currentLocation != null) {
+            val overlay = locationOverlay ?: return@AndroidView
+
+            if (shouldFollowLocation && !overlay.isFollowLocationEnabled) {
+                overlay.enableFollowLocation()
+            } else if (!shouldFollowLocation && overlay.isFollowLocationEnabled) {
+                overlay.disableFollowLocation()
+            }
+
+            if (forceCenter != null) {
+                mv.controller.animateTo(forceCenter)
+                if (overlay.isFollowLocationEnabled) {
+                    overlay.disableFollowLocation()
+                }
+            } else if (!isInitialized && currentLocation != null && shouldFollowLocation) {
                 mv.controller.setCenter(GeoPoint(currentLocation.first, currentLocation.second))
                 isInitialized = true
             }
 
-            // Удаляем старые маркеры
             mv.overlays.removeAll { it is Marker || it is MapEventsOverlay }
 
-            // Добавляем маркеры
             points.forEach { point ->
                 val ref = species.find { it.id == point.speciesId }
 
-                // Отладка
-                println("DEBUG POINT: id=${point.id}, speciesId=${point.speciesId}, savedCategory=${point.category}, final=$category")
-
                 val category = when {
-                    !point.category.isNullOrBlank() -> point.category!!.lowercase().trim()
-
-                    ref != null && !ref.category.isNullOrBlank() -> ref.category!!.lowercase().trim()
-
+                    !point.category.isNullOrBlank() -> point.category.lowercase().trim()
+                    ref != null && ref.category.isNotBlank() -> ref.category.lowercase().trim()
                     else -> "custom"
                 }
 
@@ -87,18 +97,14 @@ fun OsmMapView(
                 val marker = Marker(mv).apply {
                     position = GeoPoint(point.latitude, point.longitude)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
                     title = point.userName.ifBlank { ref?.name ?: "Точка ${point.id}" }
                     snippet = ref?.name
-
-                    icon = BitmapDrawable(context.resources, bitmap)
-
+                    icon = bitmap.toDrawable(context.resources)
                     setOnMarkerClickListener { _, _ ->
                         onMarkerClick(point)
                         true
                     }
                 }
-
                 mv.overlays.add(marker)
             }
 

@@ -35,65 +35,143 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
     when (lower) {
         "mushroom" -> {
             fill.color = mainColor
+            stroke.color = android.graphics.Color.WHITE
+            stroke.strokeWidth = 4f
+
             val cap = Path().apply {
-                moveTo(cx - 29f, 42f)
-                lineTo(cx + 29f, 42f)
-                quadTo(cx, 16f, cx - 29f, 42f)
+                moveTo(cx - 34f, 48f)
+                quadTo(cx, 8f, cx + 34f, 48f)
+                lineTo(cx - 34f, 48f)
+                close()
             }
             canvas.drawPath(cap, fill)
             canvas.drawPath(cap, stroke)
 
-            val stem = RectF(cx - 9f, 42f, cx + 9f, 78f)
+            fill.color = "#D2B48C".toColorInt()
+            val stem = RectF(cx - 9f, 48f, cx + 9f, 78f)
             canvas.drawRect(stem, fill)
             canvas.drawRect(stem, stroke)
+
+            val highlight = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.WHITE
+                alpha = 160
+            }
+            canvas.drawCircle(cx - 14f, 26f, 8f, highlight)
         }
 
         "berry" -> {
             fill.color = mainColor
-            val berry = Path().apply {
-                moveTo(cx, 68f)
-                cubicTo(cx - 22f, 48f, cx - 25f, 32f, cx, 22f)
-                cubicTo(cx + 25f, 32f, cx + 22f, 48f, cx, 68f)
+
+            val radius = 26f
+            val berryRect = RectF(cx - radius, 68f - radius * 0.9f, cx + radius, 68f + radius * 0.7f)
+            canvas.drawOval(berryRect, fill)
+            canvas.drawOval(berryRect, stroke)
+
+            val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.WHITE
+                alpha = 180
             }
-            canvas.drawPath(berry, fill)
-            canvas.drawPath(berry, stroke)
+            canvas.drawCircle(cx - 8f, 60f, 7f, highlightPaint)
+
+            val leafPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = "#2E7D32".toColorInt()
+                style = Paint.Style.FILL
+            }
+            val leafPath = Path().apply {
+                moveTo(cx, 48f)
+                cubicTo(cx - 5f, 45f, cx - 10f, 48f, cx - 12f, 52f)
+                cubicTo(cx - 8f, 50f, cx - 4f, 49f, cx, 48f)
+                moveTo(cx, 48f)
+                cubicTo(cx + 5f, 45f, cx + 10f, 48f, cx + 12f, 52f)
+                cubicTo(cx + 8f, 50f, cx + 4f, 49f, cx, 48f)
+            }
+            canvas.drawPath(leafPath, leafPaint)
+
+            val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = "#4A148C".toColorInt()
+            }
+            canvas.drawCircle(cx, 68f, 5f, centerPaint)
         }
 
         "plant" -> {
             fill.color = mainColor
-            val leaf1 = Path().apply {
-                moveTo(cx - 6f, 75f)
-                lineTo(cx - 22f, 35f)
-                lineTo(cx - 5f, 25f)
-                lineTo(cx + 8f, 42f)
-                close()
-            }
-            val leaf2 = Path().apply {
-                moveTo(cx + 6f, 75f)
-                lineTo(cx + 22f, 35f)
-                lineTo(cx + 5f, 25f)
-                lineTo(cx - 8f, 42f)
-                close()
-            }
-            canvas.drawPath(leaf1, fill)
-            canvas.drawPath(leaf2, fill)
-            canvas.drawPath(leaf1, stroke)
-            canvas.drawPath(leaf2, stroke)
 
-            fill.color = "#1B5E20".toColorInt()
-            canvas.drawRect(cx - 3f, 48f, cx + 3f, 78f, fill)
+            val stemPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = mainColor
+                strokeWidth = 8f
+                style = Paint.Style.STROKE
+                strokeCap = Paint.Cap.ROUND
+            }
+            canvas.drawLine(cx, 48f, cx, 78f, stemPaint)
+
+            val leftLeaf = Path().apply {
+                moveTo(cx, 48f)
+                cubicTo(cx - 12f, 48f, cx - 22f, 38f, cx - 22f, 30f)
+                cubicTo(cx - 22f, 22f, cx - 12f, 22f, cx, 28f)
+            }
+            canvas.drawPath(leftLeaf, fill)
+            canvas.drawPath(leftLeaf, stroke)
+
+            val rightLeaf = Path().apply {
+                moveTo(cx, 48f)
+                cubicTo(cx + 12f, 48f, cx + 22f, 38f, cx + 22f, 30f)
+                cubicTo(cx + 22f, 22f, cx + 12f, 22f, cx, 28f)
+            }
+            canvas.drawPath(rightLeaf, fill)
+            canvas.drawPath(rightLeaf, stroke)
         }
 
         "nut" -> {
-            fill.color = mainColor
-            val nut = RectF(cx - 19f, 32f, cx + 19f, 68f)
-            canvas.drawOval(nut, fill)
-            canvas.drawOval(nut, stroke)
+            val shellColor = "#D2A679".toColorInt()
+            val capColor = "#8B5A2B".toColorInt()
+            val lineColor = "#6B4226".toColorInt()
 
-            fill.color = "#4E342E".toColorInt()
-            val cap = RectF(cx - 21f, 22f, cx + 21f, 38f)
-            canvas.drawOval(cap, fill)
-            canvas.drawOval(cap, stroke)
+            fill.color = shellColor
+            stroke.color = android.graphics.Color.WHITE
+            stroke.strokeWidth = 4f
+
+            val bodyPath = Path().apply {
+                moveTo(cx, 78f)
+                cubicTo(cx + 24f, 68f, cx + 28f, 44f, cx + 16f, 30f)
+                cubicTo(cx + 6f, 20f, cx - 6f, 20f, cx - 16f, 30f)
+                cubicTo(cx - 28f, 44f, cx - 24f, 68f, cx, 78f)
+                close()
+            }
+            canvas.drawPath(bodyPath, fill)
+            canvas.drawPath(bodyPath, stroke)
+
+            val capPath = Path().apply {
+                moveTo(cx - 20f, 32f)
+                cubicTo(cx - 22f, 22f, cx - 10f, 18f, cx, 18f)
+                cubicTo(cx + 10f, 18f, cx + 22f, 22f, cx + 20f, 32f)
+                cubicTo(cx + 14f, 28f, cx - 14f, 28f, cx - 20f, 32f)
+                close()
+            }
+            canvas.drawPath(capPath, fill.apply { color = capColor })
+            canvas.drawPath(capPath, stroke)
+
+            val ridgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = lineColor
+                strokeWidth = 2.5f
+                style = Paint.Style.STROKE
+            }
+            canvas.drawLine(cx, 40f, cx, 72f, ridgePaint)
+            canvas.drawLine(cx - 10f, 48f, cx - 8f, 70f, ridgePaint)
+            canvas.drawLine(cx + 10f, 48f, cx + 8f, 70f, ridgePaint)
+
+            val crackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = lineColor
+                strokeWidth = 2f
+                style = Paint.Style.STROKE
+            }
+            canvas.drawLine(cx - 4f, 52f, cx + 4f, 62f, crackPaint)
+            canvas.drawLine(cx + 2f, 56f, cx - 2f, 66f, crackPaint)
+
+            val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.WHITE
+                alpha = 150
+            }
+            canvas.drawCircle(cx - 8f, 48f, 6f, highlightPaint)
         }
 
         else -> {

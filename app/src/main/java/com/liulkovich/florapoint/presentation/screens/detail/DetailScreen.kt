@@ -54,6 +54,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.presentation.screens.guide.numberInString
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,6 +131,24 @@ fun DetailScreen(
             ) {
                 item { HeroImage(species.imageName, species.name) }
                 item { InfoSection(species) }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { onNotificationToggle(!state.isNotificationEnabled) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (state.isNotificationEnabled) Color(0xFF66BB6A) else MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = if (state.isNotificationEnabled) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Text(
+                            text = if (state.isNotificationEnabled) "Отключить уведомления" else "Включить уведомления"
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }

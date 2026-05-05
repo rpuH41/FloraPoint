@@ -49,8 +49,9 @@ fun EditPointSheetContent(
     onDismiss: () -> Unit
 ) {
     val existingRef = species.find { it.id == point.speciesId }
+    val currentCategory = existingRef?.category ?: point.category
     val currentType = FLORA_TYPES.firstOrNull {
-        categoryForType(it) == existingRef?.category
+        categoryForType(it) == currentCategory
     } ?: FLORA_TYPES.first()
 
     var selectedType by remember(point) { mutableStateOf(currentType) }
@@ -62,7 +63,7 @@ fun EditPointSheetContent(
 
     var searchText by remember(point) {
         mutableStateOf(
-            point.userName.ifBlank { existingRef?.name ?: "" }
+            existingRef?.name ?: point.userName.ifBlank { "" }
         )
     }
     var selectedSpecies by remember(point, filteredSpecies) {
@@ -77,15 +78,14 @@ fun EditPointSheetContent(
     }
 
     var description by remember(point) { mutableStateOf(point.description) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+   // var showDeleteDialog by remember { mutableStateOf(false) }
 
     val dateStr = remember(point.timestamp) {
         SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-            .format(Date(point.timestamp.toLong() * 1000))
+            .format(Date(point.timestamp * 1000))
     }
 
     SheetContent(title = "Редактировать точку") {
-
         Text(
             text = "Добавлено: $dateStr",
             style = MaterialTheme.typography.labelSmall,
@@ -115,8 +115,9 @@ fun EditPointSheetContent(
                         onClick = {
                             selectedType = type
                             typeDropdownExpanded = false
-                            searchText = ""
-                            selectedSpecies = null
+                            if (selectedSpecies != null && categoryForType(type) != selectedSpecies?.category) {
+                                selectedSpecies = null
+                            }
                         }
                     )
                 }
@@ -135,13 +136,8 @@ fun EditPointSheetContent(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             supportingText = {
-                when {
-                    selectedSpecies != null ->
-                        Text("✓ Совпадает со справочником", color = MaterialTheme.colorScheme.primary)
-                    searchText.isNotBlank() && suggestions.isEmpty() && searchText.length >= 2 ->
-                        Text("Не найдено в справочнике — сохранится как своё название",
-                            color = MaterialTheme.colorScheme.outline)
-                    else -> {}
+                if (selectedSpecies != null) {
+                    Text("✓ Совпадает со справочником", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -222,5 +218,4 @@ fun EditPointSheetContent(
             }
         }
     }
-
 }

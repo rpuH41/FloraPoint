@@ -53,8 +53,8 @@ fun AddPointSheetContent(
     var searchText by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
 
-    val suggestions = remember(searchText, filteredSpecies) {
-        if (searchText.length < 2) emptyList()
+    val suggestions = remember(searchText, filteredSpecies, selectedSpecies) {
+        if (searchText.length < 2 || selectedSpecies != null) emptyList()
         else filteredSpecies.filter {
             it.name.lowercase().contains(searchText.lowercase().trim())
         }
@@ -84,8 +84,9 @@ fun AddPointSheetContent(
                         onClick = {
                             selectedType = type
                             typeDropdownExpanded = false
-                            searchText = ""
-                            selectedSpecies = null
+                            if (selectedSpecies != null && categoryForType(type) != selectedSpecies?.category) {
+                                selectedSpecies = null
+                            }
                         }
                     )
                 }
@@ -111,13 +112,8 @@ fun AddPointSheetContent(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             supportingText = {
-                when {
-                    selectedSpecies != null ->
-                        Text("✓ Совпадает со справочником", color = MaterialTheme.colorScheme.primary)
-                    searchText.isNotBlank() && suggestions.isEmpty() ->
-                        Text("Не найдено в справочнике — сохранится как своё название",
-                            color = MaterialTheme.colorScheme.outline)
-                    else -> {}
+                if (selectedSpecies != null) {
+                    Text("✓ Совпадает со справочником", color = MaterialTheme.colorScheme.primary)
                 }
             }
         )

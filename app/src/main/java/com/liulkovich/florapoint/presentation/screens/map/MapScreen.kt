@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +70,8 @@ fun MapScreen(
     val myLocationOverlayRef = remember { mutableStateOf<MyLocationNewOverlay?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
+    var shouldFollowLocation by remember { mutableStateOf(true) }
+    var forceCenter by remember { mutableStateOf<GeoPoint?>(null) }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -109,9 +112,8 @@ fun MapScreen(
         viewModel.command.collectLatest { command ->
             when (command) {
                 is MapCommand.CenterMapOnPoint -> {
-                    mapViewRef.value?.controller?.animateTo(
-                        GeoPoint(command.point.latitude, command.point.longitude)
-                    )
+                    shouldFollowLocation = false
+                    forceCenter = GeoPoint(command.point.latitude, command.point.longitude)
                 }
                 else -> Unit
             }
@@ -133,11 +135,17 @@ fun MapScreen(
                     species = state.species,
                     selectedPointId = state.selectedPointId,
                     currentLocation = state.currentUserLocation,
+                    shouldFollowLocation = shouldFollowLocation,
+                    forceCenter = forceCenter,
                     onMapReady = { mapView, locationOverlay ->
                         mapViewRef.value = mapView
                         myLocationOverlayRef.value = locationOverlay
                     },
-                    onMarkerClick = { point -> viewModel.onPointClicked(point) },
+                    onMarkerClick = { point ->
+                        viewModel.onPointClicked(point)
+                        shouldFollowLocation = false
+                        forceCenter = GeoPoint(point.latitude, point.longitude)
+                        },
                     onMarkerLongClick = { point -> viewModel.onPointLongClicked(point) }
                 )
 
@@ -149,6 +157,8 @@ fun MapScreen(
                     horizontalAlignment = Alignment.End
                 ) {
                     FloatingActionButton(onClick = {
+                        shouldFollowLocation = true
+                        forceCenter = null
                         val overlay = myLocationOverlayRef.value
                         val myLoc = overlay?.myLocation
                         if (myLoc != null) {
@@ -235,7 +245,10 @@ fun MapScreen(
                             point = point,
                             speciesName = displayName,
                             isSelected = point.id == state.selectedPointId,
-                            onClick = { viewModel.onPointClicked(point) },
+                            onClick = { viewModel.onPointClicked(point)
+                                shouldFollowLocation = false
+                                forceCenter = GeoPoint(point.latitude, point.longitude)
+                            },
                             onLongClick = { viewModel.onPointLongClicked(point) },
                             onEdit = { viewModel.onPointLongClicked(point) },
                             onDelete = { viewModel.deletePoint(point.id) }
