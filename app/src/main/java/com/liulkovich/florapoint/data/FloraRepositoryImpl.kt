@@ -2,6 +2,7 @@ package com.liulkovich.florapoint.data
 
 import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.domain.UserPoints
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -9,7 +10,8 @@ import javax.inject.Inject
 class FloraRepositoryImpl @Inject constructor(
 
     private val referenceDao: ReferenceDao,
-    private val userPointsDao: UserPointsDao
+    private val userPointsDao: UserPointsDao,
+    private val tipDao: TipDao
 
 ): FloraRepository {
 
@@ -36,5 +38,8 @@ class FloraRepositoryImpl @Inject constructor(
     override suspend fun getNotificationEnabled(): List<Reference> = referenceDao.getNotificationEnabled()
 
     override suspend fun hasPointsForSpecies(speciesId: Int): Boolean = userPointsDao.countBySpeciesId(speciesId) > 0
+
+    override suspend fun getRandomTip(): Tip? = tipDao.getRandomTip()
+
 
 }

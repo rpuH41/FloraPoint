@@ -254,8 +254,15 @@ fun MapScreen(
                 when (mode) {
                     is BottomSheetMode.Add -> AddPointSheetContent(
                         species = state.species,
-                        onSave = { speciesId: Int?, userName, description ->
-                            viewModel.addNewPoint(mode.latitude, mode.longitude, speciesId, userName, description)
+                        onSave = { speciesId: Int?, userName, description, category ->
+                            viewModel.addNewPoint(
+                                mode.latitude,
+                                mode.longitude,
+                                speciesId,
+                                userName,
+                                description,
+                                category   // ← добавили
+                            )
                             viewModel.dismissBottomSheet()
                         },
                         onDismiss = { viewModel.dismissBottomSheet() }
@@ -266,8 +273,14 @@ fun MapScreen(
                             EditPointSheetContent(
                                 point = point,
                                 species = state.species,
-                                onSave = { speciesId, userName, description ->
-                                    viewModel.updateUserPoint(mode.pointId, speciesId, userName, description)
+                                onSave = { speciesId, userName, description, category ->
+                                    viewModel.updateUserPoint(
+                                        mode.pointId,
+                                        speciesId,
+                                        userName,
+                                        description,
+                                        category   // ← добавили
+                                    )
                                     viewModel.dismissBottomSheet()
                                 },
                                 onDelete = {

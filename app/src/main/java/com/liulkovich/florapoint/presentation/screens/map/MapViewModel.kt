@@ -87,6 +87,7 @@ class MapViewModel @Inject constructor(
         speciesId: Int?,
         userName: String,
         description: String,
+        category: String
     ) {
 
         val newPoint = UserPoints(
@@ -96,7 +97,8 @@ class MapViewModel @Inject constructor(
             longitude = longitude,
             userName = userName.ifBlank { "Неизвестный вид" },
             description = description,
-            timestamp = (System.currentTimeMillis() / 1000).toInt(),
+            category = category,
+            timestamp = (System.currentTimeMillis() / 1000),
             isFavorite = 0,
             photoPath = "",
             accuracy = 0
@@ -109,13 +111,15 @@ class MapViewModel @Inject constructor(
         speciesId: Int?,
         userName: String,
         description: String,
+        category: String
     ) {
         viewModelScope.launch {
             state.value.userPoints.find { it.id == pointId }?.let { old ->
                 val updated = old.copy(
                     speciesId = speciesId,
                     userName = userName,
-                    description = description
+                    description = description,
+                    category = category
                 )
                 editPointUseCase(updated)
             }

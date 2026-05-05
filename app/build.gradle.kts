@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -9,11 +7,7 @@ plugins {
 
 android {
     namespace = "com.liulkovich.florapoint"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36   // упрощённый вариант
 
     defaultConfig {
         applicationId = "com.liulkovich.florapoint"
@@ -34,12 +28,18 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.kotlin.get()
     }
 }
 
@@ -55,36 +55,39 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation (libs.hilt.android)
-    ksp (libs.hilt.compiler)
-
+    // Compose
     implementation(libs.androidx.compose.material.icons.extended)
-
     implementation(libs.androidx.navigation.compose)
 
+    // Maps & Location
     implementation(libs.maps.compose)
-
     implementation(libs.osmdroid.android)
-
     implementation(libs.play.services.location)
 
     implementation(libs.androidx.datastore.preferences)
 
+    // WorkManager + Hilt
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

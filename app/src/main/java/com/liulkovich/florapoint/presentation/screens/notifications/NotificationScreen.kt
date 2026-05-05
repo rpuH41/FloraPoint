@@ -105,7 +105,7 @@ fun NotificationScreen(
                     Icon(
                         imageVector = Icons.Default.NotificationsActive,
                         contentDescription = null,
-                        tint = Color(0xFF1B5E20)
+                        tint = Color(0xFF4CAF50)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -119,7 +119,6 @@ fun NotificationScreen(
             HorizontalDivider()
             Spacer(Modifier.height(4.dp))
 
-            // Заголовок списка
             Text(
                 text = if (state.enabledSpecies.isEmpty()) "Нет видов с уведомлениями"
                 else "Уведомления включены (${state.enabledSpecies.size})",
@@ -194,7 +193,7 @@ private fun NotificationSettingItem(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = Color(0xFF1B5E20)
+                checkedTrackColor = Color(0xFF4CAF50)
             )
         )
     }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.liulkovich.florapoint.data.AppDatabase
 import com.liulkovich.florapoint.data.ReferenceDao
+import com.liulkovich.florapoint.data.TipDao
 import com.liulkovich.florapoint.data.UserPointsDao
 import dagger.Module
 import dagger.Provides
@@ -34,4 +35,6 @@ object DatabaseModule {
 
     @Provides
     fun provideUserPointsDao(db: AppDatabase): UserPointsDao = db.userPointsDao()
+    @Provides
+    fun provideTipDao(db: AppDatabase): TipDao = db.tipDao()
 }

@@ -39,7 +39,7 @@ import com.liulkovich.florapoint.presentation.screens.map.categoryForType
 @Composable
 fun AddPointSheetContent(
     species: List<Reference>,
-    onSave: (speciesId: Int?, userName: String, description: String) -> Unit,
+    onSave: (speciesId: Int?, userName: String, description: String, category: String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var selectedType by remember { mutableStateOf(FLORA_TYPES.first()) }
@@ -191,7 +191,9 @@ fun AddPointSheetContent(
                         }
                     }
 
-                    onSave(finalSpeciesId, searchText.trim(), description.trim())
+                    val selectedCategory = categoryForType(selectedType)
+
+                    onSave(finalSpeciesId, searchText.trim(), description.trim(), selectedCategory)
                 },
                 modifier = Modifier.weight(1f),
                 enabled = searchText.isNotBlank()

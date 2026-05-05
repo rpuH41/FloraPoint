@@ -28,8 +28,10 @@ data class UserPoints(
     @ColumnInfo(name = "longitude") val longitude: Double,
     @ColumnInfo(name = "user_name") val userName: String,
     @ColumnInfo(name = "description") val description: String,
-    @ColumnInfo(name = "timestamp") val timestamp: Int,
+    @ColumnInfo(name = "timestamp") val timestamp: Long,
     @ColumnInfo(name = "is_favorite") val isFavorite: Int,
     @ColumnInfo(name = "photo_path") val photoPath: String,
-    @ColumnInfo(name = "accuracy") val accuracy: Int
+    @ColumnInfo(name = "accuracy") val accuracy: Int,
+    @ColumnInfo(name = "category") val category: String? = "custom"
+
 )

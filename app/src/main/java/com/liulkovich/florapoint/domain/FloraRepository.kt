@@ -24,4 +24,6 @@ interface FloraRepository {
     suspend fun getNotificationEnabled(): List<Reference>
 
     suspend fun hasPointsForSpecies(speciesId: Int): Boolean
+
+    suspend fun getRandomTip(): Tip?
 }

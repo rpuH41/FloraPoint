@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,6 +55,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -85,6 +88,14 @@ fun HomeScreen(
                         )) {
                         MapPanel(onClickMap = onClickMap)
                     }
+                }
+                item {
+                    Title(name = "Совет")
+                }
+                item {
+                    state.tip?.let { tip ->
+                        TipOfTheDayCard(tip = tip)
+                    } ?: Spacer(modifier = Modifier.height(0.dp))
                 }
                 item {
                     Title(
@@ -269,7 +280,7 @@ fun HomeSeasonCard(
 
                 var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
                 IconToggleButton(
-                    modifier = Modifier.align(Alignment.TopEnd), // <-- правый верхний угол
+                    modifier = Modifier.align(Alignment.TopEnd),
                     checked = selectedNotif,
                     onCheckedChange = { isChecked ->
                         selectedNotif = isChecked
@@ -279,8 +290,8 @@ fun HomeSeasonCard(
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = null,
-                        tint = if (selectedNotif) Color.Green
-                        else Color.White
+                        tint = if (selectedNotif) Color(0xFF4CAF50)
+                        else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -365,13 +376,42 @@ fun MapPanel(
     }
 }
 
+@Composable
+fun TipOfTheDayCard(tip: Tip) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+        // цвет фона теперь такой же, как у других карточек (surface)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+//            Icon(
+//                imageVector = Icons.Default.Lightbulb,
+//                contentDescription = "Совет",
+//                tint = MaterialTheme.colorScheme.primary
+//            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = tip.text,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview(){
     FloraPointTheme {
         Column {
             Title(
-                "Сезон сейчайс "
+                "Сезон сейчас "
             )
         }
     }

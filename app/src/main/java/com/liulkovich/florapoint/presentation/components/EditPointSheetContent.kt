@@ -44,7 +44,7 @@ import java.util.Locale
 fun EditPointSheetContent(
     point: UserPoints,
     species: List<Reference>,
-    onSave: (speciesId: Int?, userName: String, description: String) -> Unit,
+    onSave: (speciesId: Int?, userName: String, description: String, category: String) -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -210,11 +210,16 @@ fun EditPointSheetContent(
                 onClick = {
                     val matched = selectedSpecies
                         ?: filteredSpecies.find { it.name.equals(searchText.trim(), ignoreCase = true) }
-                    onSave(matched?.id, searchText.trim(), description.trim())
+
+                    val selectedCategory = categoryForType(selectedType)
+
+                    onSave(matched?.id, searchText.trim(), description.trim(), selectedCategory)
                 },
                 modifier = Modifier.weight(1f),
                 enabled = searchText.isNotBlank()
-            ) { Text("Сохранить") }
+            ) {
+                Text("Сохранить")
+            }
         }
     }
 

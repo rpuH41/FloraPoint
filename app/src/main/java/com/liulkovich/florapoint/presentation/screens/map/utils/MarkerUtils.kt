@@ -5,10 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.toColorInt
 
 fun createShapeMarkerBitmap(category: String): Bitmap {
     val width = 70
@@ -21,17 +19,22 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
     val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = android.graphics.Color.WHITE
         style = Paint.Style.STROKE
-        strokeWidth = 3.5f
+        strokeWidth = 4f
     }
 
-    when (category.lowercase()) {
+    val lower = category.lowercase().trim()
 
+    val mainColor = when (lower) {
+        "mushroom" -> "#795548".toColorInt()
+        "berry"    -> "#E91E63".toColorInt()
+        "plant"    -> "#2E7D32".toColorInt()
+        "nut"      -> "#6D4C41".toColorInt()
+        else       -> "#FF9800".toColorInt()
+    }
+
+    when (lower) {
         "mushroom" -> {
-            fill.color = android.graphics.Color.BLACK
-            stroke.color = android.graphics.Color.BLACK
-            stroke.strokeWidth = 6f
-
-            // Шляпка
+            fill.color = mainColor
             val cap = Path().apply {
                 moveTo(cx - 29f, 42f)
                 lineTo(cx + 29f, 42f)
@@ -40,14 +43,13 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
             canvas.drawPath(cap, fill)
             canvas.drawPath(cap, stroke)
 
-            // Ножка
             val stem = RectF(cx - 9f, 42f, cx + 9f, 78f)
             canvas.drawRect(stem, fill)
             canvas.drawRect(stem, stroke)
         }
 
-        "berry" -> {  // Ягода (клубника/малина)
-            fill.color = "#E91E63".toColorInt()
+        "berry" -> {
+            fill.color = mainColor
             val berry = Path().apply {
                 moveTo(cx, 68f)
                 cubicTo(cx - 22f, 48f, cx - 25f, 32f, cx, 22f)
@@ -55,17 +57,10 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
             }
             canvas.drawPath(berry, fill)
             canvas.drawPath(berry, stroke)
-
-            // Семечки
-            val seedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.Yellow.toArgb() }
-            canvas.drawCircle(cx - 7f, 48f, 2.5f, seedPaint)
-            canvas.drawCircle(cx + 6f, 45f, 2f, seedPaint)
-            canvas.drawCircle(cx + 2f, 55f, 2.5f, seedPaint)
         }
 
-        "plant" -> {  // Зелёное растение / трава
-            fill.color = "#2E7D32".toColorInt()
-            // Три листа
+        "plant" -> {
+            fill.color = mainColor
             val leaf1 = Path().apply {
                 moveTo(cx - 6f, 75f)
                 lineTo(cx - 22f, 35f)
@@ -85,36 +80,40 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
             canvas.drawPath(leaf1, stroke)
             canvas.drawPath(leaf2, stroke)
 
-            // Стебель
             fill.color = "#1B5E20".toColorInt()
             canvas.drawRect(cx - 3f, 48f, cx + 3f, 78f, fill)
         }
 
-        "nut" -> {  // Орех (фундук)
-            fill.color = "#6D4C41".toColorInt()
+        "nut" -> {
+            fill.color = mainColor
             val nut = RectF(cx - 19f, 32f, cx + 19f, 68f)
             canvas.drawOval(nut, fill)
             canvas.drawOval(nut, stroke)
 
-            // Шапочка
             fill.color = "#4E342E".toColorInt()
             val cap = RectF(cx - 21f, 22f, cx + 21f, 38f)
             canvas.drawOval(cap, fill)
             canvas.drawOval(cap, stroke)
         }
 
-        else -> {  // Пользовательский или неизвестный
-            fill.color = android.graphics.Color.GRAY
-            canvas.drawCircle(cx, 48f, 24f, fill)
-            canvas.drawCircle(cx, 48f, 24f, stroke)
+        else -> {
+            fill.color = "#FF9800".toColorInt()
+            canvas.drawCircle(cx, 48f, 26f, fill)
+            stroke.color = android.graphics.Color.WHITE
+            stroke.strokeWidth = 5f
+            canvas.drawCircle(cx, 48f, 26f, stroke)
+
+            val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.WHITE
+                textSize = 32f
+                textAlign = Paint.Align.CENTER
+                isFakeBoldText = true
+            }
+            canvas.drawText("★", cx, 57f, textPaint)
         }
     }
 
-    // Хвостик маркера (всегда один и тот же)
-    val tailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = if (category == "mushroom") "#C62828".toColorInt()
-        else fill.color
-    }
+    val tailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = mainColor }
     val tail = Path().apply {
         moveTo(cx - 9f, 78f)
         lineTo(cx, 88f)

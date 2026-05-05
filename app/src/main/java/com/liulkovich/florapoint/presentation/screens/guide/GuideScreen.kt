@@ -210,7 +210,7 @@ fun GuideCard(
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Уведомления",
-                    tint = if (selectedNotif) Color(0xFF1B5E20)
+                    tint = if (selectedNotif) Color(0xFF4CAF50)
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
