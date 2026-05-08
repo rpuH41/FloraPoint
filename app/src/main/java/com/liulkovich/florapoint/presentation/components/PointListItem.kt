@@ -1,10 +1,8 @@
 package com.liulkovich.florapoint.presentation.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,13 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.liulkovich.florapoint.domain.UserPoints
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.res.stringResource
+import com.liulkovich.florapoint.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -48,29 +49,30 @@ fun PointListItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val bgColor = if (isSelected)
-        MaterialTheme.colorScheme.primaryContainer
-    else
-        MaterialTheme.colorScheme.surfaceVariant
-
     val dateStr = remember(point.timestamp) {
         SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-            .format(Date(point.timestamp.toLong() * 1000))
+            .format(Date(point.timestamp * 1000))
     }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    Box(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(bgColor)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant //surfaceContainer surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 80.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -102,21 +104,13 @@ fun PointListItem(
                     color = MaterialTheme.colorScheme.outline
                 )
             }
-        }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 4.dp, end = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
             IconButton(
                 onClick = onEdit,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Редактировать",
+                    contentDescription = stringResource(R.string.edit_point),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
@@ -127,7 +121,7 @@ fun PointListItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Удалить",
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(16.dp)
                 )
@@ -138,16 +132,16 @@ fun PointListItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Удалить точку?") },
-            text = { Text("Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.delete_this_point)) },
+            text = { Text(stringResource(R.string.this_action_cannot_be_undone)) },
             confirmButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false; onDelete() },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) { Text("Удалить") }
+                ) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Отмена") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }

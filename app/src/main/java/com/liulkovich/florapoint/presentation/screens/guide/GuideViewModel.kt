@@ -64,7 +64,7 @@ class GuideViewModel @Inject constructor(
                 }
             }
             .onEach { speciesList ->
-                _state.update { it.copy(species = speciesList) }
+                _state.update { it.copy(species = speciesList, isLoading = false) }
             }
             .launchIn(viewModelScope)
     }
@@ -106,6 +106,7 @@ sealed interface GuideCommand {
 data class GuideScreenState(
     val query: String = "",
     val species: List<Reference> = listOf(),
-    val selectedCategories: Set<String> = emptySet()
+    val selectedCategories: Set<String> = emptySet(),
+    val isLoading: Boolean = true
 
 )

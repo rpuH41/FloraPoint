@@ -50,12 +50,13 @@ import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.presentation.screens.guide.numberInString
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +95,7 @@ fun DetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -112,7 +113,7 @@ fun DetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
-                            contentDescription = "Уведомления",
+                            contentDescription = stringResource(R.string.notifications),
                             tint = if (notifEnabled) Color(0xFF66BB6A)
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -132,19 +133,20 @@ fun DetailScreen(
                 item { HeroImage(species.imageName, species.name) }
                 item { InfoSection(species) }
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { onNotificationToggle(!state.isNotificationEnabled) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp/*, vertical = 8.dp*/),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (state.isNotificationEnabled) Color(0xFF66BB6A) else MaterialTheme.colorScheme.secondaryContainer,
                             contentColor = if (state.isNotificationEnabled) Color.White else MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     ) {
                         Text(
-                            text = if (state.isNotificationEnabled) "Отключить уведомления" else "Включить уведомления"
+                            text = if (state.isNotificationEnabled) stringResource(R.string.turn_off_notifications) else stringResource(
+                                R.string.turn_on_notifications
+                            )
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -167,9 +169,10 @@ fun HeroImage(imageName: String, name: String) {
         Image(
             painter = if (imageId != 0) painterResource(imageId)
             else painterResource(R.drawable.ic_launcher_background),
-            contentDescription = "Изображения гриба, ягоды, растения, ореха",
+            contentDescription = stringResource(R.string.images_of_mushrooms_berries_plants_and_nuts),
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(
                     start = 16.dp,
                     end = 16.dp,
@@ -203,23 +206,27 @@ fun InfoSection(species: Reference) {
 
         InfoBlock(
             icon = Icons.Default.LocationOn,
-            title = "Где растёт",
+            title = stringResource(R.string.what_is_the_habitat_of),
             text = species.habitat
         )
         InfoBlock(
             icon = Icons.Default.Info,
-            title = "Описание",
+            title = stringResource(R.string.description),
             text = species.description
         )
         InfoBlock(
             icon = Icons.Default.Warning,
-            title = "Похожие виды",
+            title = stringResource(R.string.similar_species),
             text = species.lookAlikes
         )
         InfoBlock(
             icon = Icons.Default.DateRange,
-            title = "Период сбора",
-            text = "С ${numberInString(species.startMonth).first} по ${numberInString(species.endMonth).second}"
+            title = stringResource(R.string.harvest_period),
+            text = stringResource(
+                R.string.from_to,
+                numberInString(species.startMonth).first,
+                numberInString(species.endMonth).second
+            )
         )
     }
 }

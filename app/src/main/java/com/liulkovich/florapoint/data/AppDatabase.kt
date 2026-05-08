@@ -11,12 +11,11 @@ import com.liulkovich.florapoint.domain.UserPoints
     UserPoints::class,
     Tip::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun referenceDao(): ReferenceDao
     abstract fun userPointsDao(): UserPointsDao
-
     abstract fun tipDao(): TipDao
 
 }

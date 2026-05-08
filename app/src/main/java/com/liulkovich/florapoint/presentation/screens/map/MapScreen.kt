@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,12 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
+import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.presentation.components.AddPointSheetContent
 import com.liulkovich.florapoint.presentation.components.EditPointSheetContent
 import com.liulkovich.florapoint.presentation.components.OsmMapView
@@ -57,7 +60,6 @@ import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,6 +117,7 @@ fun MapScreen(
                     shouldFollowLocation = false
                     forceCenter = GeoPoint(command.point.latitude, command.point.longitude)
                 }
+
                 else -> Unit
             }
         }
@@ -145,7 +148,7 @@ fun MapScreen(
                         viewModel.onPointClicked(point)
                         shouldFollowLocation = false
                         forceCenter = GeoPoint(point.latitude, point.longitude)
-                        },
+                    },
                     onMarkerLongClick = { point -> viewModel.onPointLongClicked(point) }
                 )
 
@@ -193,10 +196,10 @@ fun MapScreen(
                                 }
                             }
                         },
-                        containerColor = Color(0xFF1B5E20),   // тёмно-зелёный
+                        containerColor = Color(0xFF1B5E20),
                         contentColor = Color.White,
                         icon = { Icon(Icons.Default.AddLocationAlt, contentDescription = null) },
-                        text = { Text("Добавить место") }
+                        text = { Text(stringResource(R.string.add_place)) }
                     )
                 }
             }
@@ -212,19 +215,22 @@ fun MapScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 6.dp),
-                    placeholder = { Text("Поиск мест...", fontSize = 13.sp) },
+                    placeholder = { Text(stringResource(R.string.search_places), fontSize = 13.sp) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
                 )
 
-                val filteredPoints = remember(state.userPoints, state.searchQuery, state.species) {
-                    val query = state.searchQuery.trim().lowercase()
-                    if (query.isEmpty()) state.userPoints
-                    else state.userPoints.filter { point ->
-                        val speciesName = state.species
-                            .find { it.id == point.speciesId }?.name?.lowercase() ?: ""
-                        speciesName.contains(query) || point.userName.lowercase().contains(query)
+                val filteredPoints by remember {
+                    derivedStateOf {
+                        val query = state.searchQuery.trim().lowercase()
+                        if (query.isEmpty()) state.userPoints
+                        else state.userPoints.filter { point ->
+                            val speciesName = state.species
+                                .find { it.id == point.speciesId }?.name?.lowercase() ?: ""
+                            speciesName.contains(query) || point.userName.lowercase()
+                                .contains(query)
+                        }
                     }
                 }
 
@@ -236,16 +242,17 @@ fun MapScreen(
                     items(filteredPoints, key = { it.id }) { point ->
                         val displayName = when {
                             point.userName.isNotBlank() && point.speciesId == 0 -> point.userName
-                            point.speciesId == 0 -> "Пользовательский вид"
+                            point.speciesId == 0 -> stringResource(R.string.custom_species)
                             else -> state.species.find { it.id == point.speciesId }?.name
-                                ?: point.userName.ifBlank { "Неизвестный вид" }
+                                ?: point.userName.ifBlank { stringResource(R.string.unknown_species) }
                         }
 
                         PointListItem(
                             point = point,
                             speciesName = displayName,
                             isSelected = point.id == state.selectedPointId,
-                            onClick = { viewModel.onPointClicked(point)
+                            onClick = {
+                                viewModel.onPointClicked(point)
                                 shouldFollowLocation = false
                                 forceCenter = GeoPoint(point.latitude, point.longitude)
                             },
@@ -274,12 +281,13 @@ fun MapScreen(
                                 speciesId,
                                 userName,
                                 description,
-                                category   // ← добавили
+                                category
                             )
                             viewModel.dismissBottomSheet()
                         },
                         onDismiss = { viewModel.dismissBottomSheet() }
                     )
+
                     is BottomSheetMode.Edit -> {
                         val point = state.userPoints.find { it.id == mode.pointId }
                         if (point != null) {
@@ -292,7 +300,7 @@ fun MapScreen(
                                         speciesId,
                                         userName,
                                         description,
-                                        category   // ← добавили
+                                        category
                                     )
                                     viewModel.dismissBottomSheet()
                                 },
@@ -308,14 +316,4 @@ fun MapScreen(
             }
         }
     }
-}
-
-val FLORA_TYPES = listOf("Грибы", "Ягоды", "Растения", "Орехи")
-
-fun categoryForType(type: String) = when (type) {
-    "Грибы" -> "mushroom"
-    "Ягоды" -> "berry"
-    "Растения" -> "plant"
-    "Орехи" -> "nut"
-    else -> ""
 }

@@ -26,10 +26,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.presentation.screens.guide.GuideCard
 
 @Composable
@@ -47,12 +49,12 @@ fun NotificationScreen(
         ) {
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Уведомления о сезонах",
+                text = stringResource(R.string.seasonal_notices),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "Выберите когда получать уведомления",
+                text = stringResource(R.string.choose_when_you_want_to_receive_notifications),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
@@ -61,22 +63,22 @@ fun NotificationScreen(
             Spacer(Modifier.height(8.dp))
 
             NotificationSettingItem(
-                title = "Начало сезона",
-                subtitle = "За день до начала и в первый день",
+                title = stringResource(R.string.start_of_the_season),
+                subtitle = stringResource(R.string.the_day_before_and_on_the_first_day),
                 checked = state.notifyStart,
                 onCheckedChange = viewModel::setNotifyStart
             )
             HorizontalDivider()
             NotificationSettingItem(
-                title = "Пик сезона",
-                subtitle = "В середине сезона — самое урожайное время",
+                title = stringResource(R.string.peak_season),
+                subtitle = stringResource(R.string.mid_season_is_the_peak_harvest_time),
                 checked = state.notifyPeak,
                 onCheckedChange = viewModel::setNotifyPeak
             )
             HorizontalDivider()
             NotificationSettingItem(
-                title = "Конец сезона",
-                subtitle = "За неделю до окончания сезона",
+                title = stringResource(R.string.end_of_the_season),
+                subtitle = stringResource(R.string.a_week_before_the_end_of_the_season),
                 checked = state.notifyEnd,
                 onCheckedChange = viewModel::setNotifyEnd
             )
@@ -97,7 +99,7 @@ fun NotificationScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Все уведомления отключены",
+                        text = stringResource(R.string.all_notifications_are_turned_off),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -109,7 +111,7 @@ fun NotificationScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Уведомления придут около полудня",
+                        text = stringResource(R.string.the_notifications_will_arrive_around_midday),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -120,8 +122,8 @@ fun NotificationScreen(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = if (state.enabledSpecies.isEmpty()) "Нет видов с уведомлениями"
-                else "Уведомления включены (${state.enabledSpecies.size})",
+                text = if (state.enabledSpecies.isEmpty()) stringResource(R.string.there_are_no_views_with_notifications)
+                else stringResource(R.string.notifications_are_enabled, state.enabledSpecies.size),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -130,7 +132,7 @@ fun NotificationScreen(
 
         if (state.enabledSpecies.isEmpty()) {
             Text(
-                text = "Включите уведомления в справочнике через значок колокольчика.",
+                text = stringResource(R.string.turn_on_notifications_in_the_directory_by_clicking_the_bell_icon),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp)

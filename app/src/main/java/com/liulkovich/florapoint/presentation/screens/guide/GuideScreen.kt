@@ -4,13 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -37,14 +41,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liulkovich.florapoint.R
+import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
 
 @Composable
@@ -77,30 +86,40 @@ fun GuideScreen(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            contentPadding = innerPadding
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(5.dp))
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-            items(state.species) { speciesItem ->
-                GuideCard(
-                    modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                    textImage = speciesItem.imageName,
-                    textName = speciesItem.name,
-                    startMonth = speciesItem.startMonth,
-                    endMonth = speciesItem.endMonth,
-                    reference = speciesItem,
-                    onNotifChange = { isChecked ->
-                        viewModel.processCommand(
-                            GuideCommand.ToggleNotification(
-                                id = speciesItem.id,
-                                enabled = if (isChecked) 1 else 0
+        } else {
+
+            LazyColumn(
+                contentPadding = innerPadding
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(5.dp))
+                }
+                items(state.species) { speciesItem ->
+                    GuideCard(
+                        modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                        textImage = speciesItem.imageName,
+                        textName = speciesItem.name,
+                        startMonth = speciesItem.startMonth,
+                        endMonth = speciesItem.endMonth,
+                        reference = speciesItem,
+                        onNotifChange = { isChecked ->
+                            viewModel.processCommand(
+                                GuideCommand.ToggleNotification(
+                                    id = speciesItem.id,
+                                    enabled = if (isChecked) 1 else 0
+                                )
                             )
-                        )
-                    },
-                    onClickDetail = onClickDetail,
-                )
+                        },
+                        onClickDetail = onClickDetail,
+                    )
+                }
             }
         }
     }
@@ -125,7 +144,7 @@ private fun SearchBar(
         onValueChange = onQueryChange,
         placeholder = {
             Text(
-                text = "Введите название", // исправлена опечатка
+                text = stringResource(R.string.enter_a_name),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -139,7 +158,7 @@ private fun SearchBar(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Поиск",
+                contentDescription = stringResource(R.string.search),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         },
@@ -155,7 +174,7 @@ fun GuideCard(
     startMonth: Int,
     endMonth: Int,
     reference: Reference,
-    onNotifChange: (Boolean) -> Unit, // исправлено название
+    onNotifChange: (Boolean) -> Unit,
     onClickDetail: (Reference) -> Unit
 ) {
     val context = LocalContext.current
@@ -165,41 +184,65 @@ fun GuideCard(
         context.packageName
     )
 
-    var selectedNotif by remember { mutableStateOf(reference.isNotifEnabled == 1) }
+    var selectedNotif by remember(reference.isNotifEnabled) {
+        mutableStateOf(reference.isNotifEnabled == 1)
+    }
 
     Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(1.dp),
+
         onClick = { onClickDetail(reference) }
     ) {
-        Row {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
             Image(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(10.dp),
-                painter = if (imageId != 0) {
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                painter = if (imageId != 0)
                     painterResource(id = imageId)
-                } else {
-                    painterResource(id = R.drawable.ic_launcher_background)
-                },
-                contentDescription = "Фото гриба/ягоды/растения/ореха",
+                else
+                    painterResource(id = R.drawable.ic_launcher_background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
             )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Column(
-                modifier = Modifier.weight(2f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    modifier = Modifier.padding(10.dp),
                     text = textName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = Bold
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
-                    modifier = Modifier.padding(start = 10.dp),
-                    text = "Период: c ${numberInString(startMonth).first} по ${numberInString(endMonth).second}",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = stringResource(
+                        R.string.season,
+                        numberInString(startMonth).first,
+                        numberInString(endMonth).second
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+
             IconToggleButton(
                 checked = selectedNotif,
                 onCheckedChange = { isChecked ->
@@ -209,30 +252,32 @@ fun GuideCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
-                    contentDescription = "Уведомления",
-                    tint = if (selectedNotif) Color(0xFF4CAF50)
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    contentDescription = null,
+                    tint = if (selectedNotif)
+                        Color(0xFF4CAF50)
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
 }
-
+@Composable
 fun numberInString(number: Int): Pair<String, String> {
     return when (number) {
-        1 -> "января" to "январь"
-        2 -> "февраля" to "февраль"
-        3 -> "марта" to "март"
-        4 -> "апреля" to "апрель"
-        5 -> "мая" to "май"
-        6 -> "июня" to "июнь"
-        7 -> "июля" to "июль"
-        8 -> "августа" to "август"
-        9 -> "сентября" to "сентябрь"
-        10 -> "октября" to "октябрь"
-        11 -> "ноября" to "ноябрь"
-        12 -> "декабря" to "декабрь"
-        else -> "Неизвестно" to "Неизвестно"
+        1 -> stringResource(R.string.from_january) to stringResource(R.string.january)
+        2 -> stringResource(R.string.from_february) to stringResource(R.string.february)
+        3 -> stringResource(R.string.from_march) to stringResource(R.string.march)
+        4 -> stringResource(R.string.from_april) to stringResource(R.string.april)
+        5 -> stringResource(R.string.from_may) to stringResource(R.string.may)
+        6 -> stringResource(R.string.from_june) to stringResource(R.string.june)
+        7 -> stringResource(R.string.from_july) to stringResource(R.string.july)
+        8 -> stringResource(R.string.from_august) to stringResource(R.string.august)
+        9 -> stringResource(R.string.from_september) to stringResource(R.string.september)
+        10 -> stringResource(R.string.from_october) to stringResource(R.string.october)
+        11 -> stringResource(R.string.from_november) to stringResource(R.string.november)
+        12 -> stringResource(R.string.from_december) to stringResource(R.string.december)
+        else -> stringResource(R.string.unknown) to stringResource(R.string.unknown)
     }
 }
 
@@ -241,18 +286,16 @@ fun PanelFilter(
     selectedCategories: Set<String>,
     onCategoryChange: (String) -> Unit
 ) {
-    val categories = listOf("Грибы", "Ягоды", "Растения", "Орехи")
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
     ) {
-        categories.forEach { name ->
-            val isSelected = selectedCategories.contains(name)
+        FloraCategory.entries.forEach { category ->
+            val isSelected = selectedCategories.contains(category.key)
             ElevatedFilterChip(
                 selected = isSelected,
-                onClick = { onCategoryChange(name) },
-                label = { Text(name) },
+                onClick = { onCategoryChange(category.key) },
+                label = { Text(stringResource(category.stringRes)) },
                 leadingIcon = if (isSelected) {
                     {
                         Icon(

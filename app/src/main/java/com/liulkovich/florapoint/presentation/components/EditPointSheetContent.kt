@@ -29,12 +29,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.liulkovich.florapoint.R
+import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
-import com.liulkovich.florapoint.presentation.screens.map.FLORA_TYPES
-import com.liulkovich.florapoint.presentation.screens.map.categoryForType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,26 +46,24 @@ fun EditPointSheetContent(
     point: UserPoints,
     species: List<Reference>,
     onSave: (speciesId: Int?, userName: String, description: String, category: String) -> Unit,
-    onDelete: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val existingRef = species.find { it.id == point.speciesId }
-    val currentCategory = existingRef?.category ?: point.category
-    val currentType = FLORA_TYPES.firstOrNull {
-        categoryForType(it) == currentCategory
-    } ?: FLORA_TYPES.first()
 
-    var selectedType by remember(point) { mutableStateOf(currentType) }
+    val initialCategory = FloraCategory.fromKey(
+        existingRef?.category ?: point.category ?: FloraCategory.MUSHROOM.key
+    ) ?: FloraCategory.MUSHROOM
+
+    var selectedCategory by remember(point) { mutableStateOf(initialCategory) }
     var typeDropdownExpanded by remember { mutableStateOf(false) }
 
-    val filteredSpecies = remember(species, selectedType) {
-        species.filter { it.category == categoryForType(selectedType) }
+    val filteredSpecies = remember(species, selectedCategory) {
+        species.filter { it.category == selectedCategory.key }
     }
 
     var searchText by remember(point) {
-        mutableStateOf(
-            existingRef?.name ?: point.userName.ifBlank { "" }
-        )
+        mutableStateOf(existingRef?.name ?: point.userName.ifBlank { "" })
     }
     var selectedSpecies by remember(point, filteredSpecies) {
         mutableStateOf(filteredSpecies.find { it.id == point.speciesId })
@@ -78,16 +77,15 @@ fun EditPointSheetContent(
     }
 
     var description by remember(point) { mutableStateOf(point.description) }
-   // var showDeleteDialog by remember { mutableStateOf(false) }
 
     val dateStr = remember(point.timestamp) {
         SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-            .format(Date(point.timestamp * 1000))
+            .format(Date(point.timestamp * 1000L))
     }
 
-    SheetContent(title = "Редактировать точку") {
+    SheetContent(title = stringResource(R.string.edit_point)) {
         Text(
-            text = "Добавлено: $dateStr",
+            text = stringResource(R.string.added, dateStr),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -98,25 +96,28 @@ fun EditPointSheetContent(
             onExpandedChange = { typeDropdownExpanded = it }
         ) {
             OutlinedTextField(
-                value = selectedType,
+                value = stringResource(selectedCategory.stringRes),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Тип") },
+                label = { Text(stringResource(R.string.type)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
             )
             ExposedDropdownMenu(
                 expanded = typeDropdownExpanded,
                 onDismissRequest = { typeDropdownExpanded = false }
             ) {
-                FLORA_TYPES.forEach { type ->
+                FloraCategory.entries.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text(type) },
+                        text = { Text(stringResource(category.stringRes)) },
                         onClick = {
-                            selectedType = type
+                            selectedCategory = category
                             typeDropdownExpanded = false
-                            if (selectedSpecies != null && categoryForType(type) != selectedSpecies?.category) {
+                            if (selectedSpecies?.category != category.key) {
                                 selectedSpecies = null
+                                searchText = ""
                             }
                         }
                     )
@@ -132,19 +133,17 @@ fun EditPointSheetContent(
                 searchText = it
                 if (selectedSpecies?.name != it) selectedSpecies = null
             },
-            label = { Text("Название") },
+            label = { Text(stringResource(R.string.title)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            supportingText = {
-                if (selectedSpecies != null) {
-                    Text("✓ Совпадает со справочником", color = MaterialTheme.colorScheme.primary)
-                }
-            }
+
         )
 
         if (suggestions.isNotEmpty() && selectedSpecies == null) {
             Surface(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
                 shape = RoundedCornerShape(8.dp),
                 tonalElevation = 4.dp,
                 shadowElevation = 2.dp
@@ -183,8 +182,8 @@ fun EditPointSheetContent(
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Описание") },
-            placeholder = { Text("Место, особенности, заметки...") },
+            label = { Text(stringResource(R.string.description)) },
+            placeholder = { Text(stringResource(R.string.location_features_notes)) },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
             maxLines = 4
@@ -200,21 +199,25 @@ fun EditPointSheetContent(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Отмена")
+                Text(stringResource(R.string.cancel))
             }
             Button(
                 onClick = {
                     val matched = selectedSpecies
-                        ?: filteredSpecies.find { it.name.equals(searchText.trim(), ignoreCase = true) }
-
-                    val selectedCategory = categoryForType(selectedType)
-
-                    onSave(matched?.id, searchText.trim(), description.trim(), selectedCategory)
+                        ?: filteredSpecies.find {
+                            it.name.equals(searchText.trim(), ignoreCase = true)
+                        }
+                    onSave(
+                        matched?.id,
+                        searchText.trim(),
+                        description.trim(),
+                        selectedCategory.key
+                    )
                 },
                 modifier = Modifier.weight(1f),
                 enabled = searchText.isNotBlank()
             ) {
-                Text("Сохранить")
+                Text(stringResource(R.string.save))
             }
         }
     }
