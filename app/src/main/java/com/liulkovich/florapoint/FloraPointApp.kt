@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import com.liulkovich.florapoint.data.worker.SeasonNotificationWorker
 import dagger.hilt.android.HiltAndroidApp
 import org.osmdroid.config.Configuration
+import java.io.File
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -24,10 +25,15 @@ class FloraPointApp : Application(), WorkConfiguration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-
         val config = Configuration.getInstance()
         config.load(this, getSharedPreferences("osm_config", MODE_PRIVATE))
         config.userAgentValue = "com.liulkovich.florapoint"
+
+        config.osmdroidBasePath = File(filesDir, "osmdroid")
+        config.osmdroidTileCache = File(filesDir, "osmdroid/tiles")
+
+        config.tileFileSystemCacheMaxBytes = 500L * 1024 * 1024
+        config.tileFileSystemCacheTrimBytes = 400L * 1024 * 1024
 
         scheduleSeasonWorker()
     }

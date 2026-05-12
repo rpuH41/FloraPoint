@@ -117,7 +117,6 @@ fun AddPointSheetContent(
             },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-
         )
 
         if (suggestions.isNotEmpty() && selectedSpecies == null && searchText.length >= 2) {

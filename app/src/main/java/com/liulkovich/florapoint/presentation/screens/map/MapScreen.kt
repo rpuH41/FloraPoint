@@ -1,6 +1,5 @@
 package com.liulkovich.florapoint.presentation.screens.map
 
-
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,7 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.R
@@ -60,7 +59,6 @@ import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +72,7 @@ fun MapScreen(
     val context = LocalContext.current
     var shouldFollowLocation by remember { mutableStateOf(true) }
     var forceCenter by remember { mutableStateOf<GeoPoint?>(null) }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -91,8 +90,10 @@ fun MapScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
             val fusedClient = LocationServices.getFusedLocationProviderClient(context)
             fusedClient.lastLocation.addOnSuccessListener { location ->
@@ -117,7 +118,6 @@ fun MapScreen(
                     shouldFollowLocation = false
                     forceCenter = GeoPoint(command.point.latitude, command.point.longitude)
                 }
-
                 else -> Unit
             }
         }
@@ -203,7 +203,12 @@ fun MapScreen(
                     )
                 }
             }
-            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -215,7 +220,9 @@ fun MapScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 6.dp),
-                    placeholder = { Text(stringResource(R.string.search_places), fontSize = 13.sp) },
+                    placeholder = {
+                        Text(stringResource(R.string.search_places), fontSize = 13.sp)
+                    },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
@@ -244,7 +251,9 @@ fun MapScreen(
                             point.userName.isNotBlank() && point.speciesId == 0 -> point.userName
                             point.speciesId == 0 -> stringResource(R.string.custom_species)
                             else -> state.species.find { it.id == point.speciesId }?.name
-                                ?: point.userName.ifBlank { stringResource(R.string.unknown_species) }
+                                ?: point.userName.ifBlank {
+                                    stringResource(R.string.unknown_species)
+                                }
                         }
 
                         PointListItem(
@@ -258,7 +267,10 @@ fun MapScreen(
                             },
                             onLongClick = { viewModel.onPointLongClicked(point) },
                             onEdit = { viewModel.onPointLongClicked(point) },
-                            onDelete = { viewModel.deletePoint(point.id) }
+                            onDelete = { viewModel.deletePoint(point.id) },
+                            onShare = {
+                                viewModel.sharePoint(context, point, displayName)
+                            }
                         )
                     }
                 }
@@ -287,7 +299,6 @@ fun MapScreen(
                         },
                         onDismiss = { viewModel.dismissBottomSheet() }
                     )
-
                     is BottomSheetMode.Edit -> {
                         val point = state.userPoints.find { it.id == mode.pointId }
                         if (point != null) {

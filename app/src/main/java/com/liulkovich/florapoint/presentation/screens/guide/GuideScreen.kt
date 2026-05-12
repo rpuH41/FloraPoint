@@ -18,14 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedFilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
@@ -287,24 +285,24 @@ fun PanelFilter(
     onCategoryChange: (String) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
     ) {
         FloraCategory.entries.forEach { category ->
             val isSelected = selectedCategories.contains(category.key)
-            ElevatedFilterChip(
+            FilterChip(
                 selected = isSelected,
                 onClick = { onCategoryChange(category.key) },
-                label = { Text(stringResource(category.stringRes)) },
-                leadingIcon = if (isSelected) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = null,
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else null
+                label = {
+                    Text(
+                        text = "${category.emoji} ${stringResource(category.stringRes)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             )
         }
     }

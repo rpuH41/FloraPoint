@@ -23,4 +23,7 @@ interface UserPointsDao {
 
     @Query("SELECT COUNT(*) FROM user_points_table WHERE species_id = :speciesId")
     suspend fun countBySpeciesId(speciesId: Int): Int
+
+    @Query("SELECT * FROM user_points_table")
+    suspend fun getAllList(): List<UserPoints>
 }

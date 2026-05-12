@@ -41,5 +41,8 @@ class FloraRepositoryImpl @Inject constructor(
 
     override suspend fun getRandomTip(): Tip? = tipDao.getRandomTip()
 
+    override suspend fun getAllUserPointsList(): List<UserPoints> =
+        userPointsDao.getAllList()
+
 
 }

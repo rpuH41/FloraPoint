@@ -17,6 +17,8 @@ interface FloraRepository {
 
     suspend fun editPoint(point: UserPoints)
 
+    suspend fun getAllUserPointsList(): List<UserPoints>
+
      fun getAllUserPoints(): Flow<List<UserPoints>>
 
     suspend fun updateNotification(id: Int, isEnabled: Int)

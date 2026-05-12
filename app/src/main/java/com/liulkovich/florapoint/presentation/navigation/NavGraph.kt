@@ -17,7 +17,7 @@ import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
-import com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen
+import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
 
 @Composable
 fun NavGraph() {
@@ -63,7 +63,6 @@ fun NavGraph() {
                         navController.navigate("Detail/$it")
                     }
                 )
-
             }
 
             composable(
@@ -84,13 +83,19 @@ fun NavGraph() {
             }
 
             composable(Screen.Map.rout) {
-                MapScreen(
+                MapScreen()
+            }
 
+            composable(Screen.Settings.rout) {
+                SettingsScreen(
+                    onNavigateToNotifications = {
+                        navController.navigate(Screen.Notifications.rout)
+                    }
                 )
             }
 
             composable(Screen.Notifications.rout) {
-                NotificationScreen()
+                com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen()
             }
 
             composable(
@@ -117,6 +122,7 @@ sealed class Screen(val rout: String) {
             if (category.isEmpty()) "Guide" else "Guide?category=$category"
     }
     data object Map : Screen("Map")
+    data object Settings : Screen("Settings")
     data object Notifications : Screen("Notifications")
     data object Detail : Screen("Detail/{speciesId}")
 }

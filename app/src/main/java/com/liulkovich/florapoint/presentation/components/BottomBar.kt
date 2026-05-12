@@ -4,7 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -29,7 +29,7 @@ fun BottomBar(
         BottomNavItem(stringResource(R.string.home), Icons.Default.Home, "Home"),
         BottomNavItem(stringResource(R.string.map), Icons.Default.LocationOn, "Map"),
         BottomNavItem(stringResource(R.string.guide), Icons.AutoMirrored.Filled.List, "Guide"),
-        BottomNavItem(stringResource(R.string.notifications), Icons.Default.Notifications, "Notifications"),
+        BottomNavItem(stringResource(R.string.settings), Icons.Default.Settings, "Settings"),
     )
 
     NavigationBar {

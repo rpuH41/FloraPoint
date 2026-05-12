@@ -3,11 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
 }
 
 android {
     namespace = "com.liulkovich.florapoint"
-    compileSdk = 36   // упрощённый вариант
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.liulkovich.florapoint"
@@ -36,6 +37,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -80,6 +82,9 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.work.runtime.ktx)
+
+    //JSON
+    implementation(libs.kotlinx.serialization.json)
 
     // Tests
     testImplementation(libs.junit)
