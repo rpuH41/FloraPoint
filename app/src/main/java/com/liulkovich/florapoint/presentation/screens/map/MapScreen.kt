@@ -64,6 +64,10 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = hiltViewModel(),
+    deepLinkLat: Double? = null,
+    deepLinkLon: Double? = null,
+    deepLinkName: String? = null,
+    deepLinkCategory: String? = null
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val mapViewRef = remember { mutableStateOf<MapView?>(null) }
@@ -73,6 +77,14 @@ fun MapScreen(
     var shouldFollowLocation by remember { mutableStateOf(true) }
     var forceCenter by remember { mutableStateOf<GeoPoint?>(null) }
 
+    LaunchedEffect(deepLinkLat, deepLinkLon) {
+        if (deepLinkLat != null && deepLinkLon != null && deepLinkLat != 0.0) {
+            shouldFollowLocation = false
+            forceCenter = GeoPoint(deepLinkLat, deepLinkLon)
+            viewModel.onAddNewPointClicked(deepLinkLat, deepLinkLon)
+            deepLinkName?.let { viewModel.setDeepLinkData(it, deepLinkCategory ?: "custom") }
+        }
+    }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -286,6 +298,8 @@ fun MapScreen(
                 when (mode) {
                     is BottomSheetMode.Add -> AddPointSheetContent(
                         species = state.species,
+                        initialName = state.deepLinkName,
+                        initialCategory = state.deepLinkCategory,
                         onSave = { speciesId: Int?, userName, description, category ->
                             viewModel.addNewPoint(
                                 mode.latitude,

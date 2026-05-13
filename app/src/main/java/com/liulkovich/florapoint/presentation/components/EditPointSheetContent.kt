@@ -117,7 +117,7 @@ fun EditPointSheetContent(
                             typeDropdownExpanded = false
                             if (selectedSpecies?.category != category.key) {
                                 selectedSpecies = null
-                                searchText = ""
+                                //searchText = ""
                             }
                         }
                     )

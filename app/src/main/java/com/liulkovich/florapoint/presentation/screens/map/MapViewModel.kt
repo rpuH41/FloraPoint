@@ -2,11 +2,13 @@ package com.liulkovich.florapoint.presentation.screens.map
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liulkovich.florapoint.domain.AddNewPointUseCase
 import com.liulkovich.florapoint.domain.DeletePointUseCase
 import com.liulkovich.florapoint.domain.EditPointUseCase
+import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
 import com.liulkovich.florapoint.domain.GetAllUserPointsUseCase
 import com.liulkovich.florapoint.domain.Reference
@@ -138,12 +140,19 @@ class MapViewModel @Inject constructor(
         val dateStr = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
             .format(Date(point.timestamp * 1000L))
 
-        val emoji = when (point.category) {
-            "mushroom" -> "🍄"
-            "berry"    -> "🫐"
-            "plant"    -> "🌿"
-            "nut"      -> "🌰"
-            else       -> "📍"
+        val emoji = FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
+
+        val isAppInstalled = try {
+            context.packageManager.getPackageInfo(context.packageName, 0)
+            true
+        } catch (e: Exception) {
+            false
+        }
+
+        val appLink = if (isAppInstalled) {
+            "florapoint://point?lat=${point.latitude}&lon=${point.longitude}&name=${Uri.encode(point.userName)}&category=${point.category ?: "custom"}"
+        } else {
+            "https://play.google.com/store/apps/details?id=${context.packageName}"
         }
 
         val text = buildString {
@@ -153,10 +162,9 @@ class MapViewModel @Inject constructor(
             }
             appendLine("🗓 $dateStr")
             appendLine()
-            appendLine("Открыть в FloraPoint:")
-            appendLine("florapoint://point?lat=${point.latitude}&lon=${point.longitude}&name=${point.userName}&category=${point.category ?: "custom"}")
+            appendLine("📍 https://maps.google.com/?q=${point.latitude},${point.longitude}")
             appendLine()
-            append("📍 https://maps.google.com/?q=${point.latitude},${point.longitude}")
+            append("🌿 Открыть в FloraPoint: $appLink")
         }
 
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -164,6 +172,19 @@ class MapViewModel @Inject constructor(
             putExtra(Intent.EXTRA_TEXT, text)
         }
         context.startActivity(Intent.createChooser(intent, "Поделиться точкой"))
+    }
+    private var _deepLinkName = ""
+    private var _deepLinkCategory = "custom"
+
+    fun setDeepLinkData(name: String, category: String) {
+        _deepLinkName = name
+        _deepLinkCategory = category
+        _state.update {
+            it.copy(
+                deepLinkName = name,
+                deepLinkCategory = category
+            )
+        }
     }
 }
 
@@ -184,5 +205,7 @@ data class MapScreenState(
     val currentUserLocation: Pair<Double, Double>? = null,
     val searchQuery: String = "",
     val species: List<Reference> = emptyList(),
-    val bottomSheetMode: BottomSheetMode? = null
+    val bottomSheetMode: BottomSheetMode? = null,
+    val deepLinkName: String = "",
+    val deepLinkCategory: String = ""
 )

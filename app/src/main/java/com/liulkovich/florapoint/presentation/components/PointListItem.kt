@@ -49,7 +49,7 @@ fun PointListItem(
     onLongClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onShare: () -> Unit  // ← новый параметр
+    onShare: () -> Unit
 ) {
     val dateStr = remember(point.timestamp) {
         SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())

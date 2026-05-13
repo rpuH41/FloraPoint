@@ -40,18 +40,24 @@ import com.liulkovich.florapoint.domain.Reference
 @Composable
 fun AddPointSheetContent(
     species: List<Reference>,
+    initialName: String = "",
+    initialCategory: String = "",
     onSave: (speciesId: Int?, userName: String, description: String, category: String) -> Unit,
     onDismiss: () -> Unit
 ) {
+
+
     var selectedCategory by remember { mutableStateOf(FloraCategory.MUSHROOM) }
     var typeDropdownExpanded by remember { mutableStateOf(false) }
-
+    val initialFlora = FloraCategory.fromKey(initialCategory) ?: FloraCategory.MUSHROOM
+   // var selectedCategory by remember { mutableStateOf(initialFlora) }
+    var searchText by remember { mutableStateOf(initialName) }
     val filteredSpecies = remember(species, selectedCategory) {
         species.filter { it.category == selectedCategory.key }
     }
 
     var selectedSpecies by remember(filteredSpecies) { mutableStateOf<Reference?>(null) }
-    var searchText by remember { mutableStateOf("") }
+  // var searchText by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
 
     val suggestions = remember(searchText, filteredSpecies, selectedSpecies) {

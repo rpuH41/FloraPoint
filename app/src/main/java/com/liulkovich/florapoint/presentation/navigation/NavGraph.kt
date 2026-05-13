@@ -11,12 +11,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.liulkovich.florapoint.presentation.components.BottomBar
 import com.liulkovich.florapoint.presentation.screens.detail.DetailScreen
 import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
+import com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen
 import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
 
 @Composable
@@ -53,15 +55,11 @@ fun NavGraph() {
         ) {
             composable(Screen.Home.rout) {
                 HomeScreen(
-                    onClickMap = {
-                        navController.navigate(Screen.Map.rout)
-                    },
+                    onClickMap = { navController.navigate(Screen.Map.rout) },
                     onClickCategory = { category ->
                         navController.navigate(Screen.Guide.createRoute(category))
                     },
-                    onClickDetail = {
-                        navController.navigate("Detail/$it")
-                    }
+                    onClickDetail = { navController.navigate("Detail/$it") }
                 )
             }
 
@@ -86,6 +84,45 @@ fun NavGraph() {
                 MapScreen()
             }
 
+            composable(
+                route = Screen.MapDeepLink.rout,
+                arguments = listOf(
+                    navArgument("lat") {
+                        type = NavType.StringType
+                        defaultValue = "0.0"
+                    },
+                    navArgument("lon") {
+                        type = NavType.StringType
+                        defaultValue = "0.0"
+                    },
+                    navArgument("name") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                    navArgument("category") {
+                        type = NavType.StringType
+                        defaultValue = "custom"
+                    }
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
+                    }
+                )
+            ) { backStackEntry ->
+                val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull() ?: 0.0
+                val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull() ?: 0.0
+                val name = backStackEntry.arguments?.getString("name") ?: ""
+                val category = backStackEntry.arguments?.getString("category") ?: "custom"
+
+                MapScreen(
+                    deepLinkLat = lat,
+                    deepLinkLon = lon,
+                    deepLinkName = name,
+                    deepLinkCategory = category
+                )
+            }
+
             composable(Screen.Settings.rout) {
                 SettingsScreen(
                     onNavigateToNotifications = {
@@ -95,7 +132,7 @@ fun NavGraph() {
             }
 
             composable(Screen.Notifications.rout) {
-                com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen()
+                NotificationScreen()
             }
 
             composable(
@@ -122,6 +159,7 @@ sealed class Screen(val rout: String) {
             if (category.isEmpty()) "Guide" else "Guide?category=$category"
     }
     data object Map : Screen("Map")
+    data object MapDeepLink : Screen("Map?lat={lat}&lon={lon}&name={name}&category={category}")
     data object Settings : Screen("Settings")
     data object Notifications : Screen("Notifications")
     data object Detail : Screen("Detail/{speciesId}")
