@@ -1,6 +1,7 @@
 package com.liulkovich.florapoint.data
 
 import com.liulkovich.florapoint.domain.FloraRepository
+import com.liulkovich.florapoint.domain.OfflineRegion
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.domain.UserPoints
@@ -11,7 +12,8 @@ class FloraRepositoryImpl @Inject constructor(
 
     private val referenceDao: ReferenceDao,
     private val userPointsDao: UserPointsDao,
-    private val tipDao: TipDao
+    private val tipDao: TipDao,
+    private val offlineRegionDao: OfflineRegionDao
 
 ): FloraRepository {
 
@@ -41,8 +43,15 @@ class FloraRepositoryImpl @Inject constructor(
 
     override suspend fun getRandomTip(): Tip? = tipDao.getRandomTip()
 
-    override suspend fun getAllUserPointsList(): List<UserPoints> =
-        userPointsDao.getAllList()
+    override suspend fun getAllUserPointsList(): List<UserPoints> = userPointsDao.getAllList()
+
+    override fun getAllOfflineRegions(): Flow<List<OfflineRegion>> = offlineRegionDao.getAll()
+
+    override suspend fun saveOfflineRegion(region: OfflineRegion) = offlineRegionDao.insert(region)
+
+    override suspend fun deleteOfflineRegion(id: String) = offlineRegionDao.delete(id)
+
+    override suspend fun countOfflineRegions(): Int = offlineRegionDao.count()
 
 
 }

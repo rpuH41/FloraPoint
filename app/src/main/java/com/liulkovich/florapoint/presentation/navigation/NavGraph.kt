@@ -19,6 +19,8 @@ import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
 import com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen
+import com.liulkovich.florapoint.presentation.screens.settings.DownloadAreaScreen
+import com.liulkovich.florapoint.presentation.screens.settings.OfflineRegionsScreen
 import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
 
 @Composable
@@ -127,6 +129,9 @@ fun NavGraph() {
                 SettingsScreen(
                     onNavigateToNotifications = {
                         navController.navigate(Screen.Notifications.rout)
+                    },
+                    onNavigateToOfflineRegions = {
+                        navController.navigate(Screen.OfflineRegions.rout)
                     }
                 )
             }
@@ -148,6 +153,19 @@ fun NavGraph() {
                     }
                 )
             }
+            composable(Screen.OfflineRegions.rout) {
+                OfflineRegionsScreen(
+                    onNavigateToDownload = {
+                        navController.navigate(Screen.DownloadArea.rout)
+                    }
+                )
+            }
+
+            composable(Screen.DownloadArea.rout) {
+                DownloadAreaScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
@@ -163,4 +181,7 @@ sealed class Screen(val rout: String) {
     data object Settings : Screen("Settings")
     data object Notifications : Screen("Notifications")
     data object Detail : Screen("Detail/{speciesId}")
+
+    data object OfflineRegions : Screen("OfflineRegions")
+    data object DownloadArea : Screen("DownloadArea")
 }

@@ -28,4 +28,12 @@ interface FloraRepository {
     suspend fun hasPointsForSpecies(speciesId: Int): Boolean
 
     suspend fun getRandomTip(): Tip?
+
+    fun getAllOfflineRegions(): Flow<List<OfflineRegion>>
+
+    suspend fun saveOfflineRegion(region: OfflineRegion)
+
+    suspend fun deleteOfflineRegion(id: String)
+
+    suspend fun countOfflineRegions(): Int
 }

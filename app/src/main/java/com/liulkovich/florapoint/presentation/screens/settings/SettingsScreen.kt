@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
@@ -53,7 +54,8 @@ import com.liulkovich.florapoint.R
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onNavigateToNotifications: () -> Unit
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToOfflineRegions: () -> Unit
 ) {
     val context = LocalContext.current
     var showPrivacyDialog by remember { mutableStateOf(false) }
@@ -104,6 +106,13 @@ fun SettingsScreen(
                 title = stringResource(R.string.restore),
                 subtitle = stringResource(R.string.load_points_from_a_file),
                 onClick = { showRestoreDialog = true }
+            )
+            HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
+            SettingsItem(
+                icon = Icons.Default.Download,
+                title = stringResource(R.string.download_map),
+                subtitle = stringResource(R.string.download_areas_description),
+                onClick = { onNavigateToOfflineRegions() }
             )
         }
 
@@ -196,32 +205,46 @@ fun SettingsScreen(
     }
 
     if (showBackupDialog) {
+        val chooserTitle = stringResource(R.string.save_backup_title)
+
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showBackupDialog = false },
             title = { Text(stringResource(R.string.backup)) },
             text = { Text(stringResource(R.string.save_all_your_points_to_a_file)) },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    showBackupDialog = false
-                    viewModel.exportPoints(context) { uri ->
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "application/gpx+xml"
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        showBackupDialog = false
+                        viewModel.exportPoints(context) { uri ->
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "application/gpx+xml"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            val chooser = Intent.createChooser(intent, chooserTitle).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+
+                            runCatching {
+                                context.startActivity(chooser)
+                            }
                         }
-                        context.startActivity(
-                            Intent.createChooser(intent, "Сохранить резервную копию")
-                        )
                     }
-                }) { Text(stringResource(R.string.save)) }
+                ) {
+                    Text(stringResource(R.string.save))
+                }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(
                     onClick = { showBackupDialog = false }
-                ) { Text(stringResource(R.string.cancel)) }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }
+
 
     if (showRestoreDialog) {
         androidx.compose.material3.AlertDialog(
