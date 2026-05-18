@@ -53,6 +53,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.localizedName
 
 @Composable
 fun GuideScreen(
@@ -103,7 +104,7 @@ fun GuideScreen(
                     GuideCard(
                         modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                         textImage = speciesItem.imageName,
-                        textName = speciesItem.name,
+                        textName = speciesItem.localizedName(),
                         startMonth = speciesItem.startMonth,
                         endMonth = speciesItem.endMonth,
                         reference = speciesItem,

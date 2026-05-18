@@ -144,4 +144,14 @@
     <string name="error_format">Error: %1$s</string>
     <string name="download_areas_description">Download areas for offline use</string>
     <string name="save_backup_title">Save backup copy</string>
+    <string name="season_starts_tomorrow">The season starts tomorrow!</string>
+    <string name="outdoor_preparation_hint">%1$s — get ready for the outdoors.</string>
+    <string name="season_is_open_format">Season is open: %1$s</string>
+    <string name="check_your_spots_hint">It’s the perfect time to check your spots on the map!</string>
+    <string name="peak_season_format">Peak season: %1$s</string>
+    <string name="prime_harvest_time">It’s prime time right now. Don’t miss out!</string>
+    <string name="season_is_ending_format">Season is ending: %1$s</string>
+    <string name="one_week_left_in_season">Only one week left in the season.</string>
+    <string name="flora_seasons">Flora Seasons</string>
+    <string name="season_notifications_description">Notifications for the start, peak, and end of the harvest season</string>
 </resources>

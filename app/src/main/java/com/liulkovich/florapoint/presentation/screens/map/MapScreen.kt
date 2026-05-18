@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.R
+import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.components.AddPointSheetContent
 import com.liulkovich.florapoint.presentation.components.EditPointSheetContent
 import com.liulkovich.florapoint.presentation.components.OsmMapView
@@ -246,7 +247,7 @@ fun MapScreen(
                         if (query.isEmpty()) state.userPoints
                         else state.userPoints.filter { point ->
                             val speciesName = state.species
-                                .find { it.id == point.speciesId }?.name?.lowercase() ?: ""
+                                .find { it.id == point.speciesId }?.localizedName()?.lowercase() ?: ""
                             speciesName.contains(query) || point.userName.lowercase()
                                 .contains(query)
                         }
@@ -262,7 +263,7 @@ fun MapScreen(
                         val displayName = when {
                             point.userName.isNotBlank() && point.speciesId == 0 -> point.userName
                             point.speciesId == 0 -> stringResource(R.string.custom_species)
-                            else -> state.species.find { it.id == point.speciesId }?.name
+                            else -> state.species.find { it.id == point.speciesId }?.localizedName()
                                 ?: point.userName.ifBlank {
                                     stringResource(R.string.unknown_species)
                                 }

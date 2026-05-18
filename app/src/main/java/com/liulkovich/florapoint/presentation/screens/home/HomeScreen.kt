@@ -54,6 +54,8 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.Tip
+import com.liulkovich.florapoint.domain.localizedName
+import com.liulkovich.florapoint.domain.localizedText
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -150,10 +152,11 @@ fun HomeScreen(
                             items(state.species) { speciesItem ->
                                 HomeSeasonCard(
                                     textImage = speciesItem.imageName,
-                                    textName = speciesItem.name,
+                                    textName = speciesItem.localizedName(),
                                     endMonth = speciesItem.endMonth,
                                     reference = speciesItem,
-                                    onNotificationChange = { },
+                                    onNotificationChange = { isChecked ->
+                                        viewModel.toggleNotification(speciesItem.id, isChecked) },
                                     onClickDetail = { onClickDetail(speciesItem.id) },
                                 )
                             }
@@ -371,7 +374,7 @@ fun TipOfTheDayCard(tip: Tip) {
         ) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = tip.text,
+                text = tip.localizedText(),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )

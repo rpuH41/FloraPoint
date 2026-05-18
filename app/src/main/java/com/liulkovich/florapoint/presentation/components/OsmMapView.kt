@@ -31,6 +31,7 @@ import androidx.core.graphics.drawable.toDrawable
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
+import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.screens.map.utils.createShapeMarkerBitmap
 import com.liulkovich.florapoint.presentation.screens.map.utils.isOnline
 import org.osmdroid.events.MapEventsReceiver
@@ -126,9 +127,9 @@ fun OsmMapView(
                         position = GeoPoint(point.latitude, point.longitude)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         title = point.userName.ifBlank {
-                            ref?.name ?: pointTitleTemplate.format(point.id)
+                            ref?.localizedName() ?: pointTitleTemplate.format(point.id)
                         }
-                        snippet = ref?.name
+                        snippet = ref?.localizedName()
                         icon = bitmap.toDrawable(context.resources)
                         setOnMarkerClickListener { _, _ ->
                             onMarkerClick(point)

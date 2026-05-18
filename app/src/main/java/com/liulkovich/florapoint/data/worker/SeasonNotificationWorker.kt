@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.localizedName
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -69,20 +70,22 @@ class SeasonNotificationWorker @AssistedInject constructor(
         when {
             notifyStart
                     && month == prevMonth
-                    && day == lastDayOfPrev -> {
+                    && day == lastDayOfPrev ->
                 sendNotification(
                     id    = ref.id * 10 + 1,
-                    title = "Завтра открывается сезон!",
-                    text  = "${ref.name} — подготовьтесь к выходу на природу."
+                    title = context.getString(R.string.season_starts_tomorrow),
+                    text  = context.getString(
+                        R.string.outdoor_preparation_hint,
+                        ref.localizedName()
+                    )
                 )
-            }
             notifyStart
                     && month == start
                     && day == 1 -> {
                 sendNotification(
                     id    = ref.id * 10 + 2,
-                    title = "Сезон открыт: ${ref.name}",
-                    text  = "Самое время проверить свои точки на карте!"
+                    title = context.getString(R.string.season_is_open_format, ref.localizedName()),
+                    text  = context.getString(R.string.check_your_spots_hint)
                 )
             }
             notifyPeak
@@ -90,8 +93,8 @@ class SeasonNotificationWorker @AssistedInject constructor(
                     && day == 1 -> {
                 sendNotification(
                     id    = ref.id * 10 + 3,
-                    title = "Пик сезона: ${ref.name}",
-                    text  = "Сейчас самое урожайное время. Не пропустите!"
+                    title = context.getString(R.string.peak_season_format, ref.localizedName()),
+                    text  = context.getString(R.string.prime_harvest_time)
                 )
             }
             notifyEnd
@@ -99,8 +102,8 @@ class SeasonNotificationWorker @AssistedInject constructor(
                     && day == weekBeforeEndDay -> {
                 sendNotification(
                     id    = ref.id * 10 + 4,
-                    title = "Сезон заканчивается: ${ref.name}",
-                    text  = "До конца сезона осталась неделя."
+                    title = context.getString(R.string.season_is_ending_format, ref.localizedName()),
+                    text  = context.getString(R.string.one_week_left_in_season)
                 )
             }
         }
@@ -138,10 +141,10 @@ class SeasonNotificationWorker @AssistedInject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Сезоны флоры",
+                context.getString(R.string.flora_seasons),
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Уведомления о начале, пике и конце сезона сбора"
+                description = context.getString(R.string.season_notifications_description)
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE)
                     as NotificationManager

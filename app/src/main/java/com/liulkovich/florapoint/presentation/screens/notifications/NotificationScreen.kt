@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liulkovich.florapoint.R
+import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.screens.guide.GuideCard
 
 @Composable
@@ -146,7 +147,7 @@ fun NotificationScreen(
                     GuideCard(
                         modifier = Modifier.padding(vertical = 8.dp),
                         textImage = species.imageName,
-                        textName = species.name,
+                        textName = species.localizedName(),
                         startMonth = species.startMonth,
                         endMonth = species.endMonth,
                         reference = species,

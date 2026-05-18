@@ -6,6 +6,7 @@ import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
 import com.liulkovich.florapoint.domain.GetRandomTipUseCase
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.Tip
+import com.liulkovich.florapoint.domain.UpdateNotificationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
 
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
-    private val getRandomTipUseCase: GetRandomTipUseCase
+    private val getRandomTipUseCase: GetRandomTipUseCase,
+    private val updateNotificationUseCase: UpdateNotificationUseCase
 
 ): ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
@@ -47,6 +49,11 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val tip = getRandomTipUseCase()
             _state.update { it.copy(tip = tip) }
+        }
+    }
+    fun toggleNotification(id: Int, enabled: Boolean) {
+        viewModelScope.launch {
+            updateNotificationUseCase(id, if (enabled) 1 else 0)
         }
     }
 

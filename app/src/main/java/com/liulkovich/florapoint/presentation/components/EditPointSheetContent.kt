@@ -36,6 +36,7 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
+import com.liulkovich.florapoint.domain.localizedName
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,7 +64,7 @@ fun EditPointSheetContent(
     }
 
     var searchText by remember(point) {
-        mutableStateOf(existingRef?.name ?: point.userName.ifBlank { "" })
+        mutableStateOf(existingRef?.localizedName() ?: point.userName.ifBlank { "" })
     }
     var selectedSpecies by remember(point, filteredSpecies) {
         mutableStateOf(filteredSpecies.find { it.id == point.speciesId })
@@ -72,7 +73,7 @@ fun EditPointSheetContent(
     val suggestions = remember(searchText, filteredSpecies, selectedSpecies) {
         if (searchText.length < 2 || selectedSpecies != null) emptyList()
         else filteredSpecies.filter {
-            it.name.lowercase().contains(searchText.lowercase().trim())
+            it.localizedName().lowercase().contains(searchText.lowercase().trim())
         }
     }
 
@@ -131,7 +132,7 @@ fun EditPointSheetContent(
             value = searchText,
             onValueChange = {
                 searchText = it
-                if (selectedSpecies?.name != it) selectedSpecies = null
+                if (selectedSpecies?.localizedName() != it) selectedSpecies = null
             },
             label = { Text(stringResource(R.string.title)) },
             modifier = Modifier.fillMaxWidth(),
@@ -154,7 +155,7 @@ fun EditPointSheetContent(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    ref.name,
+                                    ref.localizedName(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -168,7 +169,7 @@ fun EditPointSheetContent(
                                 )
                             },
                             onClick = {
-                                searchText = ref.name
+                                searchText = ref.localizedName()
                                 selectedSpecies = ref
                             }
                         )
@@ -205,7 +206,7 @@ fun EditPointSheetContent(
                 onClick = {
                     val matched = selectedSpecies
                         ?: filteredSpecies.find {
-                            it.name.equals(searchText.trim(), ignoreCase = true)
+                            it.localizedName().equals(searchText.trim(), ignoreCase = true)
                         }
                     onSave(
                         matched?.id,

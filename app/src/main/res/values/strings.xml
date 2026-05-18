@@ -143,4 +143,14 @@
     <string name="error_format">Ошибка: %1$s</string>
     <string name="download_areas_description">Скачать районы для работы без интернета</string>
     <string name="save_backup_title">Сохранить резервную копию</string>
+    <string name="season_starts_tomorrow">Завтра открывается сезон!</string>
+    <string name="outdoor_preparation_hint">%1$s — подготовьтесь к выходу на природу.</string>
+    <string name="season_is_open_format">Сезон открыт: %1$s</string>
+    <string name="check_your_spots_hint">Самое время проверить свои точки на карте!</string>
+    <string name="peak_season_format">Пик сезона: %1$s</string>
+    <string name="prime_harvest_time">Сейчас самое урожайное время. Не пропустите!</string>
+    <string name="season_is_ending_format">Сезон заканчивается: %1$s</string>
+    <string name="one_week_left_in_season">До конца сезона осталась неделя.</string>
+    <string name="flora_seasons">Сезоны флоры</string>
+    <string name="season_notifications_description">Уведомления о начале, пике и конце сезона сбора</string>
 </resources>

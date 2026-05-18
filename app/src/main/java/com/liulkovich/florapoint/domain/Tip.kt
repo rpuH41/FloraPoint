@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.domain
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -7,5 +8,6 @@ import androidx.room.PrimaryKey
 data class Tip(
     @PrimaryKey
     val id: Int,
-    val text: String
+    @ColumnInfo(name = "text_ru") val textRu: String,
+    @ColumnInfo(name = "text_en") val textEn: String?
 )

@@ -57,6 +57,10 @@ import com.liulkovich.florapoint.presentation.screens.guide.numberInString
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.res.stringResource
+import com.liulkovich.florapoint.domain.localizedDescription
+import com.liulkovich.florapoint.domain.localizedHabitat
+import com.liulkovich.florapoint.domain.localizedLookAlikes
+import com.liulkovich.florapoint.domain.localizedName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +80,7 @@ fun DetailScreen(
                 windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
                 title = {
                     Text(
-                        text = state.species?.name ?: "",
+                        text = state.species?.localizedName() ?: "",
                         fontWeight = Bold,
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = 24.sp,
@@ -130,7 +134,7 @@ fun DetailScreen(
             LazyColumn(
                 contentPadding = innerPadding
             ) {
-                item { HeroImage(species.imageName, species.name) }
+                item { HeroImage(species.imageName, species.localizedName()) }
                 item { InfoSection(species) }
                 item {
                     Button(
@@ -207,17 +211,18 @@ fun InfoSection(species: Reference) {
         InfoBlock(
             icon = Icons.Default.LocationOn,
             title = stringResource(R.string.what_is_the_habitat_of),
-            text = species.habitat
+            text = species.localizedHabitat()
         )
         InfoBlock(
             icon = Icons.Default.Info,
             title = stringResource(R.string.description),
-            text = species.description
+            text = species.localizedDescription()
         )
         InfoBlock(
             icon = Icons.Default.Warning,
             title = stringResource(R.string.similar_species),
-            text = species.lookAlikes
+            text = species.localizedLookAlikes()
+
         )
         InfoBlock(
             icon = Icons.Default.DateRange,

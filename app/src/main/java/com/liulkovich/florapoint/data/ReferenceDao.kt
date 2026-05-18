@@ -14,13 +14,17 @@ interface ReferenceDao {
     @Query("SELECT * FROM reference_table WHERE category IN (:categories)")
     fun getByCategories(categories: Set<String>): Flow<List<Reference>>
 
-    @Query("SELECT * FROM reference_table WHERE category IN (:categories) AND name LIKE :name || '%'")
+    @Query("""
+    SELECT * FROM reference_table 
+    WHERE category IN (:categories) 
+    AND (name_ru LIKE :name || '%' OR name_en LIKE :name || '%')
+""")
     fun getByCategoriesAndName(categories: Set<String>, name: String): Flow<List<Reference>>
 
     @Query("SELECT * FROM reference_table WHERE category = :category AND start_month = :startMonth")
     fun getByCategoryAndStartSeason(category: String, startMonth: Int): Flow<List<Reference>>
 
-    @Query("SELECT * FROM reference_table WHERE name LIKE :name || '%'")
+    @Query("SELECT * FROM reference_table WHERE name_ru LIKE :name || '%' OR name_en LIKE :name || '%'")
     fun getByName(name: String): Flow<List<Reference>>
 
     @Query("SELECT * FROM reference_table WHERE id = :referenceId")

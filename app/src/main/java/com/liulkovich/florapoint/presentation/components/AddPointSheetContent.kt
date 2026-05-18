@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.localizedName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,6 @@ fun AddPointSheetContent(
     var selectedCategory by remember { mutableStateOf(FloraCategory.MUSHROOM) }
     var typeDropdownExpanded by remember { mutableStateOf(false) }
     val initialFlora = FloraCategory.fromKey(initialCategory) ?: FloraCategory.MUSHROOM
-   // var selectedCategory by remember { mutableStateOf(initialFlora) }
     var searchText by remember { mutableStateOf(initialName) }
     val filteredSpecies = remember(species, selectedCategory) {
         species.filter { it.category == selectedCategory.key }
@@ -63,7 +63,7 @@ fun AddPointSheetContent(
     val suggestions = remember(searchText, filteredSpecies, selectedSpecies) {
         if (searchText.length < 2 || selectedSpecies != null) emptyList()
         else filteredSpecies.filter {
-            it.name.lowercase().contains(searchText.lowercase().trim())
+            it.localizedName().lowercase().contains(searchText.lowercase().trim())
         }
     }
 
@@ -107,12 +107,12 @@ fun AddPointSheetContent(
             value = searchText,
             onValueChange = {
                 searchText = it
-                if (selectedSpecies?.name != it) selectedSpecies = null
+                if (selectedSpecies?.localizedName() != it) selectedSpecies = null
             },
             label = { Text(stringResource(R.string.title)) },
             placeholder = {
                 Text(
-                    text = filteredSpecies.firstOrNull()?.name?.let {
+                    text = filteredSpecies.firstOrNull()?.localizedName()?.let {
                         stringResource(
                             R.string.example,
                             it
@@ -140,7 +140,7 @@ fun AddPointSheetContent(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = ref.name,
+                                    text = ref.localizedName(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -154,7 +154,7 @@ fun AddPointSheetContent(
                                 )
                             },
                             onClick = {
-                                searchText = ref.name
+                                searchText = ref.localizedName()
                                 selectedSpecies = ref
                             }
                         )
@@ -189,7 +189,7 @@ fun AddPointSheetContent(
                     val finalSpeciesId: Int? = when {
                         selectedSpecies != null -> selectedSpecies!!.id
                         else -> filteredSpecies.find {
-                            it.name.equals(searchText.trim(), ignoreCase = true)
+                            it.localizedName().equals(searchText.trim(), ignoreCase = true)
                         }?.id
                     }
                     onSave(
