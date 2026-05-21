@@ -156,6 +156,21 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
                 }
                 canvas.drawCircle(cx - 8f, 48f, 6f, highlightPaint)
             }
+            "other" -> {
+                fill.color = "#FF9800".toColorInt()           // оранжевый
+                canvas.drawCircle(cx, 48f, 26f, fill)
+                stroke.color = android.graphics.Color.WHITE
+                stroke.strokeWidth = 5f
+                canvas.drawCircle(cx, 48f, 26f, stroke)
+
+                val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.WHITE
+                    textSize = 32f
+                    textAlign = Paint.Align.CENTER
+                    isFakeBoldText = true
+                }
+                canvas.drawText("★", cx, 57f, textPaint)      // или "?"
+            }
 
             else -> {
                 fill.color = "#FF9800".toColorInt()
@@ -179,6 +194,7 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
             "berry" -> "#6B3E9E".toColorInt()
             "plant" -> "#1F6B1F".toColorInt()
             "nut" -> "#A36A2E".toColorInt()
+            "other" -> "#FF9800".toColorInt()
             else -> "#FF9800".toColorInt()
         }
 

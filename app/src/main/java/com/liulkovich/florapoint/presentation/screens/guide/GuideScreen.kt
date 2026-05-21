@@ -100,7 +100,7 @@ fun GuideScreen(
                 item {
                     Spacer(modifier = Modifier.height(5.dp))
                 }
-                items(state.species) { speciesItem ->
+                items(items = state.species.filter { it.category != FloraCategory.OTHER.key }) { speciesItem ->
                     GuideCard(
                         modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                         textImage = speciesItem.imageName,
@@ -288,10 +288,12 @@ fun PanelFilter(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+            .padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterHorizontally)
     ) {
-        FloraCategory.entries.forEach { category ->
+        FloraCategory.entries
+            .filter { it != FloraCategory.OTHER }
+            .forEach { category ->
             val isSelected = selectedCategories.contains(category.key)
             FilterChip(
                 selected = isSelected,

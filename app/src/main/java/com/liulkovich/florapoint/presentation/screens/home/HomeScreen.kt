@@ -103,11 +103,12 @@ fun HomeScreen(
                 )
             }
             item {
+                val visibleCategories = FloraCategory.entries.filter { it != FloraCategory.OTHER }
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    FloraCategory.entries.chunked(2).forEach { row ->
+                    visibleCategories.chunked(2).forEach { row ->
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             row.forEach { category ->
                                 TypeFlora(
@@ -242,7 +243,7 @@ fun HomeSeasonCard(
             context.packageName
         )
     Card(
-        modifier = modifier.width(185.dp),
+        modifier = modifier.width(165.dp),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = { onClickDetail(reference.id) }

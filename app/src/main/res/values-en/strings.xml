@@ -154,4 +154,5 @@
     <string name="one_week_left_in_season">Only one week left in the season.</string>
     <string name="flora_seasons">Flora Seasons</string>
     <string name="season_notifications_description">Notifications for the start, peak, and end of the harvest season</string>
+    <string name="category_other">Other</string>
 </resources>

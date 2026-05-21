@@ -153,4 +153,5 @@
     <string name="one_week_left_in_season">До конца сезона осталась неделя.</string>
     <string name="flora_seasons">Сезоны флоры</string>
     <string name="season_notifications_description">Уведомления о начале, пике и конце сезона сбора</string>
+    <string name="category_other">Другое</string>
 </resources>

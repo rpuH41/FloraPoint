@@ -50,6 +50,11 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.lang.Math.toRadians
 import kotlin.math.cos
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationServices
 
 @Composable
 fun DownloadAreaScreen(
@@ -64,6 +69,23 @@ fun DownloadAreaScreen(
     var regionName by remember { mutableStateOf("") }
 
     val mapView = remember { MapView(context) }
+
+    LaunchedEffect(Unit) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    mapView.controller.animateTo(
+                        GeoPoint(location.latitude, location.longitude)
+                    )
+                }
+            }
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose { mapView.onDetach() }
@@ -142,6 +164,27 @@ fun DownloadAreaScreen(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                FloatingActionButton(
+                    onClick = {
+                        if (ActivityCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+                            fusedClient.lastLocation.addOnSuccessListener { location ->
+                                if (location != null) {
+                                    mapView.controller.animateTo(
+                                        GeoPoint(location.latitude, location.longitude)
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Icon(Icons.Default.LocationSearching, contentDescription = null)
+                }
                 FloatingActionButton(
                     onClick = { mapView.controller.zoomIn() },
                     modifier = Modifier.size(44.dp)

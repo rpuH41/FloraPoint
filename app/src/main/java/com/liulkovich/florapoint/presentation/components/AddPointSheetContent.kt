@@ -57,7 +57,7 @@ fun AddPointSheetContent(
     }
 
     var selectedSpecies by remember(filteredSpecies) { mutableStateOf<Reference?>(null) }
-  // var searchText by remember { mutableStateOf("") }
+
     var description by remember { mutableStateOf("") }
 
     val suggestions = remember(searchText, filteredSpecies, selectedSpecies) {

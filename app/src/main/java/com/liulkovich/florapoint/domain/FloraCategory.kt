@@ -12,7 +12,8 @@ enum class FloraCategory(
     MUSHROOM(R.string.mushrooms, "mushroom", "mushroom", "🍄"),
     BERRY(R.string.berries, "berry", "berry",  "🫐"),
     PLANT(R.string.plants, "plant", "plant", "🌿"),
-    NUT(R.string.nuts, "nut", "nut", "🌰");
+    NUT(R.string.nuts, "nut", "nut", "🌰"),
+    OTHER(R.string.category_other, "other", "other", "📍");
 
     companion object {
         fun fromKey(key: String): FloraCategory? =

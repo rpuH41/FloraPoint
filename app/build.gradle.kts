@@ -86,6 +86,9 @@ dependencies {
     //JSON
     implementation(libs.kotlinx.serialization.json)
 
+    //SplashScreen
+    implementation(libs.androidx.core.splashscreen)
+
     // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
