@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liulkovich.florapoint.data.weather.WeatherService
 import com.liulkovich.florapoint.domain.AddNewPointUseCase
 import com.liulkovich.florapoint.domain.DeletePointUseCase
 import com.liulkovich.florapoint.domain.EditPointUseCase
@@ -14,6 +15,7 @@ import com.liulkovich.florapoint.domain.GetAllUserPointsUseCase
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -34,6 +36,7 @@ class MapViewModel @Inject constructor(
     private val addNewPointUseCase: AddNewPointUseCase,
     private val editPointUseCase: EditPointUseCase,
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
+    private val weatherService: WeatherService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MapScreenState())
@@ -86,6 +89,33 @@ class MapViewModel @Inject constructor(
     fun dismissBottomSheet() {
         _state.update { it.copy(bottomSheetMode = null) }
     }
+    fun updateMissingWeatherData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allPoints = state.value.userPoints
+
+            val pointsToUpdate = allPoints.filter {
+                it.avgTemp5Days == null || it.avgHumidity5Days == null
+            }
+
+            if (pointsToUpdate.isEmpty()) return@launch
+
+            _command.emit(MapCommand.ShowMessage("Обновляем погоду..."))
+
+            pointsToUpdate.forEach { point ->
+                val weather = weatherService.getWeatherData(point.latitude, point.longitude)
+                if (weather != null) {
+                    val updated = point.copy(
+                        temperature = weather.temperature,
+                        humidity = weather.humidity,
+                        avgTemp5Days = weather.avgTemp5Days,
+                        avgHumidity5Days = weather.avgHumidity5Days,
+                        weatherTimestamp = System.currentTimeMillis()
+                    )
+                    editPointUseCase(updated)
+                }
+            }
+        }
+    }
 
     fun addNewPoint(
         latitude: Double,
@@ -95,20 +125,37 @@ class MapViewModel @Inject constructor(
         description: String,
         category: String
     ) {
-        val newPoint = UserPoints(
-            id = 0,
-            speciesId = speciesId,
-            latitude = latitude,
-            longitude = longitude,
-            userName = userName.ifBlank { "Неизвестный вид" },
-            description = description,
-            category = category,
-            timestamp = System.currentTimeMillis() / 1000,
-            isFavorite = 0,
-            photoPath = "",
-            accuracy = 0
-        )
-        viewModelScope.launch { addNewPointUseCase(newPoint) }
+        viewModelScope.launch(Dispatchers.IO) {
+            val weather = weatherService.getWeatherData(latitude, longitude)
+
+            val newPoint = UserPoints(
+                speciesId = speciesId,
+                latitude = latitude,
+                longitude = longitude,
+                userName = userName.ifBlank { "Неизвестный вид" },
+                description = description.trim(),
+                category = category,
+                timestamp = System.currentTimeMillis() / 1000,
+
+                temperature = weather?.temperature,
+                humidity = weather?.humidity,
+                avgTemp5Days = weather?.avgTemp5Days,
+                avgHumidity5Days = weather?.avgHumidity5Days,
+                weatherTimestamp = if (weather != null) System.currentTimeMillis() else null,
+
+                isFavorite = 0,
+                photoPath = "",
+                accuracy = 0
+            )
+
+            addNewPointUseCase(newPoint)
+
+            if (weather == null) {
+                _command.emit(MapCommand.ShowMessage("Точка добавлена. Погода будет загружена при появлении интернета."))
+            } else {
+                _command.emit(MapCommand.ShowMessage("Точка добавлена с данными о погоде"))
+            }
+        }
     }
 
     fun updateUserPoint(

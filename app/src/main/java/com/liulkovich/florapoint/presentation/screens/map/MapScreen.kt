@@ -101,7 +101,9 @@ fun MapScreen(
             myLocationOverlayRef.value?.enableMyLocation()
         }
     }
-
+    LaunchedEffect(Unit) {
+        viewModel.updateMissingWeatherData()
+    }
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(
                 context,

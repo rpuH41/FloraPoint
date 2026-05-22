@@ -85,6 +85,7 @@ fun PointListItem(
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
             )
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = speciesName,
@@ -92,6 +93,7 @@ fun PointListItem(
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1
                 )
+
                 if (point.description.isNotBlank()) {
                     Text(
                         text = point.description,
@@ -100,17 +102,17 @@ fun PointListItem(
                         maxLines = 1
                     )
                 }
+
                 Text(
                     text = dateStr,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
+
+                WeatherInfoRow(point)
             }
 
-            IconButton(
-                onClick = onShare,
-                modifier = Modifier.size(36.dp)
-            ) {
+            IconButton(onClick = onShare, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = stringResource(R.string.share),
@@ -119,10 +121,7 @@ fun PointListItem(
                 )
             }
 
-            IconButton(
-                onClick = onEdit,
-                modifier = Modifier.size(36.dp)
-            ) {
+            IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = stringResource(R.string.edit_point),
@@ -131,10 +130,7 @@ fun PointListItem(
                 )
             }
 
-            IconButton(
-                onClick = { showDeleteDialog = true },
-                modifier = Modifier.size(36.dp)
-            ) {
+            IconButton(onClick = { showDeleteDialog = true }, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = stringResource(R.string.delete),
@@ -153,16 +149,44 @@ fun PointListItem(
             confirmButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false; onDelete() },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) { Text(stringResource(R.string.delete)) }
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun WeatherInfoRow(point: UserPoints) {
+    if (point.temperature != null && point.avgTemp5Days != null) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(1.dp),
+            modifier = Modifier.padding(top = 4.dp)
+        ) {
+            Text(
+                text = "☀️ ${point.temperature.toInt()}°  💧 ${point.humidity}%",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "За 5 дней средн. ☀️ ${point.avgTemp5Days.toInt()}°  💧 ${point.avgHumidity5Days}%",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+    } else if (point.weatherTimestamp == null) {
+        Text(
+            text = "🌤️ Загрузка погоды...",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline
         )
     }
 }

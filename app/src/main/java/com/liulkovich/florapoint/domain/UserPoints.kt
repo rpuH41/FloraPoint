@@ -34,6 +34,12 @@ data class UserPoints(
     @ColumnInfo(name = "is_favorite") val isFavorite: Int,
     @ColumnInfo(name = "photo_path") val photoPath: String,
     @ColumnInfo(name = "accuracy") val accuracy: Int,
-    @ColumnInfo(name = "category") val category: String? = "custom"
+    @ColumnInfo(name = "category") val category: String? = "custom",
+
+    @ColumnInfo(name = "temperature") val temperature: Double? = null,
+    @ColumnInfo(name = "humidity") val humidity: Int? = null,
+    @ColumnInfo(name = "avg_temp_5days") val avgTemp5Days: Double? = null,
+    @ColumnInfo(name = "avg_humidity_5days") val avgHumidity5Days: Int? = null,
+    @ColumnInfo(name = "weather_timestamp") val weatherTimestamp: Long? = null
 
 )
