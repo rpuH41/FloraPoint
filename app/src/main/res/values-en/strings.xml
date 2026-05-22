@@ -155,4 +155,5 @@
     <string name="flora_seasons">Flora Seasons</string>
     <string name="season_notifications_description">Notifications for the start, peak, and end of the harvest season</string>
     <string name="category_other">Other</string>
+    <string name="loadingl_eather">🌤️ Loading weather...</string>
 </resources>

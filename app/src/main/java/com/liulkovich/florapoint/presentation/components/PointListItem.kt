@@ -177,14 +177,14 @@ private fun WeatherInfoRow(point: UserPoints) {
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "За 5 дней средн. ☀️ ${point.avgTemp5Days.toInt()}°  💧 ${point.avgHumidity5Days}%",
+                text = "Ø ☀️ ${point.avgTemp5Days.toInt()}° 💧 ${point.avgHumidity5Days}%",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
         }
     } else if (point.weatherTimestamp == null) {
         Text(
-            text = "🌤️ Загрузка погоды...",
+            text = stringResource(R.string.loadingl_eather),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline
         )

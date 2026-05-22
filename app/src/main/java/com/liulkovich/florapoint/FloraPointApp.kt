@@ -5,6 +5,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.liulkovich.florapoint.data.worker.SeasonNotificationWorker
+import com.liulkovich.florapoint.data.worker.AnniversaryNotificationWorker
 import dagger.hilt.android.HiltAndroidApp
 import org.osmdroid.config.Configuration
 import java.io.File
@@ -36,6 +37,7 @@ class FloraPointApp : Application(), WorkConfiguration.Provider {
         config.tileFileSystemCacheTrimBytes = 400L * 1024 * 1024
 
         scheduleSeasonWorker()
+        scheduleAnniversaryWorker()
     }
 
     private fun scheduleSeasonWorker() {
@@ -67,5 +69,33 @@ class FloraPointApp : Application(), WorkConfiguration.Provider {
         )
 
 
+    }
+    private fun scheduleAnniversaryWorker() {
+        val now = Calendar.getInstance()
+
+        val targetTime = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 13)   // 13:00
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            if (before(now)) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+
+        val initialDelay = targetTime.timeInMillis - now.timeInMillis
+
+        val request = PeriodicWorkRequestBuilder<AnniversaryNotificationWorker>(
+            1, TimeUnit.DAYS
+        )
+            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "anniversary_notification",
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
     }
 }

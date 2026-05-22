@@ -154,4 +154,5 @@
     <string name="flora_seasons">Сезоны флоры</string>
     <string name="season_notifications_description">Уведомления о начале, пике и конце сезона сбора</string>
     <string name="category_other">Другое</string>
+    <string name="loadingl_eather">🌤️ Загрузка погоды...</string>
 </resources>
