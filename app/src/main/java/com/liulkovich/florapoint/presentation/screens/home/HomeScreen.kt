@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -169,7 +170,7 @@ fun HomeScreen(
         }
     }
 }
-
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun TypeFlora(
     modifier: Modifier,
@@ -224,7 +225,7 @@ fun countDay(endMonth: Int): Long {
 
     return if (diffDays < 0) 0 else diffDays
 }
-
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun HomeSeasonCard(
     modifier: Modifier = Modifier,

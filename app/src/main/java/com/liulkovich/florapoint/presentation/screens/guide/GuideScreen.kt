@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.guide
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -164,7 +165,7 @@ private fun SearchBar(
         shape = RoundedCornerShape(10.dp)
     )
 }
-
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun GuideCard(
     modifier: Modifier = Modifier,

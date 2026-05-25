@@ -1,5 +1,7 @@
 package com.liulkovich.florapoint.presentation.screens.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,31 +39,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.R
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.lang.Math.toRadians
 import kotlin.math.cos
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.compose.material.icons.filled.LocationSearching
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.LocationServices
 
 @Composable
 fun DownloadAreaScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     val context = LocalContext.current
     val progress by viewModel.downloadProgress.collectAsStateWithLifecycle()
 
@@ -315,7 +317,7 @@ fun DownloadAreaScreen(
                     val (areaKm2, tilesCount, sizeMb) = areaInfo
 
                     Text(
-                        text = stringResource(R.string.area_size, String.format("%.1f", areaKm2)),
+                        text = stringResource(R.string.area_size, String.format(locale, "%.1f", areaKm2)),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF1B5E20)
@@ -324,7 +326,7 @@ fun DownloadAreaScreen(
                     Text(
                         text = stringResource(
                             R.string.approx_size_format,
-                            String.format("%.1f", sizeMb),
+                            String.format(locale, "%.1f", sizeMb),
                             tilesCount
                         ),
                         style = MaterialTheme.typography.labelSmall,

@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -43,15 +44,16 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun OsmMapView(
     modifier: Modifier = Modifier,
     points: List<UserPoints>,
     species: List<Reference>,
-    selectedPointId: Int? = null,
     currentLocation: Pair<Double, Double>?,
     shouldFollowLocation: Boolean = true,
     forceCenter: GeoPoint? = null,
+    selectedPointId: Int? = null,
     onMapReady: (MapView, MyLocationNewOverlay) -> Unit,
     onMarkerClick: (UserPoints) -> Unit,
     onMarkerLongClick: (UserPoints) -> Unit,
@@ -79,9 +81,10 @@ fun OsmMapView(
                 mapView.apply {
                     setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(true)
-                    setBuiltInZoomControls(false)
+
                     controller.setCenter(GeoPoint(53.133562, 25.141006))
                     controller.setZoom(13.0)
+
                     val overlay = MyLocationNewOverlay(GpsMyLocationProvider(context), this)
                     overlay.enableMyLocation()
                     if (shouldFollowLocation) overlay.enableFollowLocation()
@@ -123,6 +126,9 @@ fun OsmMapView(
                     }
 
                     val bitmap = createShapeMarkerBitmap(category)
+
+                    val isSelected = point.id == selectedPointId
+
                     val marker = Marker(mv).apply {
                         position = GeoPoint(point.latitude, point.longitude)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
@@ -131,17 +137,22 @@ fun OsmMapView(
                         }
                         snippet = ref?.localizedName()
                         icon = bitmap.toDrawable(context.resources)
+                        alpha = if (isSelected) 1.0f else 0.85f
+
                         setOnMarkerClickListener { _, _ ->
                             onMarkerClick(point)
                             true
                         }
                     }
+
                     mv.overlays.add(marker)
                 }
 
                 mv.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
                     override fun singleTapConfirmedHelper(p: GeoPoint?) = false
-                    override fun longPressHelper(p: GeoPoint?): Boolean = false
+                    override fun longPressHelper(p: GeoPoint?): Boolean {
+                       return false
+                    }
                 }))
 
                 mv.invalidate()

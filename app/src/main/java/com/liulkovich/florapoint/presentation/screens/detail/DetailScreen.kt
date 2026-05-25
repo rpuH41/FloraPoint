@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,11 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,19 +58,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
-import com.liulkovich.florapoint.presentation.screens.guide.numberInString
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.ui.res.stringResource
 import com.liulkovich.florapoint.domain.localizedDescription
 import com.liulkovich.florapoint.domain.localizedHabitat
 import com.liulkovich.florapoint.domain.localizedLookAlikes
 import com.liulkovich.florapoint.domain.localizedName
+import com.liulkovich.florapoint.presentation.screens.guide.numberInString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    modifier: Modifier = Modifier,
+
     viewModel: DetailViewModel = hiltViewModel(),
     onBack: () -> Unit,
     isNotificationEnabled: Boolean = false,
@@ -159,48 +161,67 @@ fun DetailScreen(
         }
     }
 }
-
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun HeroImage(imageName: String, name: String) {
     val context = LocalContext.current
-    val imageId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+
+    val imageId = remember(imageName) {
+        context.resources.getIdentifier(imageName, "drawable", context.packageName)
+    }
+
+    val painter = if (imageId != 0) {
+        painterResource(imageId)
+    } else {
+        painterResource(R.drawable.ic_launcher_background)
+    }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        Image(
-            painter = if (imageId != 0) painterResource(imageId)
-            else painterResource(R.drawable.ic_launcher_background),
-            contentDescription = stringResource(R.string.images_of_mushrooms_berries_plants_and_nuts),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                )
-                .clip(RoundedCornerShape(16.dp))
-        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp))
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = stringResource(R.string.images_of_mushrooms_berries_plants_and_nuts),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
 
-        )
-        Text(
-            text = name,
-            color = Color.White,
-            fontSize = 25.sp,
-            fontWeight = Bold,
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.6f)
+                            ),
+                            startY = 400f
+                        )
+                    )
+            )
 
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(
-                    start = 26.dp,
-                    bottom = 16.dp
-                )
-        )
+            // Текст
+            Text(
+                text = name,
+                color = Color.White,
+                fontSize = 25.sp,
+                fontWeight = Bold,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(
+                        start = 16.dp,
+                        bottom = 16.dp
+                    )
+            )
+        }
     }
 }
 
