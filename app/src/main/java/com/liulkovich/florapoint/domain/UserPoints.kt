@@ -40,6 +40,11 @@ data class UserPoints(
     @ColumnInfo(name = "humidity") val humidity: Int? = null,
     @ColumnInfo(name = "avg_temp_5days") val avgTemp5Days: Double? = null,
     @ColumnInfo(name = "avg_humidity_5days") val avgHumidity5Days: Int? = null,
-    @ColumnInfo(name = "weather_timestamp") val weatherTimestamp: Long? = null
+    @ColumnInfo(name = "weather_timestamp") val weatherTimestamp: Long? = null,
+
+    @ColumnInfo(name = "is_public") val isPublic: Boolean = false,
+    @ColumnInfo(name = "owner_uid") val ownerUid: String? = null,
+    @ColumnInfo(name = "cloud_id") val cloudId: String? = null,
+    @ColumnInfo(name = "sync_state") val syncState: String = SyncState.LOCAL.name
 
 )

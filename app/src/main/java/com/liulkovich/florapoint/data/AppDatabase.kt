@@ -13,7 +13,7 @@ import com.liulkovich.florapoint.domain.UserPoints
     Tip::class,
     OfflineRegion::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun referenceDao(): ReferenceDao

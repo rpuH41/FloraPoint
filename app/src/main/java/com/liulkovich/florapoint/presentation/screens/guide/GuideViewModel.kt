@@ -3,6 +3,7 @@ package com.liulkovich.florapoint.presentation.screens.guide
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
 import com.liulkovich.florapoint.domain.GetByCategoriesAndNameUseCase
 import com.liulkovich.florapoint.domain.GetSpeciesByCategoryUseCase
@@ -64,7 +65,12 @@ class GuideViewModel @Inject constructor(
                 }
             }
             .onEach { speciesList ->
-                _state.update { it.copy(species = speciesList, isLoading = false) }
+                _state.update {
+                    it.copy(
+                        species = speciesList.filter { it.category != FloraCategory.OTHER.key },
+                        isLoading = false
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }

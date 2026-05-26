@@ -101,7 +101,8 @@ fun GuideScreen(
                 item {
                     Spacer(modifier = Modifier.height(5.dp))
                 }
-                items(items = state.species.filter { it.category != FloraCategory.OTHER.key }) { speciesItem ->
+                items(items = state.species,
+                    key = { it.id }) { speciesItem ->
                     GuideCard(
                         modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                         textImage = speciesItem.imageName,
@@ -178,11 +179,9 @@ fun GuideCard(
     onClickDetail: (Reference) -> Unit
 ) {
     val context = LocalContext.current
-    val imageId = context.resources.getIdentifier(
-        textImage,
-        "drawable",
-        context.packageName
-    )
+    val imageId = remember(textImage) {
+        context.resources.getIdentifier(textImage, "drawable", context.packageName)
+    }
 
     var selectedNotif by remember(reference.isNotifEnabled) {
         mutableStateOf(reference.isNotifEnabled == 1)
