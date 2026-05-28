@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -88,6 +89,15 @@ dependencies {
 
     //SplashScreen
     implementation(libs.androidx.core.splashscreen)
+
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
+    //Google
+    implementation(libs.play.services.auth)
+
 
     // Tests
     testImplementation(libs.junit)

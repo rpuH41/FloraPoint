@@ -29,9 +29,16 @@ class HomeViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
+        loadSpecies()
+        loadTips()
+    }
+
+    private fun loadSpecies() {
         getAllSpeciesUseCase()
             .onEach { species ->
-                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+                val today = Calendar.getInstance()
+                val currentMonth = today.get(Calendar.MONTH) + 1
+
                 val filtered = species.filter { item ->
                     item.category != "other" &&
                             if (item.startMonth <= item.endMonth) {
@@ -40,7 +47,6 @@ class HomeViewModel @Inject constructor(
                                 currentMonth >= item.startMonth || currentMonth <= item.endMonth
                             }
                 }.sortedBy { item ->
-                    val today = Calendar.getInstance()
                     val endCal = Calendar.getInstance().apply {
                         set(Calendar.MONTH, item.endMonth - 1)
                         set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
@@ -54,10 +60,9 @@ class HomeViewModel @Inject constructor(
                 _state.update { it.copy(species = filtered, isLoading = false) }
             }
             .launchIn(viewModelScope)
-        loadRandomTip()
     }
 
-    private fun loadRandomTip() {
+    private fun loadTips() {
         viewModelScope.launch {
             val tip = getRandomTipUseCase()
             _state.update { it.copy(tip = tip, isTipLoading = false) }

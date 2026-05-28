@@ -157,7 +157,7 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
                 canvas.drawCircle(cx - 8f, 48f, 6f, highlightPaint)
             }
             "other" -> {
-                fill.color = "#FF9800".toColorInt()           // оранжевый
+                fill.color = "#FF9800".toColorInt()
                 canvas.drawCircle(cx, 48f, 26f, fill)
                 stroke.color = android.graphics.Color.WHITE
                 stroke.strokeWidth = 5f
@@ -169,7 +169,7 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
                     textAlign = Paint.Align.CENTER
                     isFakeBoldText = true
                 }
-                canvas.drawText("★", cx, 57f, textPaint)      // или "?"
+                canvas.drawText("★", cx, 57f, textPaint)
             }
 
             else -> {

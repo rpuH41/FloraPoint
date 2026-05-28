@@ -83,7 +83,11 @@ fun NavGraph() {
             }
 
             composable(Screen.Map.rout) {
-                MapScreen()
+                MapScreen(
+                    onOpenSettings = {
+                        navController.navigate(Screen.Settings.rout)
+                    }
+                )
             }
 
             composable(
@@ -121,7 +125,10 @@ fun NavGraph() {
                     deepLinkLat = lat,
                     deepLinkLon = lon,
                     deepLinkName = name,
-                    deepLinkCategory = category
+                    deepLinkCategory = category,
+                    onOpenSettings = {
+                        navController.navigate(Screen.Settings.rout)
+                    }
                 )
             }
 

@@ -98,7 +98,7 @@ class TileDownloadManager @Inject constructor(
                                 Thread.sleep(60)
                             }
                         } catch (e: Exception) {
-                            // Пропускаем проблемные тайлы
+
                         }
                     }
                 }

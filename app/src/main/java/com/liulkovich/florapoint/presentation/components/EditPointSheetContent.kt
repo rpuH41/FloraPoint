@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,15 +41,26 @@ import com.liulkovich.florapoint.domain.localizedName
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.material3.Switch
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextDecoration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPointSheetContent(
     point: UserPoints,
     species: List<Reference>,
-    onSave: (speciesId: Int?, userName: String, description: String, category: String) -> Unit,
+    onSave: (
+        speciesId: Int?,
+        userName: String,
+        description: String,
+        category: String,
+        isPublic: Boolean
+    ) -> Unit,
     onDismiss: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    isAuthorized: Boolean,
+    onOpenSettings: () -> Unit
 ) {
     val existingRef = species.find { it.id == point.speciesId }
 
@@ -78,6 +90,7 @@ fun EditPointSheetContent(
     }
 
     var description by remember(point) { mutableStateOf(point.description) }
+    var isPublic by remember(point) { mutableStateOf(point.isPublic) }
 
     val dateStr = remember(point.timestamp) {
         SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
@@ -194,6 +207,45 @@ fun EditPointSheetContent(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = stringResource(R.string.public_location),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Text(
+                    text = stringResource(R.string.visible_to_others_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+
+            Switch(
+                checked = isPublic,
+                onCheckedChange = { isPublic = it },
+                enabled = isAuthorized
+            )
+            if (!isAuthorized) {
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = stringResource(R.string.registered_users_only_locations),
+                    style = MaterialTheme.typography.labelSmall,
+                    textDecoration = TextDecoration.Underline,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        onOpenSettings()
+                    }
+                )
+            }
+        }
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(
@@ -212,7 +264,8 @@ fun EditPointSheetContent(
                         matched?.id,
                         searchText.trim(),
                         description.trim(),
-                        selectedCategory.key
+                        selectedCategory.key,
+                        isPublic
                     )
                 },
                 modifier = Modifier.weight(1f),

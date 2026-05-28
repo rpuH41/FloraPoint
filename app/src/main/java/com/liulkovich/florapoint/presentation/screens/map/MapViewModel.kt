@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.data.weather.WeatherService
 import com.liulkovich.florapoint.domain.AddNewPointUseCase
 import com.liulkovich.florapoint.domain.DeletePointUseCase
@@ -14,6 +15,8 @@ import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
 import com.liulkovich.florapoint.domain.GetAllUserPointsUseCase
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
+import com.liulkovich.florapoint.domain.cloud.FirestoreRepository
+import com.liulkovich.florapoint.presentation.auth.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,12 +34,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: Context,
     private val getAllUserPointsUseCase: GetAllUserPointsUseCase,
     private val deletePointUseCase: DeletePointUseCase,
     private val addNewPointUseCase: AddNewPointUseCase,
     private val editPointUseCase: EditPointUseCase,
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
-    private val weatherService: WeatherService
+    private val weatherService: WeatherService,
+    private val authManager: AuthManager,
+    private val firestoreRepository: FirestoreRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MapScreenState())
@@ -57,6 +63,22 @@ class MapViewModel @Inject constructor(
                 _state.update { it.copy(species = speciesList) }
             }
             .launchIn(viewModelScope)
+
+        loadPublicPoints()
+    }
+
+    private fun loadPublicPoints() {
+        viewModelScope.launch {
+            val publicPoints = firestoreRepository.downloadPublicPoints()
+
+            _state.update {
+                it.copy(publicPoints = publicPoints)
+            }
+        }
+    }
+
+    fun isAuthorized(): Boolean {
+        return authManager.isAuthorized()
     }
 
     fun selectPoint(pointId: Int?) {
@@ -73,24 +95,34 @@ class MapViewModel @Inject constructor(
 
     fun onPointClicked(point: UserPoints) {
         selectPoint(point.id)
+
         viewModelScope.launch {
             _command.emit(MapCommand.CenterMapOnPoint(point))
         }
     }
 
     fun onAddNewPointClicked(lat: Double, lon: Double) {
-        _state.update { it.copy(bottomSheetMode = BottomSheetMode.Add(lat, lon)) }
+        _state.update {
+            it.copy(bottomSheetMode = BottomSheetMode.Add(lat, lon))
+        }
     }
 
     fun onPointLongClicked(point: UserPoints) {
-        _state.update { it.copy(bottomSheetMode = BottomSheetMode.Edit(point.id)) }
+        _state.update {
+            it.copy(bottomSheetMode = BottomSheetMode.Edit(point.id))
+        }
     }
 
     fun dismissBottomSheet() {
-        _state.update { it.copy(bottomSheetMode = null) }
+        _state.update {
+            it.copy(bottomSheetMode = null)
+        }
     }
+
     fun updateMissingWeatherData() {
+        //val updatingWeather = context.getString(R.string.updating_weather)
         viewModelScope.launch(Dispatchers.IO) {
+
             val allPoints = state.value.userPoints
 
             val pointsToUpdate = allPoints.filter {
@@ -99,11 +131,20 @@ class MapViewModel @Inject constructor(
 
             if (pointsToUpdate.isEmpty()) return@launch
 
-            _command.emit(MapCommand.ShowMessage("Обновляем погоду..."))
+            _command.emit(
+                MapCommand.ShowMessage(context.getString(R.string.updating_weather))
+            )
 
             pointsToUpdate.forEach { point ->
-                val weather = weatherService.getWeatherData(point.latitude, point.longitude)
+
+                val weather =
+                    weatherService.getWeatherData(
+                        point.latitude,
+                        point.longitude
+                    )
+
                 if (weather != null) {
+
                     val updated = point.copy(
                         temperature = weather.temperature,
                         humidity = weather.humidity,
@@ -123,37 +164,110 @@ class MapViewModel @Inject constructor(
         speciesId: Int?,
         userName: String,
         description: String,
-        category: String
+        category: String,
+        isPublic: Boolean
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val weather = weatherService.getWeatherData(latitude, longitude)
+        viewModelScope.launch {
 
-            val newPoint = UserPoints(
+            val tempPoint = UserPoints(
                 speciesId = speciesId,
                 latitude = latitude,
                 longitude = longitude,
-                userName = userName.ifBlank { "Неизвестный вид" },
+                userName = userName.ifBlank {
+                    context.getString(R.string.unknown_species)
+                },
                 description = description.trim(),
                 category = category,
                 timestamp = System.currentTimeMillis() / 1000,
-
-                temperature = weather?.temperature,
-                humidity = weather?.humidity,
-                avgTemp5Days = weather?.avgTemp5Days,
-                avgHumidity5Days = weather?.avgHumidity5Days,
-                weatherTimestamp = if (weather != null) System.currentTimeMillis() else null,
-
+                temperature = null,
+                humidity = null,
+                avgTemp5Days = null,
+                avgHumidity5Days = null,
+                weatherTimestamp = null,
                 isFavorite = 0,
                 photoPath = "",
-                accuracy = 0
+                accuracy = 0,
+                isPublic = isPublic && authManager.isAuthorized(),
+                ownerUid = authManager.getCurrentUserId()
             )
 
-            addNewPointUseCase(newPoint)
+            addNewPointUseCase(tempPoint)
 
-            if (weather == null) {
-                _command.emit(MapCommand.ShowMessage("Точка добавлена. Погода будет загружена при появлении интернета."))
-            } else {
-                _command.emit(MapCommand.ShowMessage("Точка добавлена с данными о погоде"))
+            _command.emit(
+                MapCommand.ShowMessage(
+                    context.getString(R.string.loadingl_eather)
+                )
+            )
+
+            launch(Dispatchers.IO) {
+                val weather = weatherService.getWeatherData(
+                    latitude,
+                    longitude
+                )
+                val updatedPoint = tempPoint.copy(
+                    temperature = weather?.temperature,
+                    humidity = weather?.humidity,
+                    avgTemp5Days = weather?.avgTemp5Days,
+                    avgHumidity5Days = weather?.avgHumidity5Days,
+                    weatherTimestamp = if (weather != null) {
+                        System.currentTimeMillis()
+                    } else {
+                        null
+                    }
+                )
+
+                editPointUseCase(updatedPoint)
+
+                if (
+                    updatedPoint.isPublic &&
+                    authManager.isAuthorized()
+                ) {
+                    val result =
+                        firestoreRepository.uploadPoint(updatedPoint)
+                    result.onSuccess { cloudId ->
+                        editPointUseCase(
+                            updatedPoint.copy(
+                                cloudId = cloudId,
+                                syncState = "SYNCED"
+                            )
+                        )
+
+                        _command.emit(
+                            MapCommand.ShowMessage(
+                                context.getString(R.string.point_published)
+                            )
+                        )
+                    }
+
+                    result.onFailure {
+                        editPointUseCase(
+                            updatedPoint.copy(
+                                syncState = "UPLOAD_FAILED"
+                            )
+                        )
+
+                        _command.emit(
+                            MapCommand.ShowMessage(
+                                context.getString(R.string.publication_error)
+                            )
+                        )
+                    }
+                }
+
+                if (weather == null) {
+                    _command.emit(
+                        MapCommand.ShowMessage(
+                            context.getString(R.string.point_added_no_weather)
+                        )
+                    )
+
+                } else {
+                    _command.emit(
+                        MapCommand.ShowMessage(
+                            context.getString(R.string.point_added_with_weather)
+                        )
+                    )
+                }
             }
         }
     }
@@ -163,69 +277,150 @@ class MapViewModel @Inject constructor(
         speciesId: Int?,
         userName: String,
         description: String,
-        category: String
+        category: String,
+        isPublic: Boolean
     ) {
+
         viewModelScope.launch {
-            state.value.userPoints.find { it.id == pointId }?.let { old ->
-                editPointUseCase(
-                    old.copy(
+
+            state.value.userPoints
+                .find { it.id == pointId }
+                ?.let { old ->
+
+                    val updatedPoint = old.copy(
                         speciesId = speciesId,
                         userName = userName,
                         description = description,
-                        category = category
+                        category = category,
+                        isPublic = isPublic && authManager.isAuthorized()
                     )
-                )
-            }
+
+                    editPointUseCase(updatedPoint)
+
+                    if (
+                        updatedPoint.isPublic &&
+                        updatedPoint.cloudId != null &&
+                        authManager.isAuthorized()
+                    ) {
+
+                        firestoreRepository.updatePoint(updatedPoint)
+                    }
+
+                    if (
+                        updatedPoint.isPublic &&
+                        authManager.isAuthorized()
+                    ) {
+
+                        runCatching {
+                            firestoreRepository.uploadPoint(updatedPoint)
+                        }
+                    }
+                }
         }
     }
 
     fun deletePoint(pointId: Int) {
-        viewModelScope.launch { deletePointUseCase(pointId) }
+            viewModelScope.launch {
+
+                val point = state.value.userPoints
+                    .find { it.id == pointId }
+
+                if (
+                    point?.cloudId != null &&
+                    authManager.isAuthorized()
+                ) {
+
+                    firestoreRepository.deletePoint(point.cloudId)
+                }
+
+                deletePointUseCase(pointId)
+            }
     }
 
-    fun sharePoint(context: Context, point: UserPoints, speciesName: String) {
-        val dateStr = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-            .format(Date(point.timestamp * 1000L))
+    fun sharePoint(
+        context: Context,
+        point: UserPoints,
+        speciesName: String
+    ) {
 
-        val emoji = FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
+        val dateStr = SimpleDateFormat(
+            "dd.MM.yyyy",
+            Locale.getDefault()
+        ).format(Date(point.timestamp * 1000L))
+
+        val emoji =
+            FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
 
         val isAppInstalled = try {
-            context.packageManager.getPackageInfo(context.packageName, 0)
+
+            context.packageManager.getPackageInfo(
+                context.packageName,
+                0
+            )
+
             true
+
         } catch (e: Exception) {
             false
         }
 
-        val appLink = if (isAppInstalled) {
-            "florapoint://point?lat=${point.latitude}&lon=${point.longitude}&name=${Uri.encode(point.userName)}&category=${point.category ?: "custom"}"
-        } else {
-            "https://play.google.com/store/apps/details?id=${context.packageName}"
-        }
+        val appLink =
+            if (isAppInstalled) {
+
+                "florapoint://point?lat=${point.latitude}" +
+                        "&lon=${point.longitude}" +
+                        "&name=${Uri.encode(point.userName)}" +
+                        "&category=${point.category ?: "custom"}"
+
+            } else {
+
+                "https://play.google.com/store/apps/details?id=${context.packageName}"
+            }
 
         val text = buildString {
+
             appendLine("$emoji $speciesName")
+
             if (point.description.isNotBlank()) {
                 appendLine("📝 ${point.description}")
             }
+
             appendLine("🗓 $dateStr")
+
             appendLine()
-            appendLine("📍 https://maps.google.com/?q=${point.latitude},${point.longitude}")
+
+            appendLine(
+                "📍 https://maps.google.com/?q=${point.latitude},${point.longitude}"
+            )
+
             appendLine()
-            append("🌿 Открыть в FloraPoint: $appLink")
+
+            append(context.getString(R.string.share_open_in_app, appLink))
         }
 
         val intent = Intent(Intent.ACTION_SEND).apply {
+
             type = "text/plain"
+
             putExtra(Intent.EXTRA_TEXT, text)
         }
-        context.startActivity(Intent.createChooser(intent, "Поделиться точкой"))
+
+        context.startActivity(
+            Intent.createChooser(intent, context.getString(R.string.share_title))
+        )
     }
+
     private var _deepLinkName = ""
     private var _deepLinkCategory = "custom"
 
-    fun setDeepLinkData(name: String, category: String) {
+    fun setDeepLinkData(
+        name: String,
+        category: String
+    ) {
+
         _deepLinkName = name
         _deepLinkCategory = category
+
         _state.update {
             it.copy(
                 deepLinkName = name,
@@ -233,26 +428,53 @@ class MapViewModel @Inject constructor(
             )
         }
     }
+
+    fun togglePointsFilter() {
+        _state.update {
+            it.copy(
+                showOnlyMyPoints = !it.showOnlyMyPoints
+            )
+        }
+    }
 }
 
 sealed interface MapCommand {
-    data class CenterMapOnPoint(val point: UserPoints) : MapCommand
-    data class ShowDeleteConfirmation(val pointId: Int) : MapCommand
-    data class ShowMessage(val text: String) : MapCommand
+
+    data class CenterMapOnPoint(
+        val point: UserPoints
+    ) : MapCommand
+
+    data class ShowDeleteConfirmation(
+        val pointId: Int
+    ) : MapCommand
+
+    data class ShowMessage(
+        val text: String
+    ) : MapCommand
 }
 
 sealed interface BottomSheetMode {
-    data class Add(val latitude: Double, val longitude: Double) : BottomSheetMode
-    data class Edit(val pointId: Int) : BottomSheetMode
+
+    data class Add(
+        val latitude: Double,
+        val longitude: Double
+    ) : BottomSheetMode
+
+    data class Edit(
+        val pointId: Int
+    ) : BottomSheetMode
 }
 
 data class MapScreenState(
+
     val userPoints: List<UserPoints> = emptyList(),
+    val publicPoints: List<UserPoints> = emptyList(),
     val selectedPointId: Int? = null,
     val currentUserLocation: Pair<Double, Double>? = null,
     val searchQuery: String = "",
     val species: List<Reference> = emptyList(),
     val bottomSheetMode: BottomSheetMode? = null,
     val deepLinkName: String = "",
-    val deepLinkCategory: String = ""
+    val deepLinkCategory: String = "",
+    val showOnlyMyPoints: Boolean = false
 )

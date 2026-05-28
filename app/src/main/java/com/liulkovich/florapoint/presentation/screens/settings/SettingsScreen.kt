@@ -2,6 +2,7 @@ package com.liulkovich.florapoint.presentation.screens.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -18,11 +19,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
@@ -47,9 +50,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liulkovich.florapoint.BuildConfig
 import com.liulkovich.florapoint.R
-
 
 @Composable
 fun SettingsScreen(
@@ -58,14 +61,34 @@ fun SettingsScreen(
     onNavigateToOfflineRegions: () -> Unit
 ) {
     val context = LocalContext.current
+
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showRestoreDialog by remember { mutableStateOf(false) }
+
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let { viewModel.handleImport(context, it) }
     }
+    val successMessage = stringResource(R.string.sign_in_success)
+
+    val errorMessageTemplate = stringResource(R.string.sign_in_error)
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.handleGoogleSignInResult(
+            result.data,
+            onSuccess = {
+                 Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+            },
+            onError = { error ->
+                Toast.makeText(context, errorMessageTemplate,
+                    Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+    val authState by viewModel.authState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -81,6 +104,39 @@ fun SettingsScreen(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+
+        Spacer(Modifier.height(12.dp))
+
+        SettingsSection(title = stringResource(R.string.account)) {
+            if (authState.isAuthorized) {
+                SettingsItem(
+                    icon = Icons.Default.AccountCircle,
+                    title = authState.userName ?: stringResource(R.string.default_user_name),
+                    subtitle = authState.userEmail ?: "",
+                    onClick = {},
+                    showArrow = false
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
+
+                SettingsItem(
+                    icon = Icons.Default.Logout,
+                    title = stringResource(R.string.logout),
+                    subtitle = stringResource(R.string.logout_from_account),
+                    onClick = { viewModel.logout() }
+                )
+            } else {
+                SettingsItem(
+                    icon = Icons.Default.AccountCircle,
+                    title = stringResource(R.string.sign_in_google),
+                    subtitle = stringResource(R.string.sync_and_publish_points),
+                    onClick = {
+                        val signInIntent = viewModel.getGoogleSignInIntent(context)
+                        googleSignInLauncher.launch(signInIntent)
+                    }
+                )
+            }
+        }
 
         SettingsSection(title = stringResource(R.string.notifications)) {
             SettingsItem(
@@ -135,11 +191,10 @@ fun SettingsScreen(
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:")
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("your@email.com")) //не забыть поменять почту
-                        putExtra(Intent.EXTRA_SUBJECT, feedback )
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("ivanlulkovich@gmail.com"))
+                        putExtra(Intent.EXTRA_SUBJECT, feedback)
                     }
-                    context.startActivity(Intent.createChooser(intent,
-                        letter))
+                    context.startActivity(Intent.createChooser(intent, letter))
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(start = 52.dp))

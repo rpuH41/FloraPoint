@@ -1,6 +1,7 @@
 package com.liulkovich.florapoint.presentation.screens.settings
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
@@ -22,12 +23,16 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.views.MapView
 import javax.inject.Inject
 
+import com.liulkovich.florapoint.presentation.auth.AuthManager
+import kotlinx.coroutines.delay
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val exportPointsUseCase: ExportPointsUseCase,
     private val importPointsUseCase: ImportPointsUseCase,
     private val tileDownloadManager: TileDownloadManager,
-    private val repository: FloraRepository
+    private val repository: FloraRepository,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     val offlineRegions = repository.getAllOfflineRegions()
@@ -39,7 +44,20 @@ class SettingsViewModel @Inject constructor(
 
     private val _downloadProgress = MutableStateFlow<DownloadProgress?>(null)
     val downloadProgress = _downloadProgress.asStateFlow()
+    private val _authState = MutableStateFlow(AuthState())
+    val authState = _authState.asStateFlow()
 
+    init {
+        observeAuthState()
+    }
+
+    private fun observeAuthState() {
+        _authState.value = AuthState(
+            isAuthorized = authManager.isAuthorized(),
+            userName = authManager.getCurrentUserName(),
+            userEmail = authManager.getCurrentUserEmail()
+        )
+    }
     fun downloadArea(
         context: Context,
         boundingBox: BoundingBox,
@@ -100,4 +118,47 @@ class SettingsViewModel @Inject constructor(
 
     fun countTiles(boundingBox: BoundingBox): Int =
         tileDownloadManager.countTiles(boundingBox)
+    fun isAuthorized(): Boolean {
+        return authManager.isAuthorized()
+    }
+
+    fun getUserName(): String {
+        return authManager.getCurrentUserName()
+            ?: "Google User"
+    }
+
+    fun getUserEmail(): String {
+        return authManager.getCurrentUserEmail()
+            ?: ""
+    }
+
+    fun logout() {
+        authManager.logout()
+        observeAuthState()
+    }
+
+
+    fun getGoogleSignInIntent(context: Context): Intent {
+        return authManager.getGoogleSignInIntent(context)
+    }
+
+    fun handleGoogleSignInResult(
+        intent: Intent?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        authManager.handleGoogleSignInResult(
+            intent,
+            onSuccess = {
+                observeAuthState()
+                onSuccess()
+            },
+            onError = onError
+        )
+    }
 }
+data class AuthState(
+    val isAuthorized: Boolean = false,
+    val userName: String? = null,
+    val userEmail: String? = null
+)

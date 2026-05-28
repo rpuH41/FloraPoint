@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,9 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -68,7 +72,8 @@ fun MapScreen(
     deepLinkLat: Double? = null,
     deepLinkLon: Double? = null,
     deepLinkName: String? = null,
-    deepLinkCategory: String? = null
+    deepLinkCategory: String? = null,
+    onOpenSettings: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val mapViewRef = remember { mutableStateOf<MapView?>(null) }
@@ -138,6 +143,18 @@ fun MapScreen(
         }
     }
 
+    val mapPoints = remember(
+        state.userPoints,
+        state.publicPoints,
+        state.showOnlyMyPoints
+    ) {
+        if (state.showOnlyMyPoints) {
+            state.userPoints
+        } else {
+            state.userPoints + state.publicPoints
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -149,7 +166,7 @@ fun MapScreen(
             ) {
                 OsmMapView(
                     modifier = Modifier.fillMaxSize(),
-                    points = state.userPoints,
+                    points = mapPoints,
                     species = state.species,
                     selectedPointId = state.selectedPointId,
                     currentLocation = state.currentUserLocation,
@@ -166,6 +183,66 @@ fun MapScreen(
                     },
                     onMarkerLongClick = { point -> viewModel.onPointLongClicked(point) }
                 )
+
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 3.dp, end = 3.dp)
+                ) {
+
+                    SegmentedButton(
+                        selected = !state.showOnlyMyPoints,
+                        onClick = {
+                            if (state.showOnlyMyPoints) {
+                                viewModel.togglePointsFilter()
+                            }
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = 0,
+                            count = 2
+                        ),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = Color(0xFF1B5E20),
+                            activeContentColor = Color.White,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        icon = {},
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.filter_all_points),
+                            fontSize = 11.sp
+                        )
+                    }
+
+                    SegmentedButton(
+                        selected = state.showOnlyMyPoints,
+                        onClick = {
+                            if (!state.showOnlyMyPoints) {
+                                viewModel.togglePointsFilter()
+                            }
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = 1,
+                            count = 2
+                        ),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = Color(0xFF1B5E20),
+                            activeContentColor = Color.White,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        icon = {
+                        },
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.filter_my_points),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
 
                 Column(
                     modifier = Modifier
@@ -303,18 +380,23 @@ fun MapScreen(
                         species = state.species,
                         initialName = state.deepLinkName,
                         initialCategory = state.deepLinkCategory,
-                        onSave = { speciesId: Int?, userName, description, category ->
+                        onSave = { speciesId: Int?, userName, description, category, isPublic ->
                             viewModel.addNewPoint(
                                 mode.latitude,
                                 mode.longitude,
                                 speciesId,
                                 userName,
                                 description,
-                                category
+                                category,
+                                isPublic
                             )
                             viewModel.dismissBottomSheet()
                         },
-                        onDismiss = { viewModel.dismissBottomSheet() }
+                        onDismiss = { viewModel.dismissBottomSheet() },
+                        isAuthorized = viewModel.isAuthorized(),
+                        onOpenSettings = {
+                            onOpenSettings()
+                        }
                     )
                     is BottomSheetMode.Edit -> {
                         val point = state.userPoints.find { it.id == mode.pointId }
@@ -322,13 +404,14 @@ fun MapScreen(
                             EditPointSheetContent(
                                 point = point,
                                 species = state.species,
-                                onSave = { speciesId, userName, description, category ->
+                                onSave = { speciesId, userName, description, category, isPublic ->
                                     viewModel.updateUserPoint(
                                         mode.pointId,
                                         speciesId,
                                         userName,
                                         description,
-                                        category
+                                        category,
+                                        isPublic
                                     )
                                     viewModel.dismissBottomSheet()
                                 },
@@ -336,7 +419,11 @@ fun MapScreen(
                                     viewModel.deletePoint(mode.pointId)
                                     viewModel.dismissBottomSheet()
                                 },
-                                onDismiss = { viewModel.dismissBottomSheet() }
+                                onDismiss = { viewModel.dismissBottomSheet() },
+                                isAuthorized = viewModel.isAuthorized(),
+                                onOpenSettings = {
+                                    onOpenSettings()
+                                }
                             )
                         }
                     }
