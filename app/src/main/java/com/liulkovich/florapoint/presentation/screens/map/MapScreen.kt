@@ -8,19 +8,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLocationAlt
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -30,9 +39,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -46,8 +52,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -64,6 +72,8 @@ import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,10 +158,18 @@ fun MapScreen(
         state.publicPoints,
         state.showOnlyMyPoints
     ) {
-        if (state.showOnlyMyPoints) {
+
+        if (!viewModel.isAuthorized()) {
+
             state.userPoints
+
         } else {
-            state.userPoints + state.publicPoints
+
+            if (state.showOnlyMyPoints) {
+                state.userPoints
+            } else {
+                state.userPoints + state.publicPoints
+            }
         }
     }
 
@@ -173,76 +191,25 @@ fun MapScreen(
                     shouldFollowLocation = shouldFollowLocation,
                     forceCenter = forceCenter,
                     onMapReady = { mapView, locationOverlay ->
+                        mapView.setBuiltInZoomControls(false)
                         mapViewRef.value = mapView
                         myLocationOverlayRef.value = locationOverlay
                     },
                     onMarkerClick = { point ->
-                        viewModel.onPointClicked(point)
+
+                        if (viewModel.isPublicForeignPoint(point)) {
+                            viewModel.onPublicPointClicked(point)
+                        } else {
+                            viewModel.onPointClicked(point)
+                        }
+
                         shouldFollowLocation = false
                         forceCenter = GeoPoint(point.latitude, point.longitude)
                     },
                     onMarkerLongClick = { point -> viewModel.onPointLongClicked(point) }
                 )
 
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 3.dp, end = 3.dp)
-                ) {
 
-                    SegmentedButton(
-                        selected = !state.showOnlyMyPoints,
-                        onClick = {
-                            if (state.showOnlyMyPoints) {
-                                viewModel.togglePointsFilter()
-                            }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = 0,
-                            count = 2
-                        ),
-                        colors = SegmentedButtonDefaults.colors(
-                            activeContainerColor = Color(0xFF1B5E20),
-                            activeContentColor = Color.White,
-                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        icon = {},
-                        modifier = Modifier.height(30.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.filter_all_points),
-                            fontSize = 11.sp
-                        )
-                    }
-
-                    SegmentedButton(
-                        selected = state.showOnlyMyPoints,
-                        onClick = {
-                            if (!state.showOnlyMyPoints) {
-                                viewModel.togglePointsFilter()
-                            }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = 1,
-                            count = 2
-                        ),
-                        colors = SegmentedButtonDefaults.colors(
-                            activeContainerColor = Color(0xFF1B5E20),
-                            activeContentColor = Color.White,
-                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        icon = {
-                        },
-                        modifier = Modifier.height(30.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.filter_my_points),
-                            fontSize = 11.sp
-                        )
-                    }
-                }
 
                 Column(
                     modifier = Modifier
@@ -275,6 +242,40 @@ fun MapScreen(
                     FloatingActionButton(onClick = { mapViewRef.value?.controller?.zoomOut() }) {
                         Icon(Icons.Default.Remove, contentDescription = null)
                     }
+
+                    if (viewModel.isAuthorized()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(
+                                onClick = { viewModel.togglePointsFilter() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (state.showOnlyMyPoints)
+                                        Color(0xFF1B5E20)
+                                    else
+                                        MaterialTheme.colorScheme.primary
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.height(42.dp)
+                            ) {
+                                Text(
+                                    text = if (state.showOnlyMyPoints)
+                                        stringResource(R.string.filter_my_points)
+                                    else
+                                        stringResource(R.string.filter_all_points),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (state.showOnlyMyPoints)
+                                        Color.White
+                                    else
+                                        MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+
                     ExtendedFloatingActionButton(
                         onClick = {
                             val overlay = myLocationOverlayRef.value
@@ -295,6 +296,7 @@ fun MapScreen(
                     )
                 }
             }
+
 
             HorizontalDivider(
                 thickness = 1.dp,
@@ -370,6 +372,9 @@ fun MapScreen(
         }
 
         state.bottomSheetMode?.let { mode ->
+
+            val configuration = LocalConfiguration.current
+            val currentLocale = configuration.locales[0]
             ModalBottomSheet(
                 onDismissRequest = { viewModel.dismissBottomSheet() },
                 sheetState = sheetState,
@@ -425,6 +430,91 @@ fun MapScreen(
                                     onOpenSettings()
                                 }
                             )
+                        }
+                    }
+
+                    is BottomSheetMode.ViewPublic -> {
+
+                        val point = mode.point
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                    Text(
+                                        text = point.userName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+
+                                    Spacer(Modifier.width(6.dp))
+
+                                    Icon(
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.outline
+                                    )
+
+                                    Spacer(Modifier.width(4.dp))
+
+                                    Text(
+                                        text = SimpleDateFormat(
+                                            "dd MMM yyyy",
+                                            currentLocale
+                                        ).format(Date(point.timestamp * 1000)),
+                                        color = MaterialTheme.colorScheme.outline,
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+
+                                if (point.description.isNotBlank()) {
+
+                                    Spacer(Modifier.height(8.dp))
+
+                                    Text(
+                                        text = point.description,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                Spacer(Modifier.height(12.dp))
+
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+
+                                    point.temperature?.let {
+                                        Text("☀️ ${it.toInt()}°")
+                                    }
+
+                                    point.humidity?.let {
+                                        Text("💧 ${it}%")
+                                    }
+
+                                    point.avgTemp5Days?.let {
+                                        Text("🌡️ Ø ${it.toInt()}°")
+                                    }
+
+                                    point.avgHumidity5Days?.let {
+                                        Text("💧 Ø ${it}%")
+                                    }
+                                }
+                            }
                         }
                     }
                 }

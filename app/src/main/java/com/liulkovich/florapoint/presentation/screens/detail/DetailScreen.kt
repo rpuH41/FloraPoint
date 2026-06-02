@@ -137,7 +137,10 @@ fun DetailScreen(
                 contentPadding = innerPadding
             ) {
                 item { HeroImage(species.imageName, species.localizedName()) }
-                item { InfoSection(species) }
+                item {  InfoSection(
+                    species = species,
+                    isHighlighted = state.isNotificationEnabled
+                )}
                 item {
                     Button(
                         onClick = { onNotificationToggle(!state.isNotificationEnabled) },
@@ -226,23 +229,29 @@ fun HeroImage(imageName: String, name: String) {
 }
 
 @Composable
-fun InfoSection(species: Reference) {
+fun InfoSection(
+    species: Reference,
+    isHighlighted: Boolean
+) {
     Column(modifier = Modifier.padding(16.dp)) {
 
         InfoBlock(
             icon = Icons.Default.LocationOn,
             title = stringResource(R.string.what_is_the_habitat_of),
-            text = species.localizedHabitat()
+            text = species.localizedHabitat(),
+            isHighlighted = isHighlighted,
         )
         InfoBlock(
             icon = Icons.Default.Info,
             title = stringResource(R.string.description),
-            text = species.localizedDescription()
+            text = species.localizedDescription(),
+            isHighlighted = isHighlighted,
         )
         InfoBlock(
             icon = Icons.Default.Warning,
             title = stringResource(R.string.similar_species),
-            text = species.localizedLookAlikes()
+            text = species.localizedLookAlikes(),
+            isHighlighted = isHighlighted,
 
         )
         InfoBlock(
@@ -252,13 +261,19 @@ fun InfoSection(species: Reference) {
                 R.string.from_to,
                 numberInString(species.startMonth).first,
                 numberInString(species.endMonth).second
-            )
+            ),
+            isHighlighted = isHighlighted,
         )
     }
 }
 
 @Composable
-fun InfoBlock(icon: ImageVector, title: String, text: String) {
+fun InfoBlock(
+    icon: ImageVector,
+    title: String,
+    text: String,
+    isHighlighted: Boolean
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -275,7 +290,11 @@ fun InfoBlock(icon: ImageVector, title: String, text: String) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                //tint = Color(0xFF2E7D32),
+                tint = if (isHighlighted) {
+                    Color(0xFF66BB6A)
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 modifier = Modifier.padding(end = 12.dp, top = 2.dp)
             )
             Column {

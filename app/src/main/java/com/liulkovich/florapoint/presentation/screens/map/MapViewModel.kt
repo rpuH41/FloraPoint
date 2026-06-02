@@ -429,6 +429,19 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun onPublicPointClicked(point: UserPoints) {
+        _state.update {
+            it.copy(
+                bottomSheetMode = BottomSheetMode.ViewPublic(point)
+            )
+        }
+    }
+
+    fun isPublicForeignPoint(point: UserPoints): Boolean {
+        return point.isPublic &&
+                point.ownerUid != authManager.getCurrentUserId()
+    }
+
     fun togglePointsFilter() {
         _state.update {
             it.copy(
@@ -463,6 +476,10 @@ sealed interface BottomSheetMode {
     data class Edit(
         val pointId: Int
     ) : BottomSheetMode
+
+    data class ViewPublic(
+        val point: UserPoints
+    ) : BottomSheetMode
 }
 
 data class MapScreenState(
@@ -476,5 +493,5 @@ data class MapScreenState(
     val bottomSheetMode: BottomSheetMode? = null,
     val deepLinkName: String = "",
     val deepLinkCategory: String = "",
-    val showOnlyMyPoints: Boolean = false
+    val showOnlyMyPoints: Boolean = true
 )

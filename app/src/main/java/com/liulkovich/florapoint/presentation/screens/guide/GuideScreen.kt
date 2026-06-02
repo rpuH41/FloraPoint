@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,10 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -285,28 +288,41 @@ fun PanelFilter(
     selectedCategories: Set<String>,
     onCategoryChange: (String) -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLargeFont = configuration.fontScale > 1.15f
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
     ) {
         FloraCategory.entries
             .filter { it != FloraCategory.OTHER }
             .forEach { category ->
-            val isSelected = selectedCategories.contains(category.key)
-            FilterChip(
-                selected = isSelected,
-                onClick = { onCategoryChange(category.key) },
-                label = {
-                    Text(
-                        text = "${category.emoji} ${stringResource(category.stringRes)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            )
-        }
+                val isSelected = selectedCategories.contains(category.key)
+
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onCategoryChange(category.key) },
+                    label = {
+                        if (isLargeFont) {
+                            Text(
+                                text = category.emoji,
+                                style = MaterialTheme.typography.labelLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        } else {
+                            Text(
+                                text = "${category.emoji} ${stringResource(category.stringRes)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    },
+                    modifier = Modifier.height(IntrinsicSize.Min)
+                )
+            }
     }
 }

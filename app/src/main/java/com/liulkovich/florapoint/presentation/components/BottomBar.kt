@@ -1,5 +1,7 @@
 package com.liulkovich.florapoint.presentation.components
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
@@ -10,8 +12,12 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.liulkovich.florapoint.R
 
 data class BottomNavItem(
@@ -32,18 +38,36 @@ fun BottomBar(
         BottomNavItem(stringResource(R.string.settings), Icons.Default.Settings, "Settings"),
     )
 
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier.height(100.dp)
+    ) {
         items.forEach { item ->
+
             NavigationBarItem(
-                selected = currentRoute.startsWith(item.route.substringBefore("?")),
+                selected = currentRoute.startsWith(item.route),
                 onClick = { onNavigate(item.route) },
+
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label
+                        contentDescription = item.label,
+                        modifier = Modifier.size(24.dp)
                     )
                 },
-                label = { Text(text = item.label) }
+
+                label = {
+                    val density = LocalDensity.current
+
+                    Text(
+                        text = item.label,
+                        fontSize = with(density) {
+                            (12.sp.value / fontScale).sp
+                        },
+                        maxLines = 1
+                    )
+                },
+
+                alwaysShowLabel = true
             )
         }
     }
