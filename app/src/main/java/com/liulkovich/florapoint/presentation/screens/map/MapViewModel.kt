@@ -65,6 +65,7 @@ class MapViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         loadPublicPoints()
+        updateMissingWeatherData()
     }
 
     private fun loadPublicPoints() {
@@ -191,39 +192,29 @@ class MapViewModel @Inject constructor(
                 ownerUid = authManager.getCurrentUserId()
             )
 
-            addNewPointUseCase(tempPoint)
-
             _command.emit(
                 MapCommand.ShowMessage(
                     context.getString(R.string.loadingl_eather)
                 )
             )
+            val newId = addNewPointUseCase(tempPoint)
 
             launch(Dispatchers.IO) {
-                val weather = weatherService.getWeatherData(
-                    latitude,
-                    longitude
-                )
+                val weather = weatherService.getWeatherData(latitude, longitude)
+
                 val updatedPoint = tempPoint.copy(
+                    id = newId,
                     temperature = weather?.temperature,
                     humidity = weather?.humidity,
                     avgTemp5Days = weather?.avgTemp5Days,
                     avgHumidity5Days = weather?.avgHumidity5Days,
-                    weatherTimestamp = if (weather != null) {
-                        System.currentTimeMillis()
-                    } else {
-                        null
-                    }
+                    weatherTimestamp = if (weather != null) System.currentTimeMillis() else null
                 )
 
                 editPointUseCase(updatedPoint)
 
-                if (
-                    updatedPoint.isPublic &&
-                    authManager.isAuthorized()
-                ) {
-                    val result =
-                        firestoreRepository.uploadPoint(updatedPoint)
+                if ( updatedPoint.isPublic && authManager.isAuthorized()) {
+                    val result = firestoreRepository.uploadPoint(updatedPoint)
                     result.onSuccess { cloudId ->
                         editPointUseCase(
                             updatedPoint.copy(
@@ -231,7 +222,6 @@ class MapViewModel @Inject constructor(
                                 syncState = "SYNCED"
                             )
                         )
-
                         _command.emit(
                             MapCommand.ShowMessage(
                                 context.getString(R.string.point_published)
@@ -249,6 +239,18 @@ class MapViewModel @Inject constructor(
                         _command.emit(
                             MapCommand.ShowMessage(
                                 context.getString(R.string.publication_error)
+                            )
+                        )
+                    }
+                }
+
+                if (!updatedPoint.isPublic && authManager.isAuthorized()) {
+                    val result = firestoreRepository.uploadPrivatePoint(updatedPoint)
+                    result.onSuccess { cloudId ->
+                        editPointUseCase(
+                            updatedPoint.copy(
+                                cloudId = cloudId,
+                                syncState = "SYNCED"
                             )
                         )
                     }

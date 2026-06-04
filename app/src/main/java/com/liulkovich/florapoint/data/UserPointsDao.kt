@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface UserPointsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(point: UserPoints)
+    suspend fun insert(point: UserPoints): Long
 
     @Update
     suspend fun updateUsers(point: UserPoints)
@@ -26,4 +26,7 @@ interface UserPointsDao {
 
     @Query("SELECT * FROM user_points_table")
     suspend fun getAllList(): List<UserPoints>
+
+    @Query("SELECT * FROM user_points_table WHERE cloud_id = :cloudId LIMIT 1")
+    suspend fun getByCloudId(cloudId: String): UserPoints?
 }

@@ -19,3 +19,43 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# ============ Hilt ============
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class * { *; }
+-keep @dagger.hilt.android.AndroidEntryPoint class * { *; }
+
+# ============ Room ============
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
+-dontwarn androidx.room.**
+
+# ============ Firebase ============
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# ============ Kotlin Serialization ============
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keep @kotlinx.serialization.Serializable class * { *; }
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName <fields>;
+}
+
+# ============ WorkManager ============
+-keep class * extends androidx.work.Worker
+-keep class * extends androidx.work.CoroutineWorker
+-keep class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
+
+# ============ OSMDroid ============
+-dontwarn org.osmdroid.**
+-keep class org.osmdroid.** { *; }
+
+# ============ Отладка крашей ============
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

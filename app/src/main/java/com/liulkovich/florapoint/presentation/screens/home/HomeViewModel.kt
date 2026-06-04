@@ -2,11 +2,14 @@ package com.liulkovich.florapoint.presentation.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.GetAllSpeciesUseCase
 import com.liulkovich.florapoint.domain.GetRandomTipUseCase
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.domain.UpdateNotificationUseCase
+import com.liulkovich.florapoint.domain.cloud.FirestoreRepository
+import com.liulkovich.florapoint.presentation.auth.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +25,10 @@ class HomeViewModel @Inject constructor(
 
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
     private val getRandomTipUseCase: GetRandomTipUseCase,
-    private val updateNotificationUseCase: UpdateNotificationUseCase
+    private val updateNotificationUseCase: UpdateNotificationUseCase,
+    private val authManager: AuthManager,
+    private val firestoreRepository: FirestoreRepository,
+    private val repository: FloraRepository
 
 ): ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
@@ -71,6 +77,20 @@ class HomeViewModel @Inject constructor(
     fun toggleNotification(id: Int, enabled: Boolean) {
         viewModelScope.launch {
             updateNotificationUseCase(id, if (enabled) 1 else 0)
+        }
+    }
+
+    fun syncPointsFromCloud() {
+        viewModelScope.launch {
+            val uid = authManager.getCurrentUserId() ?: return@launch
+            val publicPoints = firestoreRepository.downloadUserPoints(uid)
+            val privatePoints = firestoreRepository.downloadPrivatePoints(uid)
+            (publicPoints + privatePoints).forEach { point ->
+                val existing = repository.getPointByCloudId(point.cloudId ?: return@forEach)
+                if (existing == null) {
+                    repository.insertPoint(point)
+                }
+            }
         }
     }
 

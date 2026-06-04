@@ -5,7 +5,7 @@ import javax.inject.Inject
 class AddNewPointUseCase @Inject constructor(
     private val repository: FloraRepository
 ) {
-    suspend operator fun invoke(point: UserPoints){
-        repository.addNewPoint(point)
+    suspend operator fun invoke(point: UserPoints): Int {
+        return repository.addNewPoint(point)
     }
 }

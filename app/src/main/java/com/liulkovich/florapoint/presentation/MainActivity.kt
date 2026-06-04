@@ -1,7 +1,6 @@
 package com.liulkovich.florapoint.presentation
 
 import android.Manifest
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -45,8 +44,10 @@ class MainActivity : ComponentActivity() {
         authManager.signInAnonymously(
             onSuccess = {
                 Log.d("AUTH", "UID = ${authManager.getCurrentUserId()}")
-                Log.d("AUTH", "anonymous = ${authManager.isAnonymous()}")
-                Log.d("AUTH", "registered = ${authManager.isRegistered()}")
+
+                if (authManager.isRegistered()) {
+                    homeViewModel.syncPointsFromCloud()
+                }
             },
             onError = {
                 Log.d("AUTH", "ERROR = $it")

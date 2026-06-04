@@ -12,6 +12,7 @@ import com.liulkovich.florapoint.domain.ExportFormat
 import com.liulkovich.florapoint.domain.ExportPointsUseCase
 import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.ImportPointsUseCase
+import com.liulkovich.florapoint.domain.cloud.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +33,8 @@ class SettingsViewModel @Inject constructor(
     private val importPointsUseCase: ImportPointsUseCase,
     private val tileDownloadManager: TileDownloadManager,
     private val repository: FloraRepository,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val firestoreRepository: FirestoreRepository
 ) : ViewModel() {
 
     val offlineRegions = repository.getAllOfflineRegions()
@@ -149,8 +151,34 @@ class SettingsViewModel @Inject constructor(
     ) {
         authManager.handleGoogleSignInResult(
             intent,
-            onSuccess = {
+            onSuccess = { anonymousUid ->
                 observeAuthState()
+                viewModelScope.launch {
+                    val newUid = authManager.getCurrentUserId() ?: return@launch
+
+                    if (anonymousUid != null) {
+                        val localPoints = repository.getAllUserPointsList()
+                        localPoints.forEach { point ->
+                            if (point.ownerUid == anonymousUid || point.ownerUid == null) {
+                                val updatedPoint = point.copy(ownerUid = newUid)
+                                repository.editPoint(updatedPoint)
+                                if (updatedPoint.isPublic) {
+                                    firestoreRepository.uploadPoint(updatedPoint)
+                                } else {
+                                    firestoreRepository.uploadPrivatePoint(updatedPoint)
+                                }
+                            }
+                        }
+                    }
+                    val publicPoints = firestoreRepository.downloadUserPoints(newUid)
+                    val privatePoints = firestoreRepository.downloadPrivatePoints(newUid)
+                    (publicPoints + privatePoints).forEach { point ->
+                        val existing = repository.getPointByCloudId(point.cloudId ?: return@forEach)
+                        if (existing == null) {
+                            repository.insertPoint(point)
+                        }
+                    }
+                }
                 onSuccess()
             },
             onError = onError

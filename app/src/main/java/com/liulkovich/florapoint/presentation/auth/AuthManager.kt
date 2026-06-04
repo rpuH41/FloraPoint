@@ -74,7 +74,7 @@ class AuthManager @Inject constructor() {
 
     fun handleGoogleSignInResult(
         intent: Intent?,
-        onSuccess: () -> Unit,
+        onSuccess: (anonymousUid: String?) -> Unit,
         onError: (String) -> Unit
     ) {
         try {
@@ -83,9 +83,13 @@ class AuthManager @Inject constructor() {
             val idToken = account.idToken
 
             if (idToken != null) {
+                val anonymousUid = if (auth.currentUser?.isAnonymous == true) {
+                    auth.currentUser?.uid
+                } else null
+
                 val credential = GoogleAuthProvider.getCredential(idToken, null)
                 auth.signInWithCredential(credential)
-                    .addOnSuccessListener { onSuccess() }
+                    .addOnSuccessListener { onSuccess(anonymousUid) }
                     .addOnFailureListener { onError(it.message ?: "Firebase auth failed") }
             } else {
                 onError("ID Token is null")

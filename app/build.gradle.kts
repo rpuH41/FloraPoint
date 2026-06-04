@@ -17,13 +17,13 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,9 +41,7 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.kotlin.get()
-    }
+
 }
 
 dependencies {
@@ -55,7 +53,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Room
@@ -93,8 +90,8 @@ dependencies {
     //Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     //Google
     implementation(libs.play.services.auth)
 

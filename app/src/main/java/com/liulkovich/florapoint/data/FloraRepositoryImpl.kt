@@ -27,7 +27,15 @@ class FloraRepositoryImpl @Inject constructor(
 
     override fun getById(referenceId: Int): Flow<Reference?> = referenceDao.getById(referenceId)
 
-    override suspend fun addNewPoint(point: UserPoints) = userPointsDao.insert(point)
+    override suspend fun addNewPoint(point: UserPoints): Int {
+        return userPointsDao.insert(point).toInt()
+    }
+
+    override suspend fun insertPoint(point: UserPoints) { userPointsDao.insert(point)}
+
+    override suspend fun getPointByCloudId(cloudId: String): UserPoints? {
+        return userPointsDao.getByCloudId(cloudId)
+    }
 
     override suspend fun deletePoint(pointId: Int) = userPointsDao.delete(pointId)
 

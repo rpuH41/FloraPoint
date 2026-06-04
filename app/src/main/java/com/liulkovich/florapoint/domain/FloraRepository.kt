@@ -9,9 +9,11 @@ interface FloraRepository {
     fun getByCategoriesAndName(categories: Set<String>, speciesName: String): Flow<List<Reference>>
     fun getSpeciesByName(speciesName: String): Flow<List<Reference>>
     fun getById(referenceId: Int): Flow<Reference?>
-    suspend fun addNewPoint(point: UserPoints)
+    suspend fun addNewPoint(point: UserPoints): Int
     suspend fun deletePoint(pointId: Int)
     suspend fun editPoint(point: UserPoints)
+    suspend fun insertPoint(point: UserPoints)
+    suspend fun getPointByCloudId(cloudId: String): UserPoints?
     suspend fun getAllUserPointsList(): List<UserPoints>
      fun getAllUserPoints(): Flow<List<UserPoints>>
     suspend fun updateNotification(id: Int, isEnabled: Int)
@@ -21,6 +23,5 @@ interface FloraRepository {
     fun getAllOfflineRegions(): Flow<List<OfflineRegion>>
     suspend fun saveOfflineRegion(region: OfflineRegion)
     suspend fun deleteOfflineRegion(id: String)
-
     suspend fun countOfflineRegions(): Int
 }
