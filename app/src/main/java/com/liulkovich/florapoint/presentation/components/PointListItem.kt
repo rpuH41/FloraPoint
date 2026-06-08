@@ -1,13 +1,11 @@
 package com.liulkovich.florapoint.presentation.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +39,15 @@ import com.liulkovich.florapoint.domain.UserPoints
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -59,15 +66,27 @@ fun PointListItem(
             .format(Date(point.timestamp * 1000))
     }
 
+    var expanded by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isSelected) {
+        if (isSelected) expanded = true
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 100.dp, max = 200.dp)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            .combinedClickable(
+                onClick = {
+                    expanded = !expanded
+                    onClick()
+                },
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 1.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (expanded) 4.dp else 1.dp
+        ),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
@@ -76,15 +95,7 @@ fun PointListItem(
         )
     ) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-                .background(
-                if (isSelected)
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.surfaceVariant
-                )
-
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
 
             Row(
@@ -94,63 +105,88 @@ fun PointListItem(
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
-                    modifier = Modifier.size(17.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = speciesName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .padding(start = 6.dp)
+                        .weight(1f)
                 )
                 Text(
                     text = dateStr,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
+                    //color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                Icon(
+                    imageVector = if (expanded)
+                        Icons.Default.KeyboardArrowUp
+                    else
+                        Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline,
                     modifier = Modifier
                         .padding(start = 4.dp)
-                        .weight(1f)
-                )
-                IconButton(onClick = onShare, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        Icons.Default.Share,
-                        contentDescription = null,
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
-                IconButton(
-                    onClick = { showDeleteDialog = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
-            }
-
-            Text(
-                text = speciesName,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            if (point.description.isNotBlank()) {
-                Text(
-                    text = point.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2,
-                    modifier = Modifier.padding(top = 4.dp)
+                        .size(18.dp)
                 )
             }
 
-            WeatherInlineRow(
-                point = point,
-                isSelected = isSelected,
-                modifier = Modifier.padding(top = 10.dp)
-            )
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    )
+
+                    if (point.description.isNotBlank()) {
+                        Text(
+                            text = point.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            //color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                    WeatherInlineRow(
+                        point = point,
+                        isSelected = isSelected,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(onClick = onShare, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Share, contentDescription = null,
+                               // tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(16.dp))
+                        }
+                        IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Edit, contentDescription = null,
+                                //tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(16.dp))
+                        }
+                        IconButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp))
+                        }
+                    }
+                }
+            }
         }
     }
 
