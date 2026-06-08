@@ -110,10 +110,10 @@ fun SettingsScreen(
             text = stringResource(R.string.settings),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 6.dp)
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(6.dp))
 
         SettingsSection(title = stringResource(R.string.account)) {
             if (authState.isAuthorized) {
@@ -366,7 +366,8 @@ private fun SettingsSection(
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
+        color = Color(0xFF66BB6A),
+        //color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
     )
@@ -386,7 +387,7 @@ private fun SettingsItem(
     subtitle: String,
     onClick: () -> Unit,
     showArrow: Boolean = true,
-    iconTint: Color = MaterialTheme.colorScheme.primary
+    iconTint: Color =  Color(0xFF66BB6A)
 ) {
     Row(
         modifier = Modifier

@@ -40,10 +40,33 @@ class AuthManager @Inject constructor() {
         return auth.currentUser != null &&
                 auth.currentUser?.isAnonymous == false
     }
-    fun deleteAccount(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        auth.currentUser?.delete()
-            ?.addOnSuccessListener { onSuccess() }
-            ?.addOnFailureListener { onError(it.message ?: "Error") }
+    fun deleteAccount(
+        context: Context,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val user = auth.currentUser ?: return
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        val googleSignInAccount = GoogleSignIn.getLastSignedInAccount(context)
+        val idToken = googleSignInAccount?.idToken
+
+        if (idToken != null) {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            user.reauthenticate(credential)
+                .addOnSuccessListener {
+                    user.delete()
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { onError(it.message ?: "Error") }
+                }
+                .addOnFailureListener { onError(it.message ?: "Reauth failed") }
+        } else {
+            onError("reauth_required")
+        }
     }
     fun signInAnonymously(
         onSuccess: () -> Unit,

@@ -13,7 +13,9 @@ import com.liulkovich.florapoint.domain.ExportPointsUseCase
 import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.ImportPointsUseCase
 import com.liulkovich.florapoint.domain.cloud.FirestoreRepository
+import com.liulkovich.florapoint.presentation.auth.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,11 +26,9 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.views.MapView
 import javax.inject.Inject
 
-import com.liulkovich.florapoint.presentation.auth.AuthManager
-import kotlinx.coroutines.delay
-
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val exportPointsUseCase: ExportPointsUseCase,
     private val importPointsUseCase: ImportPointsUseCase,
     private val tileDownloadManager: TileDownloadManager,
@@ -148,11 +148,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val uid = authManager.getCurrentUserId() ?: return@launch
-
                 firestoreRepository.deleteAllUserPoints(uid)
                 firestoreRepository.deleteAllPrivatePoints(uid)
-
                 authManager.deleteAccount(
+                    context = context,
                     onSuccess = {
                         observeAuthState()
                         onSuccess()

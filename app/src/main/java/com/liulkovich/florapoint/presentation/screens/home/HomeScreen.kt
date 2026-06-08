@@ -84,6 +84,9 @@ fun HomeScreen(
                     onClickDetail = onClickDetail
                 )
             }
+            item {
+                Spacer(Modifier.height(10.dp))
+            }
         }
     }
 }

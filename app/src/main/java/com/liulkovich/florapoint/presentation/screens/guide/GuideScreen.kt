@@ -80,6 +80,7 @@ fun GuideScreen(
                         viewModel.processCommand(GuideCommand.InputSearchQuery(it))
                     }
                 )
+                Spacer(modifier = Modifier.height(12.dp))
                 PanelFilter(
                     selectedCategories = state.selectedCategories,
                     onCategoryChange = { categoryName ->
