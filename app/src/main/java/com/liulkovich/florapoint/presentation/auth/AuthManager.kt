@@ -40,7 +40,11 @@ class AuthManager @Inject constructor() {
         return auth.currentUser != null &&
                 auth.currentUser?.isAnonymous == false
     }
-
+    fun deleteAccount(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        auth.currentUser?.delete()
+            ?.addOnSuccessListener { onSuccess() }
+            ?.addOnFailureListener { onError(it.message ?: "Error") }
+    }
     fun signInAnonymously(
         onSuccess: () -> Unit,
         onError: (String) -> Unit

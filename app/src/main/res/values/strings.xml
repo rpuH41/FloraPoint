@@ -99,15 +99,6 @@
     <string name="app_version">Версия приложения</string>
     <string name="help_us_get_better">Помогите нам стать лучше</string>
     <string name="rate_the_app">Оценить приложение</string>
-    <string name="what_we_store">Что мы храним:</string>
-    <string name="your_map_points">• Ваши точки на карте (координаты, названия, описания)</string>
-    <string name="notification_settings">• Настройки уведомлений</string>
-    <string name="what_we_dont">Что мы НЕ делаем:</string>
-    <string name="we_dont_share_data_with_third_parties">• Не передаём данные третьим лицам</string>
-    <string name="we_dont_sell_your_data">• Не продаём ваши данные</string>
-    <string name="we_dont_use_data_for_advertising">• Не используем данные для рекламы</string>
-    <string name="all_data_is_stored_only_on_your_device">Все данные хранятся только на вашем устройстве.</string>
-    <string name="got_it">Понятно</string>
     <string name="save_all_your_points_to_a_file">Сохранить все ваши точки в файл? Файл можно отправить себе или другу.</string>
     <string name="restore_points">Восстановить точки</string>
     <string name="select_backup_file">Выберите файл резервной копии. Точки будут добавлены к существующим.</string>
@@ -181,4 +172,9 @@
     <string name="sign_in_error">❌ Ошибка входа: %1$s</string>
     <string name="filter_all_points">Все</string>
     <string name="filter_my_points">Мои</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="delete_account_subtitle">Удалить аккаунт и все данные</string>
+    <string name="delete_account_warning">Все ваши точки и данные будут безвозвратно удалены. Это действие нельзя отменить.</string>
+    <string name="account_deleted">Аккаунт удалён</string>
+    <string name="delete_account_error">Ошибка удаления аккаунта</string>
 </resources>

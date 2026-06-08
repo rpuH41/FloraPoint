@@ -144,6 +144,27 @@ class SettingsViewModel @Inject constructor(
         return authManager.getGoogleSignInIntent(context)
     }
 
+    fun deleteAccount(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val uid = authManager.getCurrentUserId() ?: return@launch
+
+                firestoreRepository.deleteAllUserPoints(uid)
+                firestoreRepository.deleteAllPrivatePoints(uid)
+
+                authManager.deleteAccount(
+                    onSuccess = {
+                        observeAuthState()
+                        onSuccess()
+                    },
+                    onError = onError
+                )
+            } catch (e: Exception) {
+                onError(e.message ?: "Ошибка удаления")
+            }
+        }
+    }
+
     fun handleGoogleSignInResult(
         intent: Intent?,
         onSuccess: () -> Unit,

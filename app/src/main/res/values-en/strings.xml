@@ -100,15 +100,6 @@
     <string name="app_version">App version</string>
     <string name="help_us_get_better">Help us get better</string>
     <string name="rate_the_app">Rate the app</string>
-    <string name="what_we_store">What we store:</string>
-    <string name="your_map_points">• Your map points (coordinates, names, descriptions)</string>
-    <string name="notification_settings">• Notification settings</string>
-    <string name="what_we_dont">What we DON\'T do:</string>
-    <string name="we_dont_share_data_with_third_parties">• We don\'t share data with third parties</string>
-    <string name="we_dont_sell_your_data">• We don\'t sell your data</string>
-    <string name="we_dont_use_data_for_advertising">• We don\'t use data for advertising</string>
-    <string name="all_data_is_stored_only_on_your_device">All data is stored only on your device.</string>
-    <string name="got_it">Got it</string>
     <string name="save_all_your_points_to_a_file">Save all your points to a file? The file can be sent to yourself or a friend.</string>
     <string name="restore_points">Restore points</string>
     <string name="select_backup_file">Select a backup file. Points will be added to existing ones.</string>
@@ -182,4 +173,9 @@
     <string name="sign_in_error">❌ Sign in error: %1$s</string>
     <string name="filter_all_points">All</string>
     <string name="filter_my_points">My</string>
+    <string name="delete_account">Delete account</string>
+    <string name="delete_account_subtitle">Delete account and all data</string>
+    <string name="delete_account_warning">All your points and data will be permanently deleted. This action cannot be undone.</string>
+    <string name="account_deleted">Account deleted</string>
+    <string name="delete_account_error">Failed to delete account</string>
 </resources>

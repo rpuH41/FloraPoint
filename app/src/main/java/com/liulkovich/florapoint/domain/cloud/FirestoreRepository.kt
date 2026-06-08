@@ -197,4 +197,35 @@ class FirestoreRepository @Inject constructor() {
             emptyList()
         }
     }
+
+    suspend fun deleteAllUserPoints(uid: String): Result<Unit> {
+        return try {
+            val batch = firestore.batch()
+            firestore.collection("public_points")
+                .whereEqualTo("ownerUid", uid)
+                .get().await()
+                .documents
+                .forEach { batch.delete(it.reference) }
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteAllPrivatePoints(uid: String): Result<Unit> {
+        return try {
+            val batch = firestore.batch()
+            firestore.collection("users").document(uid)
+                .collection("private_points")
+                .get().await()
+                .documents
+                .forEach { batch.delete(it.reference) }
+            batch.delete(firestore.collection("users").document(uid))
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

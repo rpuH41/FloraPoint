@@ -53,6 +53,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liulkovich.florapoint.BuildConfig
 import com.liulkovich.florapoint.R
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun SettingsScreen(
@@ -62,9 +67,12 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
 
-    var showPrivacyDialog by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showRestoreDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+
+    val accountDeletedMessage = stringResource(R.string.account_deleted)
+    val deleteAccountErrorMessage = stringResource(R.string.delete_account_error)
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -125,6 +133,16 @@ fun SettingsScreen(
                     subtitle = stringResource(R.string.logout_from_account),
                     onClick = { viewModel.logout() }
                 )
+
+                HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
+
+                SettingsItem(
+                    icon = Icons.Default.DeleteForever,
+                    title = stringResource(R.string.delete_account),
+                    subtitle = stringResource(R.string.delete_account_subtitle),
+                    onClick = { showDeleteAccountDialog = true },
+                    iconTint = MaterialTheme.colorScheme.error
+                )
             } else {
                 SettingsItem(
                     icon = Icons.Default.AccountCircle,
@@ -179,7 +197,13 @@ fun SettingsScreen(
                 icon = Icons.Default.Lock,
                 title = stringResource(R.string.privacy),
                 subtitle = stringResource(R.string.how_we_handle_your_data),
-                onClick = { showPrivacyDialog = true }
+                onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://rpuH41.github.io/florapoint-privacy")
+                    )
+                    context.startActivity(intent)
+                }
             )
             HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
             val feedback = stringResource(R.string.feedback_subject)
@@ -219,44 +243,6 @@ fun SettingsScreen(
                 showArrow = false
             )
         }
-    }
-
-    if (showPrivacyDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showPrivacyDialog = false },
-            title = { Text(stringResource(R.string.privacy)) },
-            text = {
-                Column {
-                    Text(
-                        text = stringResource(R.string.what_we_store),
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    Text(stringResource(R.string.your_map_points))
-                    Text(stringResource(R.string.notification_settings))
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.what_we_dont),
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    Text(stringResource(R.string.we_dont_share_data_with_third_parties))
-                    Text(stringResource(R.string.we_dont_sell_your_data))
-                    Text(stringResource(R.string.we_dont_use_data_for_advertising))
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.all_data_is_stored_only_on_your_device),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { showPrivacyDialog = false }
-                ) { Text(stringResource(R.string.got_it)) }
-            }
-        )
     }
 
     if (showBackupDialog) {
@@ -319,6 +305,56 @@ fun SettingsScreen(
             }
         )
     }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            icon = {
+                Icon(
+                    Icons.Default.DeleteForever,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = { Text(stringResource(R.string.delete_account)) },
+            text = {
+                Text(stringResource(R.string.delete_account_warning))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAccountDialog = false
+                        viewModel.deleteAccount(
+                            onSuccess = {
+                                Toast.makeText(
+                                    context,
+                                    accountDeletedMessage,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            onError = {
+                                Toast.makeText(
+                                    context,
+                                    deleteAccountErrorMessage,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        )
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAccountDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 
@@ -349,7 +385,8 @@ private fun SettingsItem(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
-    showArrow: Boolean = true
+    showArrow: Boolean = true,
+    iconTint: Color = MaterialTheme.colorScheme.primary
 ) {
     Row(
         modifier = Modifier
@@ -361,7 +398,7 @@ private fun SettingsItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = iconTint,
             modifier = Modifier.size(24.dp)
         )
         Spacer(Modifier.width(16.dp))
