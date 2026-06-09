@@ -178,4 +178,6 @@
     <string name="delete_account_warning">All your points and data will be permanently deleted. This action cannot be undone.</string>
     <string name="account_deleted">Account deleted</string>
     <string name="delete_account_error">Failed to delete account</string>
+    <string name="weather_on_date">Weather on: %1$s</string>
+    <string name="weather_5days_before">5-day avg before: %1$s</string>
 </resources>

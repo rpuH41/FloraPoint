@@ -160,6 +160,7 @@ fun PointListItem(
                     WeatherInlineRow(
                         point = point,
                         isSelected = isSelected,
+                        dateStr = dateStr,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -217,6 +218,7 @@ fun PointListItem(
 private fun WeatherInlineRow(
     point: UserPoints,
     isSelected: Boolean,
+    dateStr: String,
     modifier: Modifier = Modifier
 ) {
     if (
@@ -225,17 +227,16 @@ private fun WeatherInlineRow(
         point.avgTemp5Days != null &&
         point.avgHumidity5Days != null
     ) {
-
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                WeatherChip(emoji = "☀️", label = "${point.temperature.toInt()}°", isSelected = isSelected)
-                WeatherChip(emoji = "💧", label = "${point.humidity}%", isSelected = isSelected)
-                WeatherChip(emoji = "🌡️", label = "Ø ${point.avgTemp5Days.toInt()}°", isSelected = isSelected)
-                WeatherChip(emoji = "💧", label = "Ø ${point.avgHumidity5Days}%", isSelected = isSelected)
-            }
-
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = stringResource(R.string.weather_on_date, dateStr))
+            WeatherChip(emoji = "☀️", label = "${point.temperature.toInt()}°", isSelected = isSelected)
+            WeatherChip(emoji = "💧", label = "${point.humidity}%", isSelected = isSelected)
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = stringResource(R.string.weather_5days_before, dateStr))
+            WeatherChip(emoji = "🌡️", label = "${point.avgTemp5Days.toInt()}°", isSelected = isSelected)
+            WeatherChip(emoji = "💧", label = "${point.avgHumidity5Days}%", isSelected = isSelected)
+        }
     } else {
         Text(
             text = stringResource(R.string.loadingl_eather),
@@ -254,15 +255,15 @@ private fun WeatherChip(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = emoji,
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.labelLarge
         )
         Text(
             text = " $label",
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isSelected)
-                Color.White
+            style = MaterialTheme.typography.labelLarge,
+            /*color = if (isSelected)
+                Color.Black
             else
-                MaterialTheme.colorScheme.onSurfaceVariant,
+                MaterialTheme.colorScheme.onSurfaceVariant*/
             fontWeight = FontWeight.Medium
         )
     }
