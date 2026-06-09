@@ -19,6 +19,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.liulkovich.florapoint.R
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 
 data class BottomNavItem(
     val label: String,
@@ -38,37 +43,38 @@ fun BottomBar(
         BottomNavItem(stringResource(R.string.settings), Icons.Default.Settings, "Settings"),
     )
 
-    NavigationBar(
-        modifier = Modifier.height(100.dp)
+    Surface(
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shadowElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        items.forEach { item ->
-
-            NavigationBarItem(
-                selected = currentRoute.startsWith(item.route),
-                onClick = { onNavigate(item.route) },
-
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-
-                label = {
-                    val density = LocalDensity.current
-
-                    Text(
-                        text = item.label,
-                        fontSize = with(density) {
-                            (12.sp.value / fontScale).sp
-                        },
-                        maxLines = 1
-                    )
-                },
-
-                alwaysShowLabel = true
-            )
+        NavigationBar(
+            modifier = Modifier.height(100.dp),
+            windowInsets = WindowInsets(0.dp),
+           // containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            items.forEach { item ->
+                NavigationBarItem(
+                    selected = currentRoute.startsWith(item.route),
+                    onClick = { onNavigate(item.route) },
+                    icon = {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = {
+                        val density = LocalDensity.current
+                        Text(
+                            text = item.label,
+                            fontSize = with(density) { (12.sp.value / fontScale).sp },
+                            maxLines = 1
+                        )
+                    },
+                    alwaysShowLabel = true
+                )
+            }
         }
     }
 }

@@ -211,7 +211,6 @@ fun HeroImage(imageName: String, name: String) {
                     )
             )
 
-            // Текст
             Text(
                 text = name,
                 color = Color.White,

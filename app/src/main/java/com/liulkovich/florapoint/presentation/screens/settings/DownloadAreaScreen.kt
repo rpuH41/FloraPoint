@@ -349,12 +349,18 @@ fun DownloadAreaScreen(
                     },
                     enabled = regionName.isNotBlank()
                 ) {
-                    Text(stringResource(R.string.download))
+                    Text(
+                        stringResource(R.string.download),
+                        color = Color(0xFF66BB6A)
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNameDialog = false }) {
-                    Text(stringResource(R.string.cancel))
+                    Text(
+                        stringResource(R.string.cancel),
+                        color = Color(0xFF66BB6A)
+                    )
                 }
             }
         )

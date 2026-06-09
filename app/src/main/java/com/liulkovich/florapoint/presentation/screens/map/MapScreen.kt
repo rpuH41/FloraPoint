@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +34,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -209,8 +211,6 @@ fun MapScreen(
                     onMarkerLongClick = { point -> viewModel.onPointLongClicked(point) }
                 )
 
-
-
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -233,67 +233,99 @@ fun MapScreen(
                                 )
                             }
                         }
-                    }) {
+                    },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
                         Icon(Icons.Default.LocationSearching, contentDescription = null)
                     }
-                    FloatingActionButton(onClick = { mapViewRef.value?.controller?.zoomIn() }) {
+                    FloatingActionButton(
+                        onClick = { mapViewRef.value?.controller?.zoomIn() },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+
+                    ) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
-                    FloatingActionButton(onClick = { mapViewRef.value?.controller?.zoomOut() }) {
+                    FloatingActionButton(
+                        onClick = { mapViewRef.value?.controller?.zoomOut() },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
                         Icon(Icons.Default.Remove, contentDescription = null)
                     }
 
-                    if (viewModel.isAuthorized()) {
+                    LegendGroupBox(
+                        title = "Place",
+                       // modifier = Modifier.fillMaxWidth()//.padding(horizontal = 6.dp)
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+                            modifier = Modifier.wrapContentSize(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+
                             Button(
-                                onClick = { viewModel.togglePointsFilter() },
+                                onClick = {
+                                    val overlay = myLocationOverlayRef.value
+                                    val myLoc = overlay?.myLocation
+                                    if (myLoc != null) {
+                                        viewModel.onAddNewPointClicked(myLoc.latitude, myLoc.longitude)
+                                    } else {
+                                        val loc = state.currentUserLocation
+                                        if (loc != null) {
+                                            viewModel.onAddNewPointClicked(loc.first, loc.second)
+                                        }
+                                    }
+                                },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (state.showOnlyMyPoints)
-                                        Color(0xFF1B5E20)
-                                    else
-                                        MaterialTheme.colorScheme.primary
+                                    containerColor = Color(0xFF1B5E20),
+                                    contentColor = Color.White
                                 ),
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.height(42.dp)
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.height(36.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp)
                             ) {
-                                Text(
-                                    text = if (state.showOnlyMyPoints)
-                                        stringResource(R.string.filter_my_points)
-                                    else
-                                        stringResource(R.string.filter_all_points),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (state.showOnlyMyPoints)
-                                        Color.White
-                                    else
-                                        MaterialTheme.colorScheme.onPrimary
+                                Icon(
+                                    Icons.Default.AddLocationAlt,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
                                 )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.add_place),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+
+                            if (viewModel.isAuthorized()) {
+                                Spacer(Modifier.width(8.dp))
+                                Button(
+                                    onClick = { viewModel.togglePointsFilter() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (state.showOnlyMyPoints)
+                                            Color(0xFF1B5E20)
+                                        else
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                    ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier.height(36.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp)
+                                ) {
+                                    Text(
+                                        text = if (state.showOnlyMyPoints)
+                                            stringResource(R.string.filter_my_points)
+                                        else
+                                            stringResource(R.string.filter_all_points),
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = if (state.showOnlyMyPoints)
+                                            Color.White
+                                        else
+                                            MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
                             }
                         }
                     }
-
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            val overlay = myLocationOverlayRef.value
-                            val myLoc = overlay?.myLocation
-                            if (myLoc != null) {
-                                viewModel.onAddNewPointClicked(myLoc.latitude, myLoc.longitude)
-                            } else {
-                                val loc = state.currentUserLocation
-                                if (loc != null) {
-                                    viewModel.onAddNewPointClicked(loc.first, loc.second)
-                                }
-                            }
-                        },
-                        containerColor = Color(0xFF1B5E20),
-                        contentColor = Color.White,
-                        icon = { Icon(Icons.Default.AddLocationAlt, contentDescription = null) },
-                        text = { Text(stringResource(R.string.add_place)) }
-                    )
                 }
             }
 
@@ -520,5 +552,49 @@ fun MapScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun LegendGroupBox(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.TopEnd
+    ) {
+        Box(
+            modifier = Modifier
+                //.wrapContentSize()
+                .padding(top = 8.dp)
+                .background(
+                    color = Color.White.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.Black.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 15.dp)
+        ) {
+            content()
+        }
+
+        Text(
+            text = title,
+            fontSize = 12.sp,
+            color = Color.Black,
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .background(
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                //.padding(horizontal = 1.dp, vertical = 1.dp)
+                .align(Alignment.TopStart)
+        )
     }
 }

@@ -50,7 +50,7 @@
     <string name="season_now">Season Now</string>
     <string name="no_active_seasons">No active seasons</string>
     <string name="days_left">~%1$d days left</string>
-    <string name="add_place">Add place</string>
+    <string name="add_place">Add</string>
     <string name="search_places">Search places...</string>
     <string name="custom_species">Custom species</string>
     <string name="unknown_species">Unknown species</string>

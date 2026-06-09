@@ -49,7 +49,7 @@
     <string name="season_now">Сезон сейчас</string>
     <string name="no_active_seasons">Нет активных сезонов</string>
     <string name="days_left">Осталось ~%1$d дней</string>
-    <string name="add_place">Добавить место</string>
+    <string name="add_place">Добавить</string>
     <string name="search_places">Поиск мест...</string>
     <string name="custom_species">Пользовательский вид</string>
     <string name="unknown_species">Неизвестный вид</string>

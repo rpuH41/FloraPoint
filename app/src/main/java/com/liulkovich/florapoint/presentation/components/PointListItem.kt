@@ -89,7 +89,8 @@ fun PointListItem(
         ),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.secondaryContainer
+
             else
                 MaterialTheme.colorScheme.surfaceVariant
         )
@@ -105,7 +106,7 @@ fun PointListItem(
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color(0xFF66BB6A),
                     modifier = Modifier.size(14.dp)
                 )
                 Text(

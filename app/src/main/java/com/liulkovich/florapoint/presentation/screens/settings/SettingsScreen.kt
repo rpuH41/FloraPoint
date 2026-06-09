@@ -156,6 +156,8 @@ fun SettingsScreen(
             }
         }
 
+        Spacer(Modifier.height(12.dp))
+
         SettingsSection(title = stringResource(R.string.notifications)) {
             SettingsItem(
                 icon = Icons.Default.Notifications,
@@ -273,14 +275,20 @@ fun SettingsScreen(
                         }
                     }
                 ) {
-                    Text(stringResource(R.string.save))
+                    Text(
+                        stringResource(R.string.save),
+                        color = Color(0xFF66BB6A)
+                    )
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(
                     onClick = { showBackupDialog = false }
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    Text(
+                        stringResource(R.string.cancel),
+                        color = Color(0xFF66BB6A)
+                    )
                 }
             }
         )
@@ -296,12 +304,19 @@ fun SettingsScreen(
                 androidx.compose.material3.TextButton(onClick = {
                     showRestoreDialog = false
                     importLauncher.launch("*/*")
-                }) { Text(stringResource(R.string.choose_file)) }
+                })
+                {
+                    Text(stringResource(R.string.choose_file),
+                        color = Color(0xFF66BB6A)
+                    ) }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(
                     onClick = { showRestoreDialog = false }
-                ) { Text(stringResource(R.string.cancel)) }
+                ) { Text(
+                    stringResource(R.string.cancel),
+                    color = Color(0xFF66BB6A)
+                ) }
             }
         )
     }
