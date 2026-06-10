@@ -103,6 +103,11 @@ fun MapScreen(
             deepLinkName?.let { viewModel.setDeepLinkData(it, deepLinkCategory ?: "custom") }
         }
     }
+    LaunchedEffect(state.currentUserLocation) {
+        state.currentUserLocation?.let { (lat, lon) ->
+            viewModel.loadCurrentWeather(lat, lon)
+        }
+    }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -192,6 +197,7 @@ fun MapScreen(
                     currentLocation = state.currentUserLocation,
                     shouldFollowLocation = shouldFollowLocation,
                     forceCenter = forceCenter,
+                    currentWeather = state.currentWeather,
                     onMapReady = { mapView, locationOverlay ->
                         mapView.setBuiltInZoomControls(false)
                         mapViewRef.value = mapView

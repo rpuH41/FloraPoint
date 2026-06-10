@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Основная тема приложения -->
     <style name="Theme.FloraPoint" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <!-- Тема сплэш экрана -->
     <style name="Theme.FloraPoint.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#1B5E20</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.FloraPoint</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
+
     </style>
 
 </resources>

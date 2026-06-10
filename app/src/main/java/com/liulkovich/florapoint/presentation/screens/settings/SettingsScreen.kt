@@ -217,7 +217,7 @@ fun SettingsScreen(
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:")
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("ivanlulkovich@gmail.com"))
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("florapoint.app@gmail.com"))
                         putExtra(Intent.EXTRA_SUBJECT, feedback)
                     }
                     context.startActivity(Intent.createChooser(intent, letter))

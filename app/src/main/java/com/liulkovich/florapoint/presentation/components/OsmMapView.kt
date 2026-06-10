@@ -43,6 +43,11 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import androidx.compose.foundation.layout.Column
+import com.liulkovich.florapoint.presentation.screens.map.CurrentWeather
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
@@ -56,6 +61,7 @@ fun OsmMapView(
     selectedPointId: Int? = null,
     onMapReady: (MapView, MyLocationNewOverlay) -> Unit,
     onMarkerClick: (UserPoints) -> Unit,
+    currentWeather: CurrentWeather? = null,
     onMarkerLongClick: (UserPoints) -> Unit,
 ) {
     val context = LocalContext.current
@@ -159,30 +165,79 @@ fun OsmMapView(
             }
         )
 
-        if (!online) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = Color(0xCC000000)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (!online) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xCC000000)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.WifiOff,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.offline),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.offline),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+
+            if (currentWeather != null) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xCC000000)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.weather_now),
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = "☀️ ${currentWeather.temperature.toInt()}°",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = "💧 ${currentWeather.humidity}%",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = stringResource(R.string.weather_last_5days),
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = "🌡️ ${currentWeather.avgTemp5Days.toInt()}°",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = "💧 ${currentWeather.avgHumidity5Days}%",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
             }
         }

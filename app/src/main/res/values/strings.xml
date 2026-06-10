@@ -177,6 +177,8 @@
     <string name="delete_account_warning">Все ваши точки и данные будут безвозвратно удалены. Это действие нельзя отменить.</string>
     <string name="account_deleted">Аккаунт удалён</string>
     <string name="delete_account_error">Ошибка удаления аккаунта</string>
-    <string name="weather_on_date">"Погода на: %1$s "</string>
-    <string name="weather_5days_before">"За 5 дней до: %1$s "</string>
+    <string name="weather_now">"Сейчас:"</string>
+    <string name="weather_on_date">"Погода на:"</string>
+    <string name="weather_5days_before">"За 5 дней до:"</string>
+    <string name="weather_last_5days">За последние 5 дней:</string>
 </resources>

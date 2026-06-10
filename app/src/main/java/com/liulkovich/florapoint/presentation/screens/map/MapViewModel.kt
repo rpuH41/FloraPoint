@@ -451,6 +451,28 @@ class MapViewModel @Inject constructor(
             )
         }
     }
+    fun loadCurrentWeather(lat: Double, lon: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val weather = weatherService.getWeatherData(lat, lon)
+            if (weather != null &&
+                weather.temperature != null &&
+                weather.humidity != null &&
+                weather.avgTemp5Days != null &&
+                weather.avgHumidity5Days != null
+            ) {
+                _state.update {
+                    it.copy(
+                        currentWeather = CurrentWeather(
+                            temperature = weather.temperature,
+                            humidity = weather.humidity,
+                            avgTemp5Days = weather.avgTemp5Days,
+                            avgHumidity5Days = weather.avgHumidity5Days
+                        )
+                    )
+                }
+            }
+        }
+    }
 }
 
 sealed interface MapCommand {
@@ -495,5 +517,13 @@ data class MapScreenState(
     val bottomSheetMode: BottomSheetMode? = null,
     val deepLinkName: String = "",
     val deepLinkCategory: String = "",
-    val showOnlyMyPoints: Boolean = true
+    val showOnlyMyPoints: Boolean = true,
+    val currentWeather: CurrentWeather? = null
+)
+
+data class CurrentWeather(
+    val temperature: Double,
+    val humidity: Int,
+    val avgTemp5Days: Double,
+    val avgHumidity5Days: Int
 )
