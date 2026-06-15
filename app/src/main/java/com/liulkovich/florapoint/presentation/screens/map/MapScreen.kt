@@ -103,11 +103,7 @@ fun MapScreen(
             deepLinkName?.let { viewModel.setDeepLinkData(it, deepLinkCategory ?: "custom") }
         }
     }
-    LaunchedEffect(state.currentUserLocation) {
-        state.currentUserLocation?.let { (lat, lon) ->
-            viewModel.loadCurrentWeather(lat, lon)
-        }
-    }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -259,7 +255,7 @@ fun MapScreen(
                     }
 
                     LegendGroupBox(
-                        title = "Place",
+                        title = stringResource(R.string.place),
                        // modifier = Modifier.fillMaxWidth()//.padding(horizontal = 6.dp)
                     ) {
                         Row(

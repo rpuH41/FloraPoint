@@ -180,5 +180,6 @@
     <string name="weather_now">"Сейчас:"</string>
     <string name="weather_on_date">"Погода на:"</string>
     <string name="weather_5days_before">"За 5 дней до:"</string>
-    <string name="weather_last_5days">За последние 5 дней:</string>
+    <string name="weather_last_5days">За 5 дней:</string>
+    <string name="place">Место</string>
 </resources>

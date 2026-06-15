@@ -182,4 +182,5 @@
     <string name="weather_on_date">Weather for:</string>
     <string name="weather_5days_before">5-day avg before:</string>
     <string name="weather_last_5days">"Last 5 days: "</string>
+    <string name="place">Place</string>
 </resources>

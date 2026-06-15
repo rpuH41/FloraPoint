@@ -88,6 +88,7 @@ class MapViewModel @Inject constructor(
 
     fun updateCurrentLocation(lat: Double, lon: Double) {
         _state.update { it.copy(currentUserLocation = lat to lon) }
+        loadCurrentWeather(lat, lon)
     }
 
     fun onSearchQueryChanged(query: String) {
