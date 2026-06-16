@@ -36,4 +36,7 @@ interface ReferenceDao {
     @Query("SELECT * FROM reference_table WHERE is_notif_enabled = 1")
     suspend fun getNotificationEnabled(): List<Reference>
 
+    @Query("SELECT * FROM reference_table")
+    suspend fun getAllSpeciesList(): List<Reference>
+
 }

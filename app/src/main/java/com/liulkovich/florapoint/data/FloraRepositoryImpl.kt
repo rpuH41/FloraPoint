@@ -3,6 +3,7 @@ package com.liulkovich.florapoint.data
 import com.liulkovich.florapoint.domain.FloraRepository
 import com.liulkovich.florapoint.domain.OfflineRegion
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.SpeciesConditions
 import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.domain.UserPoints
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,8 @@ class FloraRepositoryImpl @Inject constructor(
     private val referenceDao: ReferenceDao,
     private val userPointsDao: UserPointsDao,
     private val tipDao: TipDao,
-    private val offlineRegionDao: OfflineRegionDao
+    private val offlineRegionDao: OfflineRegionDao,
+    private val speciesConditionsDao: SpeciesConditionsDao
 
 ): FloraRepository {
 
@@ -60,6 +62,10 @@ class FloraRepositoryImpl @Inject constructor(
     override suspend fun deleteOfflineRegion(id: String) = offlineRegionDao.delete(id)
 
     override suspend fun countOfflineRegions(): Int = offlineRegionDao.count()
+
+    override suspend fun getAllSpeciesList(): List<Reference> = referenceDao.getAllSpeciesList()
+
+    override suspend fun getAllConditions(): List<SpeciesConditions> = speciesConditionsDao.getAll()
 
 
 }

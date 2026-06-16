@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.liulkovich.florapoint.domain.OfflineRegion
 import com.liulkovich.florapoint.domain.Reference
+import com.liulkovich.florapoint.domain.SpeciesConditions
 import com.liulkovich.florapoint.domain.Tip
 import com.liulkovich.florapoint.domain.UserPoints
 
@@ -11,9 +12,10 @@ import com.liulkovich.florapoint.domain.UserPoints
     Reference::class,
     UserPoints::class,
     Tip::class,
-    OfflineRegion::class
+    OfflineRegion::class,
+    SpeciesConditions::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun referenceDao(): ReferenceDao
@@ -21,5 +23,7 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun tipDao(): TipDao
 
     abstract fun offlineRegionDao(): OfflineRegionDao
+
+    abstract fun speciesConditionsDao(): SpeciesConditionsDao
 
 }

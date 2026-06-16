@@ -1,9 +1,5 @@
 package com.liulkovich.florapoint.presentation.screens.map
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -60,16 +56,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.components.AddPointSheetContent
 import com.liulkovich.florapoint.presentation.components.EditPointSheetContent
 import com.liulkovich.florapoint.presentation.components.OsmMapView
 import com.liulkovich.florapoint.presentation.components.PointListItem
+import com.liulkovich.florapoint.presentation.weather.WeatherViewModel
 import kotlinx.coroutines.flow.collectLatest
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -81,6 +76,7 @@ import java.util.Date
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = hiltViewModel(),
+    weatherViewModel: WeatherViewModel,
     deepLinkLat: Double? = null,
     deepLinkLon: Double? = null,
     deepLinkName: String? = null,
@@ -104,46 +100,13 @@ fun MapScreen(
         }
     }
 
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        if (granted) {
-            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.updateCurrentLocation(location.latitude, location.longitude)
-                }
-            }
-            myLocationOverlayRef.value?.enableMyLocation()
-        }
-    }
-    LaunchedEffect(Unit) {
-        viewModel.updateMissingWeatherData()
-    }
-    LaunchedEffect(Unit) {
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.updateCurrentLocation(location.latitude, location.longitude)
-                }
-            }
-        } else {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
+    val sharedLocation by weatherViewModel.currentLocation.collectAsStateWithLifecycle()
 
+    LaunchedEffect(sharedLocation) {
+        sharedLocation?.let { (lat, lon) ->
+            viewModel.updateCurrentLocation(lat, lon)
+        }
+    }
     LaunchedEffect(Unit) {
         viewModel.command.collectLatest { command ->
             when (command) {

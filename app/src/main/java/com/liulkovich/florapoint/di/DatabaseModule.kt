@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.liulkovich.florapoint.data.AppDatabase
 import com.liulkovich.florapoint.data.OfflineRegionDao
 import com.liulkovich.florapoint.data.ReferenceDao
+import com.liulkovich.florapoint.data.SpeciesConditionsDao
 import com.liulkovich.florapoint.data.TipDao
 import com.liulkovich.florapoint.data.UserPointsDao
 import dagger.Module
@@ -27,7 +28,8 @@ object DatabaseModule {
             "flora.db"
         )
             .createFromAsset("flora.db")
-            .fallbackToDestructiveMigrationFrom(true)
+            .fallbackToDestructiveMigration()
+            //.fallbackToDestructiveMigrationFrom(true)
             .build()
     }
 
@@ -41,4 +43,7 @@ object DatabaseModule {
 
     @Provides
     fun provideOfflineRegionDao(db: AppDatabase): OfflineRegionDao = db.offlineRegionDao()
+
+    @Provides
+    fun provideSpeciesConditionsDao(db: AppDatabase): SpeciesConditionsDao = db.speciesConditionsDao()
 }

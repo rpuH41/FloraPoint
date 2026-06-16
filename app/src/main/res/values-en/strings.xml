@@ -183,4 +183,12 @@
     <string name="weather_5days_before">5-day avg before:</string>
     <string name="weather_last_5days">"Last 5 days: "</string>
     <string name="place">Place</string>
+    <string name="forecast_title">Forecast</string>
+    <string name="forecast_subtitle">Species you might find now, based on weather</string>
+    <string name="no_weather_data">No weather data</string>
+    <string name="no_suitable_species">No suitable species right now</string>
+    <string name="forecast_excellent">Excellent conditions</string>
+    <string name="forecast_good">Good conditions</string>
+    <string name="forecast_weak">Low probability</string>
+    <string name="has_nearby_point">Nearby user point exists</string>
 </resources>

@@ -182,4 +182,13 @@
     <string name="weather_5days_before">"За 5 дней до:"</string>
     <string name="weather_last_5days">За 5 дней:</string>
     <string name="place">Место</string>
+    <string name="forecast_title">Прогноз</string>
+    <string name="forecast_subtitle">Какие виды можно найти сейчас, судя по погоде</string>
+    <string name="no_weather_data">Нет данных о погоде</string>
+    <string name="no_suitable_species">Сейчас нет подходящих видов</string>
+    <string name="forecast_excellent">Отличные условия</string>
+    <string name="forecast_good">Хорошие условия</string>
+    <string name="forecast_weak">Слабая вероятность</string>
+    <string name="has_nearby_point">Есть рядом точка пользователя</string>
+
 </resources>

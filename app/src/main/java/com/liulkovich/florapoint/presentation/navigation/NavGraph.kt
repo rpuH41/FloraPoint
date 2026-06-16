@@ -3,8 +3,10 @@ package com.liulkovich.florapoint.presentation.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +17,7 @@ import androidx.navigation.navDeepLink
 import com.liulkovich.florapoint.presentation.components.BottomBar
 import com.liulkovich.florapoint.presentation.screens.detail.DetailScreen
 import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
+import com.liulkovich.florapoint.presentation.screens.forecast.ForecastScreen
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
@@ -22,12 +25,59 @@ import com.liulkovich.florapoint.presentation.screens.notifications.Notification
 import com.liulkovich.florapoint.presentation.screens.settings.DownloadAreaScreen
 import com.liulkovich.florapoint.presentation.screens.settings.OfflineRegionsScreen
 import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
+import com.liulkovich.florapoint.presentation.weather.WeatherViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationServices
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val context = LocalContext.current
+    val weatherViewModel: WeatherViewModel = hiltViewModel()
 
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    weatherViewModel.updateLocation(location.latitude, location.longitude)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    weatherViewModel.updateLocation(location.latitude, location.longitude)
+                }
+            }
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
     val screensWithoutBottomBar = listOf(Screen.Detail.rout)
     val showBottomBar = currentRoute !in screensWithoutBottomBar
 
@@ -45,6 +95,9 @@ fun NavGraph() {
                             launchSingleTop = true
                             restoreState = route != Screen.Home.rout
                         }
+                    },
+                    onForecastClick = {
+                        navController.navigate(Screen.Forecast.rout)
                     }
                 )
             }
@@ -84,9 +137,8 @@ fun NavGraph() {
 
             composable(Screen.Map.rout) {
                 MapScreen(
-                    onOpenSettings = {
-                        navController.navigate(Screen.Settings.rout)
-                    }
+                    weatherViewModel = weatherViewModel,
+                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
                 )
             }
 
@@ -122,13 +174,12 @@ fun NavGraph() {
                 val category = backStackEntry.arguments?.getString("category") ?: "custom"
 
                 MapScreen(
+                    weatherViewModel = weatherViewModel,
                     deepLinkLat = lat,
                     deepLinkLon = lon,
                     deepLinkName = name,
                     deepLinkCategory = category,
-                    onOpenSettings = {
-                        navController.navigate(Screen.Settings.rout)
-                    }
+                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
                 )
             }
 
@@ -173,6 +224,27 @@ fun NavGraph() {
                     onBack = { navController.popBackStack() }
                 )
             }
+
+            composable(Screen.Forecast.rout) {
+                val weather by weatherViewModel.currentWeather.collectAsStateWithLifecycle()
+                val location by weatherViewModel.currentLocation.collectAsStateWithLifecycle()
+
+                ForecastScreen(
+                    currentWeather = weather,
+                    currentLat = location?.first ?: 0.0,
+                    currentLon = location?.second ?: 0.0,
+                    onNavigateToDetail = { speciesId ->
+                        navController.navigate("Detail/$speciesId")
+                    },
+                    onNavigateToMapWithPoint = { pointId ->
+                        if (pointId != null) {
+                            navController.navigate("Map?focusPointId=$pointId")
+                        } else {
+                            navController.navigate(Screen.Map.rout)
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -191,4 +263,6 @@ sealed class Screen(val rout: String) {
 
     data object OfflineRegions : Screen("OfflineRegions")
     data object DownloadArea : Screen("DownloadArea")
+
+    data object Forecast : Screen("Forecast")
 }
