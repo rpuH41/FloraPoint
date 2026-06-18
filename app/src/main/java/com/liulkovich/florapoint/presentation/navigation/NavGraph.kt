@@ -34,6 +34,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
+import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
+import androidx.navigation.NavGraph.Companion.findStartDestination
 
 @Composable
 fun NavGraph() {
@@ -41,6 +43,7 @@ fun NavGraph() {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val context = LocalContext.current
     val weatherViewModel: WeatherViewModel = hiltViewModel()
+    val mapFocusHolder: MapFocusRequestHolder = hiltViewModel()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -87,17 +90,21 @@ fun NavGraph() {
                 BottomBar(
                     currentRoute = currentRoute ?: Screen.Home.rout,
                     onNavigate = { route ->
+                        if (currentRoute == Screen.Forecast.rout) {
+                            navController.popBackStack()
+                        }
                         navController.navigate(route) {
-                            popUpTo(Screen.Home.rout) {
+                            popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
-                                inclusive = route == Screen.Home.rout
                             }
                             launchSingleTop = true
-                            restoreState = route != Screen.Home.rout
+                            restoreState = true
                         }
                     },
                     onForecastClick = {
-                        navController.navigate(Screen.Forecast.rout)
+                        navController.navigate(Screen.Forecast.rout) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -138,6 +145,7 @@ fun NavGraph() {
             composable(Screen.Map.rout) {
                 MapScreen(
                     weatherViewModel = weatherViewModel,
+                    mapFocusHolder = mapFocusHolder,
                     onOpenSettings = { navController.navigate(Screen.Settings.rout) }
                 )
             }
@@ -179,7 +187,8 @@ fun NavGraph() {
                     deepLinkLon = lon,
                     deepLinkName = name,
                     deepLinkCategory = category,
-                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
+                    mapFocusHolder = mapFocusHolder,
+                    //onOpenSettings = { navController.navigate(Screen.Settings.rout) }
                 )
             }
 
@@ -234,13 +243,20 @@ fun NavGraph() {
                     currentLat = location?.first ?: 0.0,
                     currentLon = location?.second ?: 0.0,
                     onNavigateToDetail = { speciesId ->
+                        navController.popBackStack()
                         navController.navigate("Detail/$speciesId")
                     },
                     onNavigateToMapWithPoint = { pointId ->
                         if (pointId != null) {
-                            navController.navigate("Map?focusPointId=$pointId")
-                        } else {
-                            navController.navigate(Screen.Map.rout)
+                            mapFocusHolder.request(pointId)
+                        }
+                        navController.popBackStack()
+                        navController.navigate(Screen.Map.rout) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
@@ -255,6 +271,7 @@ sealed class Screen(val rout: String) {
         fun createRoute(category: String = "") =
             if (category.isEmpty()) "Guide" else "Guide?category=$category"
     }
+
     data object Map : Screen("Map")
     data object MapDeepLink : Screen("Map?lat={lat}&lon={lon}&name={name}&category={category}")
     data object Settings : Screen("Settings")

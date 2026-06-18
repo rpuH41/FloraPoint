@@ -71,6 +71,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +82,7 @@ fun MapScreen(
     deepLinkLon: Double? = null,
     deepLinkName: String? = null,
     deepLinkCategory: String? = null,
+    mapFocusHolder: MapFocusRequestHolder,
     onOpenSettings: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -90,6 +92,17 @@ fun MapScreen(
     val context = LocalContext.current
     var shouldFollowLocation by remember { mutableStateOf(true) }
     var forceCenter by remember { mutableStateOf<GeoPoint?>(null) }
+
+    val pendingFocusId by mapFocusHolder.pendingFocusPointId.collectAsStateWithLifecycle()
+
+    LaunchedEffect(pendingFocusId, state.userPoints) {
+        val id = pendingFocusId ?: return@LaunchedEffect
+        val point = state.userPoints.find { it.id == id } ?: return@LaunchedEffect
+        viewModel.onPointClicked(point)
+        shouldFollowLocation = false
+        forceCenter = GeoPoint(point.latitude, point.longitude)
+        mapFocusHolder.consume()
+    }
 
     LaunchedEffect(deepLinkLat, deepLinkLon) {
         if (deepLinkLat != null && deepLinkLon != null && deepLinkLat != 0.0) {

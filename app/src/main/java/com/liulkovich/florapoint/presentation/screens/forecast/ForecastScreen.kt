@@ -1,7 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.forecast
 
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,7 +58,7 @@ fun ForecastScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text(
                 text = stringResource(R.string.forecast_title),
                 style = MaterialTheme.typography.titleLarge,
@@ -73,10 +72,10 @@ fun ForecastScreen(
             )
 
             if (!state.noWeather && !state.isLoading) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                   // horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -95,6 +94,12 @@ fun ForecastScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
+                }
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                   // horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.weather_last_5days),
                         color = Color.White.copy(alpha = 0.7f),
@@ -112,7 +117,6 @@ fun ForecastScreen(
                         fontWeight = FontWeight.Medium
                     )
                 }
-
             }
         }
 
