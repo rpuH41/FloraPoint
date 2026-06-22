@@ -161,7 +161,9 @@ fun SeasonSection(
 @Composable
 fun SeasonCardSkeleton() {
     Card(
-        modifier = Modifier.width(165.dp),
+        modifier = Modifier
+            .width(165.dp)
+            .height(150.dp),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -269,7 +271,9 @@ fun HomeSeasonCard(
     val imageId = context.resources.getIdentifier(textImage, "drawable", context.packageName)
 
     Card(
-        modifier = modifier.width(165.dp),
+        modifier = modifier
+            .width(165.dp)
+            .height(150.dp),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = { onClickDetail(reference.id) }
