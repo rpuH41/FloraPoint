@@ -36,6 +36,9 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 
 @Composable
 fun NavGraph() {
@@ -60,25 +63,29 @@ fun NavGraph() {
         }
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     LaunchedEffect(Unit) {
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    weatherViewModel.updateLocation(location.latitude, location.longitude)
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+                fusedClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        weatherViewModel.updateLocation(location.latitude, location.longitude)
+                    }
                 }
-            }
-        } else {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
                 )
-            )
+            }
         }
     }
     val screensWithoutBottomBar = listOf(Screen.Detail.rout)
