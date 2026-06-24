@@ -102,10 +102,10 @@ fun NavGraph() {
                         }
                         navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                                saveState = false
                             }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState = false
                         }
                     },
                     onForecastClick = {
@@ -259,19 +259,6 @@ fun NavGraph() {
                         }
                         navController.navigate(Screen.Map.rout)
                     }
-//                    onNavigateToMapWithPoint = { pointId ->
-//                        if (pointId != null) {
-//                            mapFocusHolder.request(pointId)
-//                        }
-//                        navController.popBackStack()
-//                        navController.navigate(Screen.Map.rout) {
-//                            popUpTo(navController.graph.findStartDestination().id) {
-//                                saveState = true
-//                            }
-//                            launchSingleTop = true
-//                            restoreState = true
-//                        }
-//                    }
                 )
             }
         }

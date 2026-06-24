@@ -176,20 +176,40 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch {
                     val newUid = authManager.getCurrentUserId() ?: return@launch
 
-                    if (anonymousUid != null) {
-                        val localPoints = repository.getAllUserPointsList()
-                        localPoints.forEach { point ->
-                            if (point.ownerUid == anonymousUid || point.ownerUid == null) {
-                                val updatedPoint = point.copy(ownerUid = newUid)
-                                repository.editPoint(updatedPoint)
-                                if (updatedPoint.isPublic) {
-                                    firestoreRepository.uploadPoint(updatedPoint)
-                                } else {
-                                    firestoreRepository.uploadPrivatePoint(updatedPoint)
-                                }
+                    val allLocalPoints = repository.getAllUserPointsList()
+
+                    val pointsToSync = allLocalPoints.filter { point ->
+                        (point.ownerUid == anonymousUid ||
+                                point.ownerUid == newUid ||
+                                point.ownerUid == null) &&
+                                (point.cloudId == null || point.syncState != "SYNCED")
+                    }
+
+                    pointsToSync.forEach { point ->
+                        val pointWithUid = point.copy(ownerUid = newUid)
+                        if (pointWithUid.isPublic) {
+                            val result = firestoreRepository.uploadPoint(pointWithUid)
+                            result.onSuccess { cloudId ->
+                                repository.editPoint(
+                                    pointWithUid.copy(cloudId = cloudId, syncState = "SYNCED")
+                                )
+                            }
+                            result.onFailure {
+                                repository.editPoint(pointWithUid)
+                            }
+                        } else {
+                            val result = firestoreRepository.uploadPrivatePoint(pointWithUid)
+                            result.onSuccess { cloudId ->
+                                repository.editPoint(
+                                    pointWithUid.copy(cloudId = cloudId, syncState = "SYNCED")
+                                )
+                            }
+                            result.onFailure {
+                                repository.editPoint(pointWithUid)
                             }
                         }
                     }
+
                     val publicPoints = firestoreRepository.downloadUserPoints(newUid)
                     val privatePoints = firestoreRepository.downloadPrivatePoints(newUid)
                     (publicPoints + privatePoints).forEach { point ->
