@@ -1,12 +1,23 @@
 package com.liulkovich.florapoint.presentation.navigation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,31 +25,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.google.android.gms.location.LocationServices
 import com.liulkovich.florapoint.presentation.components.BottomBar
 import com.liulkovich.florapoint.presentation.screens.detail.DetailScreen
 import com.liulkovich.florapoint.presentation.screens.detail.DetailViewModel
 import com.liulkovich.florapoint.presentation.screens.forecast.ForecastScreen
 import com.liulkovich.florapoint.presentation.screens.guide.GuideScreen
 import com.liulkovich.florapoint.presentation.screens.home.HomeScreen
+import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
 import com.liulkovich.florapoint.presentation.screens.map.MapScreen
 import com.liulkovich.florapoint.presentation.screens.notifications.NotificationScreen
 import com.liulkovich.florapoint.presentation.screens.settings.DownloadAreaScreen
 import com.liulkovich.florapoint.presentation.screens.settings.OfflineRegionsScreen
 import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
 import com.liulkovich.florapoint.presentation.weather.WeatherViewModel
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.LocationServices
-import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 
 @Composable
 fun NavGraph() {
@@ -179,7 +179,8 @@ fun NavGraph() {
                 ),
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern = "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
+                        uriPattern =
+                            "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
                     }
                 )
             ) { backStackEntry ->
@@ -195,7 +196,7 @@ fun NavGraph() {
                     deepLinkName = name,
                     deepLinkCategory = category,
                     mapFocusHolder = mapFocusHolder,
-                    //onOpenSettings = { navController.navigate(Screen.Settings.rout) }
+                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
                 )
             }
 
@@ -250,22 +251,27 @@ fun NavGraph() {
                     currentLat = location?.first ?: 0.0,
                     currentLon = location?.second ?: 0.0,
                     onNavigateToDetail = { speciesId ->
-                        navController.popBackStack()
                         navController.navigate("Detail/$speciesId")
                     },
                     onNavigateToMapWithPoint = { pointId ->
                         if (pointId != null) {
                             mapFocusHolder.request(pointId)
                         }
-                        navController.popBackStack()
-                        navController.navigate(Screen.Map.rout) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigate(Screen.Map.rout)
                     }
+//                    onNavigateToMapWithPoint = { pointId ->
+//                        if (pointId != null) {
+//                            mapFocusHolder.request(pointId)
+//                        }
+//                        navController.popBackStack()
+//                        navController.navigate(Screen.Map.rout) {
+//                            popUpTo(navController.graph.findStartDestination().id) {
+//                                saveState = true
+//                            }
+//                            launchSingleTop = true
+//                            restoreState = true
+//                        }
+//                    }
                 )
             }
         }
