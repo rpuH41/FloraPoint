@@ -80,7 +80,7 @@ fun ForecastScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.weather_now),
-                        color = Color.White.copy(alpha = 0.7f),
+                        //color = Color.White.copy(alpha = 0.7f),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -102,7 +102,7 @@ fun ForecastScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.weather_last_5days),
-                        color = Color.White.copy(alpha = 0.7f),
+                       // color = Color.White.copy(alpha = 0.7f),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -170,10 +170,10 @@ private fun ForecastCard(
     onCardClick: () -> Unit,
     onLocationClick: () -> Unit
 ) {
-    val (label, color) = when {
-        item.score >= 80 -> stringResource(R.string.forecast_excellent) to Color(0xFF1BA226)
-        item.score >= 50 -> stringResource(R.string.forecast_good) to Color(0xFFF9A825)
-        else -> stringResource(R.string.forecast_weak) to Color(0xFFE65100)
+    val (color, emoji) = when {
+        item.score >= 80 -> Color(0xFF1BA226) to "🍄"
+        item.score >= 50 -> Color(0xFFF9A825) to "🍄"
+        else -> Color(0xFFE65100) to "🍄"
     }
 
     Card(
@@ -191,19 +191,18 @@ private fun ForecastCard(
         ) {
             Box(
                 modifier = Modifier
-                    .height(40.dp)
-                    .width(40.dp),
+                    .height(48.dp)
+                    .width(48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${item.score}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
+                    text = emoji,
+                    style = MaterialTheme.typography.headlineMedium,
                     color = color
                 )
             }
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -212,9 +211,14 @@ private fun ForecastCard(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = label,
+                    text = when {
+                        item.score >= 80 -> stringResource(R.string.forecast_excellent)
+                        item.score >= 50 -> stringResource(R.string.forecast_good)
+                        else -> stringResource(R.string.forecast_weak)
+                    },
                     style = MaterialTheme.typography.bodySmall,
-                    color = color
+                    color = color,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
