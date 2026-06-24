@@ -229,11 +229,19 @@ fun SettingsScreen(
                 title = stringResource(R.string.rate_the_app),
                 subtitle = stringResource(R.string.help_us_get_better),
                 onClick = {
-                    val intent = Intent(
+                    val marketIntent = Intent(
                         Intent.ACTION_VIEW,
                         "market://details?id=${context.packageName}".toUri()
                     )
-                    runCatching { context.startActivity(intent) }
+                    val browserIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                    )
+                    runCatching {
+                        context.startActivity(marketIntent)
+                    }.onFailure {
+                        runCatching { context.startActivity(browserIntent) }
+                    }
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(start = 52.dp))

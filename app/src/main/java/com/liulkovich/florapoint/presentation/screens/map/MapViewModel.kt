@@ -345,69 +345,37 @@ class MapViewModel @Inject constructor(
         point: UserPoints,
         speciesName: String
     ) {
-
         val dateStr = SimpleDateFormat(
             "dd.MM.yyyy",
             Locale.getDefault()
         ).format(Date(point.timestamp * 1000L))
 
-        val emoji =
-            FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
+        val emoji = FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
 
-        val isAppInstalled = try {
-
-            context.packageManager.getPackageInfo(
-                context.packageName,
-                0
-            )
-
-            true
-
-        } catch (e: Exception) {
-            false
-        }
-
-        val appLink =
-            if (isAppInstalled) {
-
-                "florapoint://point?lat=${point.latitude}" +
-                        "&lon=${point.longitude}" +
-                        "&name=${Uri.encode(point.userName)}" +
-                        "&category=${point.category ?: "custom"}"
-
-            } else {
-
-                "https://play.google.com/store/apps/details?id=${context.packageName}"
-            }
+        // Всегда используем https:// ссылку — она кликабельна везде
+        // и открывает приложение через App Links если FloraPoint установлен
+        val appLink = "https://rpuh41.github.io/florapoint-privacy/point" +
+                "?lat=${point.latitude}" +
+                "&lon=${point.longitude}" +
+                "&name=${Uri.encode(point.userName)}" +
+                "&category=${point.category ?: "custom"}"
 
         val text = buildString {
-
             appendLine("$emoji $speciesName")
-
             if (point.description.isNotBlank()) {
                 appendLine("📝 ${point.description}")
             }
-
             appendLine("🗓 $dateStr")
-
             appendLine()
-
-            appendLine(
-                "📍 https://maps.google.com/?q=${point.latitude},${point.longitude}"
-            )
-
+            appendLine("📍 https://maps.google.com/?q=${point.latitude},${point.longitude}")
             appendLine()
-
             append(context.getString(R.string.share_open_in_app, appLink))
         }
 
         val intent = Intent(Intent.ACTION_SEND).apply {
-
             type = "text/plain"
-
             putExtra(Intent.EXTRA_TEXT, text)
         }
-
         context.startActivity(
             Intent.createChooser(intent, context.getString(R.string.share_title))
         )

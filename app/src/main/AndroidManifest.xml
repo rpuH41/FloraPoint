@@ -36,6 +36,15 @@
                     android:scheme="florapoint"
                     android:host="point" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="rpuh41.github.io"
+                    android:pathPrefix="/florapoint-privacy/point" />
+            </intent-filter>
         </activity>
 
 
