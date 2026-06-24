@@ -32,6 +32,8 @@
 -dontwarn androidx.room.**
 
 # ============ Firebase ============
+-keepclassmembers class com.liulkovich.florapoint.domain.UserPoints { *; }
+-keepnames class com.liulkovich.florapoint.domain.UserPoints
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**
