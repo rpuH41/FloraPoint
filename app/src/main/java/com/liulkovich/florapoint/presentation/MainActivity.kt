@@ -10,6 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.liulkovich.florapoint.presentation.auth.AuthManager
 import com.liulkovich.florapoint.presentation.navigation.NavGraph
 import com.liulkovich.florapoint.presentation.screens.home.HomeViewModel
@@ -19,6 +23,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     val homeViewModel: HomeViewModel by viewModels()
 
     @Inject
@@ -26,7 +31,18 @@ class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) {
+    ) {}
+
+    private val updateLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode != RESULT_OK) {
+            Log.d("UPDATE", "Update flow failed or cancelled: ${result.resultCode}")
+        }
+    }
+
+    private val appUpdateManager by lazy {
+        AppUpdateManagerFactory.create(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +51,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
+        checkForUpdate()
 
         splashScreen.setKeepOnScreenCondition {
             val state = homeViewModel.state.value
@@ -44,7 +61,6 @@ class MainActivity : ComponentActivity() {
         authManager.signInAnonymously(
             onSuccess = {
                 Log.d("AUTH", "UID = ${authManager.getCurrentUserId()}")
-
                 if (authManager.isRegistered()) {
                     homeViewModel.syncPointsFromCloud()
                 }
@@ -61,11 +77,25 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun checkForUpdate() {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    info,
+                    updateLauncher,
+                    AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+                )
+            }
+        }.addOnFailureListener {
+            Log.d("UPDATE", "Update check failed: $it")
+        }
+    }
+
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notificationPermissionLauncher.launch(
-                Manifest.permission.POST_NOTIFICATIONS
-            )
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }

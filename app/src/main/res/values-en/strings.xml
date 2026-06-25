@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FloraPoint</string>
+    <string name="app_name">ForestPoint</string>
     <string name="back">Back</string>
     <string name="notifications">Notifications</string>
     <string name="turn_off_notifications">Turn off notifications</string>
@@ -105,7 +105,7 @@
     <string name="select_backup_file">Select a backup file. Points will be added to existing ones.</string>
     <string name="choose_file">Choose file</string>
     <string name="write_letter">Write a letter</string>
-    <string name="feedback_subject">FloraPoint — feedback</string>
+    <string name="feedback_subject">ForestPoint — feedback</string>
     <string name="share">Share</string>
     <string name="download_map">Download map</string>
     <string name="save_area_for_offline_use">Save area for offline use</string>
@@ -161,7 +161,7 @@
     <string name="point_added_no_weather">Point added. Weather will be loaded when internet is available.</string>
     <string name="point_added_with_weather">Point added with weather data</string>
     <string name="share_title">Share point</string>
-    <string name="share_open_in_app">🌿 Open in FloraPoint: %1$s</string>
+    <string name="share_open_in_app">🌿 Open in ForestPoint: %1$s</string>
     <string name="account">Account</string>
     <string name="sign_in_google">Sign in with Google</string>
     <string name="sync_and_publish_points">Sync and publish points</string>
@@ -173,7 +173,7 @@
     <string name="sign_in_error">❌ Sign in error: %1$s</string>
     <string name="filter_all_points">All</string>
     <string name="filter_my_points">My</string>
-    <string name="delete_account">Delete account FloraPoint</string>
+    <string name="delete_account">Delete account ForestPoint</string>
     <string name="delete_account_subtitle">Delete account and all data</string>
     <string name="delete_account_warning">All your points and data will be permanently deleted. This action cannot be undone.</string>
     <string name="account_deleted">Account deleted</string>

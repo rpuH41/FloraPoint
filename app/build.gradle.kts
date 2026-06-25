@@ -24,7 +24,7 @@ android {
         applicationId = "com.liulkovich.florapoint"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8
+        versionCode = 10
         versionName = "1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -112,6 +112,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     //Google
     implementation(libs.play.services.auth)
+    implementation(libs.app.update.ktx)
 
 
     // Tests

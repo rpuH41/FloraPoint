@@ -202,7 +202,7 @@ fun SettingsScreen(
                 onClick = {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://rpuH41.github.io/florapoint-privacy")
+                        Uri.parse("https://rpuH41.github.io/forestpoint-privacy")
                     )
                     context.startActivity(intent)
                 }
@@ -217,7 +217,7 @@ fun SettingsScreen(
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:")
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("florapoint.app@gmail.com"))
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("forestpoint.app@gmail.com"))
                         putExtra(Intent.EXTRA_SUBJECT, feedback)
                     }
                     context.startActivity(Intent.createChooser(intent, letter))

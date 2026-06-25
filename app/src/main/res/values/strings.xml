@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FloraPoint</string>
+    <string name="app_name">ForestPoint</string>
     <string name="back">Назад</string>
     <string name="notifications">Уведомления</string>
     <string name="turn_off_notifications">Отключить уведомления</string>
@@ -104,7 +104,7 @@
     <string name="select_backup_file">Выберите файл резервной копии. Точки будут добавлены к существующим.</string>
     <string name="choose_file">Выбрать файл</string>
     <string name="write_letter">Написать письмо</string>
-    <string name="feedback_subject">FloraPoint — обратная связь</string>
+    <string name="feedback_subject">ForestPoint — обратная связь</string>
     <string name="share">Поделиться</string>
     <string name="download_map">Скачать карту</string>
     <string name="save_area_for_offline_use">Сохранить район для офлайн использования</string>
@@ -160,7 +160,7 @@
     <string name="point_added_no_weather">Точка добавлена. Погода будет загружена при появлении интернета.</string>
     <string name="point_added_with_weather">Точка добавлена с данными о погоде</string>
     <string name="share_title">Поделиться точкой</string>
-    <string name="share_open_in_app">🌿 Открыть в FloraPoint: %1$s</string>
+    <string name="share_open_in_app">🌿 Открыть в ForestPoint: %1$s</string>
     <string name="account">Аккаунт</string>
     <string name="sign_in_google">Войти через Google</string>
     <string name="sync_and_publish_points">Синхронизация и публикация точек</string>
@@ -172,7 +172,7 @@
     <string name="sign_in_error">❌ Ошибка входа: %1$s</string>
     <string name="filter_all_points">Все</string>
     <string name="filter_my_points">Мои</string>
-    <string name="delete_account">Удалить аккаунт FloraPoint</string>
+    <string name="delete_account">Удалить аккаунт ForestPoint</string>
     <string name="delete_account_subtitle">Удалить аккаунт и все данные</string>
     <string name="delete_account_warning">Все ваши точки и данные будут безвозвратно удалены. Это действие нельзя отменить.</string>
     <string name="account_deleted">Аккаунт удалён</string>
