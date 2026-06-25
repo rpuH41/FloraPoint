@@ -5,7 +5,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.annotation.Keep
 
+@Keep
 @Entity(
     tableName = "user_points_table",
     foreignKeys = [
