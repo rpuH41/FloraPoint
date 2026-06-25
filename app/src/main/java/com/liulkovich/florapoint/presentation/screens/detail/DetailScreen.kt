@@ -3,8 +3,11 @@ package com.liulkovich.florapoint.presentation.screens.detail
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,15 +15,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -71,7 +78,8 @@ fun DetailScreen(
     viewModel: DetailViewModel = hiltViewModel(),
     onBack: () -> Unit,
     isNotificationEnabled: Boolean = false,
-    onNotificationToggle: (Boolean) -> Unit
+    onNotificationToggle: (Boolean) -> Unit,
+    onSpeciesClick: (Int) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     Scaffold(
@@ -139,7 +147,9 @@ fun DetailScreen(
                 item { HeroImage(species.imageName, species.localizedName()) }
                 item {  InfoSection(
                     species = species,
-                    isHighlighted = state.isNotificationEnabled
+                    isHighlighted = state.isNotificationEnabled,
+                    resolvedLookAlikes = state.resolvedLookAlikes,
+                    onLookAlikeClick = { id -> onSpeciesClick(id) }
                 )}
                 item {
                     Button(
@@ -230,10 +240,11 @@ fun HeroImage(imageName: String, name: String) {
 @Composable
 fun InfoSection(
     species: Reference,
-    isHighlighted: Boolean
+    isHighlighted: Boolean,
+    resolvedLookAlikes: Map<String, Int?>,
+    onLookAlikeClick: (Int) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
-
         InfoBlock(
             icon = Icons.Default.LocationOn,
             title = stringResource(R.string.what_is_the_habitat_of),
@@ -246,12 +257,10 @@ fun InfoSection(
             text = species.localizedDescription(),
             isHighlighted = isHighlighted,
         )
-        InfoBlock(
-            icon = Icons.Default.Warning,
-            title = stringResource(R.string.similar_species),
-            text = species.localizedLookAlikes(),
+        LookAlikesBlock(
+            resolvedLookAlikes = resolvedLookAlikes,
             isHighlighted = isHighlighted,
-
+            onSpeciesClick = onLookAlikeClick
         )
         InfoBlock(
             icon = Icons.Default.DateRange,
@@ -263,6 +272,71 @@ fun InfoSection(
             ),
             isHighlighted = isHighlighted,
         )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun LookAlikesBlock(
+    resolvedLookAlikes: Map<String, Int?>,
+    isHighlighted: Boolean,
+    onSpeciesClick: (Int) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = null,
+                tint = if (isHighlighted) Color(0xFF66BB6A)
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(end = 12.dp, top = 2.dp)
+            )
+            Column {
+                Text(
+                    text = stringResource(R.string.similar_species),
+                    fontWeight = Bold,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    resolvedLookAlikes.forEach { (name, id) ->
+                        if (id != null) {
+                            AssistChip(
+                                onClick = { onSpeciesClick(id) },
+                                label = { Text(name) },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            )
+                        } else {
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

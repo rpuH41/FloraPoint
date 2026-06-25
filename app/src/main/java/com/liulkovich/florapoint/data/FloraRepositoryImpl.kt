@@ -38,6 +38,8 @@ class FloraRepositoryImpl @Inject constructor(
     override suspend fun getPointByCloudId(cloudId: String): UserPoints? {
         return userPointsDao.getByCloudId(cloudId)
     }
+    override suspend fun getSpeciesByExactName(name: String): Reference? =
+        referenceDao.getByExactName(name)
 
     override suspend fun deletePoint(pointId: Int) = userPointsDao.delete(pointId)
 

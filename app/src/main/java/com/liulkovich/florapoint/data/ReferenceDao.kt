@@ -39,4 +39,7 @@ interface ReferenceDao {
     @Query("SELECT * FROM reference_table")
     suspend fun getAllSpeciesList(): List<Reference>
 
+    @Query("SELECT * FROM reference_table WHERE name_ru = :name OR name_en = :name LIMIT 1")
+    suspend fun getByExactName(name: String): Reference?
+
 }

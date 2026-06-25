@@ -225,6 +225,9 @@ fun NavGraph() {
                     onBack = { navController.popBackStack() },
                     onNotificationToggle = { enabled ->
                         viewModel.toggleNotification(enabled)
+                    },
+                    onSpeciesClick = { id ->
+                        navController.navigate("Detail/$id")
                     }
                 )
             }

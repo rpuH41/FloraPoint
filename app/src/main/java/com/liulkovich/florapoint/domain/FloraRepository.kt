@@ -24,8 +24,7 @@ interface FloraRepository {
     suspend fun saveOfflineRegion(region: OfflineRegion)
     suspend fun deleteOfflineRegion(id: String)
     suspend fun countOfflineRegions(): Int
-
     suspend fun getAllSpeciesList(): List<Reference>
-
     suspend fun getAllConditions(): List<SpeciesConditions>
+    suspend fun getSpeciesByExactName(name: String): Reference?
 }
