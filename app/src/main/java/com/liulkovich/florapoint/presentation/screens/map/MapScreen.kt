@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -459,7 +460,6 @@ fun MapScreen(
                             Column(
                                 modifier = Modifier.padding(16.dp)
                             ) {
-
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -467,9 +467,11 @@ fun MapScreen(
                                     Text(
                                         text = point.userName,
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier.weight(1f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
-
                                     Spacer(Modifier.width(6.dp))
 
                                     Icon(
@@ -489,6 +491,7 @@ fun MapScreen(
                                         color = MaterialTheme.colorScheme.outline,
                                         style = MaterialTheme.typography.labelMedium
                                     )
+
                                 }
 
                                 if (point.description.isNotBlank()) {

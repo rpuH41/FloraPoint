@@ -6,6 +6,7 @@ import com.liulkovich.florapoint.domain.UserPoints
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.ListenerRegistration
 
 @Singleton
 class FirestoreRepository @Inject constructor() {
@@ -223,6 +224,39 @@ class FirestoreRepository @Inject constructor() {
                 .forEach { batch.delete(it.reference) }
             batch.delete(firestore.collection("users").document(uid))
             batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun observePublicPoints(
+        onUpdate: (List<UserPoints>) -> Unit,
+        onError: (Exception) -> Unit
+    ): ListenerRegistration {
+        return firestore.collection("public_points")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onError(error)
+                    return@addSnapshotListener
+                }
+                val points = snapshot?.documents
+                    ?.mapNotNull { doc ->
+                        doc.toObject<CloudPoint>()
+                            ?.copy(cloudId = doc.id)
+                            ?.toUserPoint()
+                    } ?: emptyList()
+                onUpdate(points)
+            }
+    }
+
+    suspend fun deletePrivatePoint(uid: String, cloudId: String): Result<Unit> {
+        return try {
+            firestore.collection("users").document(uid)
+                .collection("private_points")
+                .document(cloudId)
+                .delete()
+                .await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

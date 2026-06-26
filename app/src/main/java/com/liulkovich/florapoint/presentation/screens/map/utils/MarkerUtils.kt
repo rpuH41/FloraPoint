@@ -188,7 +188,6 @@ fun createShapeMarkerBitmap(category: String): Bitmap {
             }
         }
 
-        // Хвостик
         val tailColor = when (category.lowercase().trim()) {
             "mushroom" -> "#A0522D".toColorInt()
             "berry" -> "#6B3E9E".toColorInt()

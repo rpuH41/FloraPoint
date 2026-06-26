@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import com.google.firebase.firestore.ListenerRegistration
+import android.util.Log
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -64,18 +66,26 @@ class MapViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        loadPublicPoints()
+        observePublicPoints()
         updateMissingWeatherData()
     }
 
-    private fun loadPublicPoints() {
-        viewModelScope.launch {
-            val publicPoints = firestoreRepository.downloadPublicPoints()
+    private var publicPointsListener: ListenerRegistration? = null
 
-            _state.update {
-                it.copy(publicPoints = publicPoints)
+    private fun observePublicPoints() {
+        publicPointsListener = firestoreRepository.observePublicPoints(
+            onUpdate = { points ->
+                _state.update { it.copy(publicPoints = points) }
+            },
+            onError = { e ->
+                Log.e("MAP", "Public points listener error: $e")
             }
-        }
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        publicPointsListener?.remove()
     }
 
     fun isAuthorized(): Boolean {
@@ -323,21 +333,17 @@ class MapViewModel @Inject constructor(
     }
 
     fun deletePoint(pointId: Int) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            val point = state.value.userPoints.find { it.id == pointId }
+            val uid = authManager.getCurrentUserId()
 
-                val point = state.value.userPoints
-                    .find { it.id == pointId }
-
-                if (
-                    point?.cloudId != null &&
-                    authManager.isAuthorized()
-                ) {
-
-                    firestoreRepository.deletePoint(point.cloudId)
-                }
-
-                deletePointUseCase(pointId)
+            if (point?.cloudId != null && uid != null) {
+                firestoreRepository.deletePoint(point.cloudId)
+                firestoreRepository.deletePrivatePoint(uid, point.cloudId)
             }
+
+            deletePointUseCase(pointId)
+        }
     }
 
     fun sharePoint(
@@ -352,9 +358,8 @@ class MapViewModel @Inject constructor(
 
         val emoji = FloraCategory.fromKey(point.category ?: "")?.emoji ?: "📍"
 
-        // Всегда используем https:// ссылку — она кликабельна везде
-        // и открывает приложение через App Links если FloraPoint установлен
-        val appLink = "https://rpuh41.github.io/florapoint-privacy/point" +
+
+        val appLink = "https://rpuh41.github.io/forestpoint-privacy/point" +
                 "?lat=${point.latitude}" +
                 "&lon=${point.longitude}" +
                 "&name=${Uri.encode(point.userName)}" +
@@ -420,7 +425,13 @@ class MapViewModel @Inject constructor(
             )
         }
     }
+    private var lastMapWeatherTime = 0L
+
     fun loadCurrentWeather(lat: Double, lon: Double) {
+        val now = System.currentTimeMillis()
+        if (now - lastMapWeatherTime < 60 * 60 * 1000L) return
+        lastMapWeatherTime = now
+
         viewModelScope.launch(Dispatchers.IO) {
             val weather = weatherService.getWeatherData(lat, lon)
             if (weather != null &&

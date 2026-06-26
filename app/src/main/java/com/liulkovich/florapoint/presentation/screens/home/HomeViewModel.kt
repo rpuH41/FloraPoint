@@ -1,5 +1,6 @@
 package com.liulkovich.florapoint.presentation.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liulkovich.florapoint.domain.FloraRepository

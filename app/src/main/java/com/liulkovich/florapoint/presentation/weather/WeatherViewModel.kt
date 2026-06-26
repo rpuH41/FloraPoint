@@ -22,9 +22,17 @@ class WeatherViewModel @Inject constructor(
     private val _currentWeather = MutableStateFlow<CurrentWeather?>(null)
     val currentWeather = _currentWeather.asStateFlow()
 
+    private var lastWeatherRequestTime = 0L
+    private val WEATHER_CACHE_DURATION = 60 * 60 * 1000L
+
     fun updateLocation(lat: Double, lon: Double) {
         _currentLocation.value = lat to lon
-        loadWeather(lat, lon)
+
+        val now = System.currentTimeMillis()
+        if (now - lastWeatherRequestTime > WEATHER_CACHE_DURATION) {
+            lastWeatherRequestTime = now
+            loadWeather(lat, lon)
+        }
     }
 
     private fun loadWeather(lat: Double, lon: Double) {
