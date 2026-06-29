@@ -32,6 +32,7 @@
     import androidx.compose.ui.unit.dp
     import androidx.compose.ui.unit.sp
     import com.liulkovich.florapoint.R
+    import androidx.compose.foundation.layout.navigationBarsPadding
 
     data class BottomNavItem(
         val label: String,
@@ -56,7 +57,9 @@
             Surface(
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 shadowElevation = 8.dp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
             ) {
                 Row(
                     modifier = Modifier

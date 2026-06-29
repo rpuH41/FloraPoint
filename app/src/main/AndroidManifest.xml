@@ -43,7 +43,7 @@
                 <data
                     android:scheme="https"
                     android:host="rpuh41.github.io"
-                    android:pathPrefix="/florapoint-privacy/point" />
+                    android:pathPrefix="/forestpoint-privacy/point" />
             </intent-filter>
         </activity>
 

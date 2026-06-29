@@ -66,6 +66,7 @@ fun GuideScreen(
     onClickDetail: (Reference) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -98,18 +99,17 @@ fun GuideScreen(
                 CircularProgressIndicator()
             }
         } else {
-
-            LazyColumn(
-                contentPadding = innerPadding
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(5.dp))
-                }
-                items(items = state.species,
-                    key = { it.id }) { speciesItem ->
+            LazyColumn(contentPadding = innerPadding) {
+                item { Spacer(modifier = Modifier.height(5.dp)) }
+                items(items = state.species, key = { it.id }) { speciesItem ->
+                    val imageId = remember(speciesItem.imageName) {
+                        context.resources.getIdentifier(
+                            speciesItem.imageName, "drawable", context.packageName
+                        )
+                    }
                     GuideCard(
                         modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                        textImage = speciesItem.imageName,
+                        imageId = imageId,
                         textName = speciesItem.localizedName(),
                         startMonth = speciesItem.startMonth,
                         endMonth = speciesItem.endMonth,
@@ -170,11 +170,11 @@ private fun SearchBar(
         shape = RoundedCornerShape(10.dp)
     )
 }
-@SuppressLint("LocalContextResourcesRead")
+
 @Composable
 fun GuideCard(
     modifier: Modifier = Modifier,
-    textImage: String,
+    imageId: Int,
     textName: String,
     startMonth: Int,
     endMonth: Int,
@@ -182,21 +182,14 @@ fun GuideCard(
     onNotifChange: (Boolean) -> Unit,
     onClickDetail: (Reference) -> Unit
 ) {
-    val context = LocalContext.current
-    val imageId = remember(textImage) {
-        context.resources.getIdentifier(textImage, "drawable", context.packageName)
-    }
-
     var selectedNotif by remember(reference.isNotifEnabled) {
         mutableStateOf(reference.isNotifEnabled == 1)
     }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(1.dp),
-
         onClick = { onClickDetail(reference) }
     ) {
         Row(
@@ -205,7 +198,6 @@ fun GuideCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Image(
                 modifier = Modifier
                     .size(72.dp)
@@ -220,9 +212,7 @@ fun GuideCard(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = textName,
                     style = MaterialTheme.typography.titleMedium,
@@ -230,9 +220,7 @@ fun GuideCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
-
                 Text(
                     text = stringResource(
                         R.string.season,
@@ -256,10 +244,8 @@ fun GuideCard(
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = if (selectedNotif)
-                        Color(0xFF4CAF50)
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (selectedNotif) Color(0xFF4CAF50)
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

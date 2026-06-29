@@ -37,6 +37,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.screens.guide.GuideCard
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun NotificationScreen(
@@ -149,9 +151,15 @@ fun NotificationScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
             ) {
                 items(state.enabledSpecies, key = { it.id }) { species ->
+                    val context = LocalContext.current
+                    val imageId = remember(species.imageName) {
+                        context.resources.getIdentifier(
+                            species.imageName, "drawable", context.packageName
+                        )
+                    }
                     GuideCard(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        textImage = species.imageName,
+                        imageId = imageId,
                         textName = species.localizedName(),
                         startMonth = species.startMonth,
                         endMonth = species.endMonth,
