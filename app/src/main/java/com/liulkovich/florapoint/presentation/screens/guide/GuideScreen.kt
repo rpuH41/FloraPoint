@@ -1,7 +1,5 @@
 package com.liulkovich.florapoint.presentation.screens.guide
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +55,9 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.FloraCategory
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.localizedName
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun GuideScreen(
@@ -88,6 +88,7 @@ fun GuideScreen(
                         viewModel.processCommand(GuideCommand.CheckCategory(categoryName))
                     }
                 )
+                Spacer(modifier = Modifier.height(2.dp))
             }
         }
     ) { innerPadding ->
@@ -102,14 +103,9 @@ fun GuideScreen(
             LazyColumn(contentPadding = innerPadding) {
                 item { Spacer(modifier = Modifier.height(5.dp)) }
                 items(items = state.species, key = { it.id }) { speciesItem ->
-                    val imageId = remember(speciesItem.imageName) {
-                        context.resources.getIdentifier(
-                            speciesItem.imageName, "drawable", context.packageName
-                        )
-                    }
                     GuideCard(
                         modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                        imageId = imageId,
+                        imageName = speciesItem.imageName,
                         textName = speciesItem.localizedName(),
                         startMonth = speciesItem.startMonth,
                         endMonth = speciesItem.endMonth,
@@ -174,7 +170,7 @@ private fun SearchBar(
 @Composable
 fun GuideCard(
     modifier: Modifier = Modifier,
-    imageId: Int,
+    imageName: String,
     textName: String,
     startMonth: Int,
     endMonth: Int,
@@ -182,6 +178,7 @@ fun GuideCard(
     onNotifChange: (Boolean) -> Unit,
     onClickDetail: (Reference) -> Unit
 ) {
+    val context = LocalContext.current
     var selectedNotif by remember(reference.isNotifEnabled) {
         mutableStateOf(reference.isNotifEnabled == 1)
     }
@@ -198,16 +195,21 @@ fun GuideCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(
+                        context.resources.getIdentifier(
+                            imageName, "drawable", context.packageName
+                        ).takeIf { it != 0 } ?: R.drawable.ic_launcher_background
+                    )
+                    .crossfade(true)
+                    .size(144) // 72dp * 2 для density
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                painter = if (imageId != 0)
-                    painterResource(id = imageId)
-                else
-                    painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
+                    .clip(RoundedCornerShape(12.dp))
             )
 
             Spacer(modifier = Modifier.width(12.dp))

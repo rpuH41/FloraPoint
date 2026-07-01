@@ -24,8 +24,8 @@ android {
         applicationId = "com.liulkovich.florapoint"
         minSdk = 24
         targetSdk = 36
-        versionCode = 11
-        versionName = "1.2"
+        versionCode = 13
+        versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -113,7 +113,10 @@ dependencies {
     //Google
     implementation(libs.play.services.auth)
     implementation(libs.app.update.ktx)
+    //Coil
+    implementation(libs.coil.compose)
 
+    implementation(libs.androidx.appcompat)
 
     // Tests
     testImplementation(libs.junit)

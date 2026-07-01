@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -58,6 +59,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Check
 
 @Composable
 fun SettingsScreen(
@@ -207,6 +212,84 @@ fun SettingsScreen(
                     context.startActivity(intent)
                 }
             )
+            val currentLang by viewModel.currentLanguage.collectAsStateWithLifecycle()
+            var showLangDropdown by remember { mutableStateOf(false) }
+
+            HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
+
+            Box {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showLangDropdown = true }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = null,
+                        tint = Color(0xFF66BB6A),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.language),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = when (currentLang) {
+                                "ru" -> stringResource(R.string.russian)
+                                "en" -> stringResource(R.string.english)
+                                else -> stringResource(R.string.system)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showLangDropdown,
+                    onDismissRequest = { showLangDropdown = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.russian)) },
+                        onClick = {
+                            viewModel.setLanguage("ru")
+                            showLangDropdown = false
+                        },
+                        leadingIcon = {
+                            if (currentLang == "ru") Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color(0xFF66BB6A)
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.english)) },
+                        onClick = {
+                            viewModel.setLanguage("en")
+                            showLangDropdown = false
+                        },
+                        leadingIcon = {
+                            if (currentLang == "en") Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color(0xFF66BB6A)
+                            )
+                        }
+                    )
+                }
+            }
             HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
             val feedback = stringResource(R.string.feedback_subject)
             val letter = stringResource(R.string.write_letter)

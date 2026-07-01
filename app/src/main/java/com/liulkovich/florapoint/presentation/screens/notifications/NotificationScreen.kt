@@ -159,7 +159,7 @@ fun NotificationScreen(
                     }
                     GuideCard(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        imageId = imageId,
+                        imageName = species.imageName,
                         textName = species.localizedName(),
                         startMonth = species.startMonth,
                         endMonth = species.endMonth,

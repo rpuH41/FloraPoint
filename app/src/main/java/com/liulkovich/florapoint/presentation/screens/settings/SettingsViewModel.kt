@@ -25,6 +25,8 @@ import kotlinx.coroutines.launch
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.views.MapView
 import javax.inject.Inject
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -142,6 +144,25 @@ class SettingsViewModel @Inject constructor(
 
     fun getGoogleSignInIntent(context: Context): Intent {
         return authManager.getGoogleSignInIntent(context)
+    }
+
+    private val _currentLanguage = MutableStateFlow(
+        AppCompatDelegate.getApplicationLocales().let {
+            if (it.isEmpty) "system" else it[0]?.language ?: "system"
+        }
+    )
+    val currentLanguage = _currentLanguage.asStateFlow()
+
+    fun setLanguage(languageTag: String) {
+        val locales = LocaleListCompat.forLanguageTags(languageTag)
+        AppCompatDelegate.setApplicationLocales(locales)
+        _currentLanguage.value = languageTag
+    }
+
+    fun getCurrentLanguage(): String {
+        val locales = AppCompatDelegate.getApplicationLocales()
+        return if (locales.isEmpty) "system"
+        else locales[0]?.language ?: "system"
     }
 
     fun deleteAccount(onSuccess: () -> Unit, onError: (String) -> Unit) {

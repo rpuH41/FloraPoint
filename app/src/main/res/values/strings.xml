@@ -190,5 +190,8 @@
     <string name="forecast_good">Хорошие условия</string>
     <string name="forecast_weak">Слабая вероятность</string>
     <string name="has_nearby_point">Есть рядом точка пользователя</string>
-
+    <string name="language">Язык</string>
+    <string name="system">Системный</string>
+    <string name="russian">Русский</string>
+    <string name="english">English</string>
 </resources>

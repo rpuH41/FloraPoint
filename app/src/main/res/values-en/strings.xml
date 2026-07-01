@@ -191,4 +191,8 @@
     <string name="forecast_good">Good conditions</string>
     <string name="forecast_weak">Low probability</string>
     <string name="has_nearby_point">Nearby user point exists</string>
+    <string name="language">Language</string>
+    <string name="system">System</string>
+    <string name="russian">Русский</string>
+    <string name="english">English</string>
 </resources>
