@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +71,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.text.SimpleDateFormat
 import java.util.Date
-import com.liulkovich.florapoint.presentation.screens.map.MapFocusRequestHolder
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -333,43 +332,66 @@ fun MapScreen(
                     textStyle = LocalTextStyle.current.copy(fontSize = 13.sp)
                 )
 
-                val filteredPoints by remember {
-                    derivedStateOf {
-                        val query = state.searchQuery.trim().lowercase()
-                        if (query.isEmpty()) state.userPoints
-                        else state.userPoints.filter { point ->
+                val displayPoints = remember(
+                    state.sortedPointsWithDistance,
+                    state.searchQuery
+                ) {
+                    val query = state.searchQuery.trim().lowercase()
+                    if (query.isEmpty()) {
+                        state.sortedPointsWithDistance
+                    } else {
+                        state.sortedPointsWithDistance.filter { (point, _) ->
                             val speciesName = state.species
                                 .find { it.id == point.speciesId }?.localizedName()?.lowercase() ?: ""
-                            speciesName.contains(query) || point.userName.lowercase()
-                                .contains(query)
+                            speciesName.contains(query) || point.userName.lowercase().contains(query)
                         }
+                    }
+                }
+                val listState = rememberLazyListState()
+
+                LaunchedEffect(state.selectedPointId) {
+                    val selectedIndex = displayPoints.indexOfFirst { (point, _) ->
+                        point.id == state.selectedPointId
+                    }
+                    if (selectedIndex >= 0) {
+                        listState.animateScrollToItem(selectedIndex)
                     }
                 }
 
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    state = listState,
                 ) {
-                    items(filteredPoints, key = { it.id }) { point ->
+                    items(
+                        items = displayPoints,
+                        key = { (point, _) ->
+                            if (point.id != 0) "local_${point.id}"
+                            else "public_${point.cloudId ?: point.hashCode()}"
+                        }
+                    ) { (point, distance) ->
+                        android.util.Log.d("POINT_KEY", "id=${point.id}, cloudId=${point.cloudId}, isPublic=${point.isPublic}, owner=${point.ownerUid}")
                         val displayName = when {
                             point.userName.isNotBlank() && point.speciesId == 0 -> point.userName
                             point.speciesId == 0 -> stringResource(R.string.custom_species)
                             else -> state.species.find { it.id == point.speciesId }?.localizedName()
-                                ?: point.userName.ifBlank {
-                                    stringResource(R.string.unknown_species)
-                                }
+                                ?: point.userName.ifBlank { stringResource(R.string.unknown_species) }
                         }
 
                         PointListItem(
                             point = point,
                             speciesName = displayName,
+                            distance = distance,
                             isSelected = point.id == state.selectedPointId,
                             onClick = {
-                                viewModel.onPointClicked(point)
+                                if (!viewModel.isPublicForeignPoint(point)) {
+                                    viewModel.onPointClicked(point)
+                                }
                                 shouldFollowLocation = false
                                 forceCenter = GeoPoint(point.latitude, point.longitude)
                             },
+                            isOwner = !viewModel.isPublicForeignPoint(point),
                             onLongClick = { viewModel.onPointLongClicked(point) },
                             onEdit = { viewModel.onPointLongClicked(point) },
                             onDelete = { viewModel.deletePoint(point.id) },

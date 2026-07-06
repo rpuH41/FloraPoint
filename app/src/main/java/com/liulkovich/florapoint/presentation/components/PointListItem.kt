@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.LaunchedEffect
+import com.liulkovich.florapoint.domain.LocationUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -57,6 +58,8 @@ fun PointListItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    isOwner: Boolean = true,
+    distance: Double? = null,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onShare: () -> Unit
@@ -66,8 +69,11 @@ fun PointListItem(
             .format(Date(point.timestamp * 1000))
     }
 
-    var expanded by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    val pointKey = if (point.id != 0) "local_${point.id}"
+    else "public_${point.cloudId ?: point.hashCode().toString()}"
+
+    var expanded by remember(pointKey) { mutableStateOf(false) }
+    var showDeleteDialog by remember(pointKey) { mutableStateOf(false) }
 
     LaunchedEffect(isSelected) {
         if (isSelected) expanded = true
@@ -88,11 +94,11 @@ fun PointListItem(
             defaultElevation = if (expanded) 4.dp else 1.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
-                MaterialTheme.colorScheme.secondaryContainer
-
-            else
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = when {
+                isSelected -> MaterialTheme.colorScheme.secondaryContainer
+                !isOwner -> MaterialTheme.colorScheme.surfaceVariant
+                else -> MaterialTheme.colorScheme.surfaceContainerLow
+            }
         )
     ) {
         Column(
@@ -118,6 +124,14 @@ fun PointListItem(
                         .padding(start = 6.dp)
                         .weight(1f)
                 )
+                if (distance != null) {
+                    Text(
+                        text = LocationUtils.formatDistance(distance),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
                 Text(
                     text = dateStr,
                     style = MaterialTheme.typography.labelSmall,
@@ -170,21 +184,21 @@ fun PointListItem(
                     ) {
                         IconButton(onClick = onShare, modifier = Modifier.size(32.dp)) {
                             Icon(Icons.Default.Share, contentDescription = null,
-                               // tint = MaterialTheme.colorScheme.outline,
                                 modifier = Modifier.size(16.dp))
                         }
-                        IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Edit, contentDescription = null,
-                                //tint = MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(16.dp))
-                        }
-                        IconButton(
-                            onClick = { showDeleteDialog = true },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(16.dp))
+                        if (isOwner) {
+                            IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Edit, contentDescription = null,
+                                    modifier = Modifier.size(16.dp))
+                            }
+                            IconButton(
+                                onClick = { showDeleteDialog = true },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp))
+                            }
                         }
                     }
                 }

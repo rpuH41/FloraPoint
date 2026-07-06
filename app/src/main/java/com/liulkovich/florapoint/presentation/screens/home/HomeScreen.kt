@@ -38,6 +38,8 @@ import com.liulkovich.florapoint.domain.localizedText
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun HomeScreen(
@@ -97,12 +99,12 @@ fun SeasonSection(
     viewModel: HomeViewModel,
     onClickDetail: (Int) -> Unit
 ) {
-    val fixedHeight = 225.dp
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(fixedHeight)
+            .height(225.dp)
             .padding(horizontal = 16.dp)
     ) {
         when {
@@ -142,7 +144,7 @@ fun SeasonSection(
                 ) {
                     items(state.species, key = { it.id }) { speciesItem ->
                         HomeSeasonCard(
-                            textImage = speciesItem.imageName,
+                            imageName = speciesItem.imageName,   // ← передаём имя
                             textName = speciesItem.localizedName(),
                             endMonth = speciesItem.endMonth,
                             reference = speciesItem,
@@ -157,7 +159,6 @@ fun SeasonSection(
         }
     }
 }
-
 @Composable
 fun SeasonCardSkeleton() {
     Card(
@@ -197,6 +198,7 @@ fun SeasonCardSkeleton() {
 @Composable
 fun ReferenceCategories(onClickCategory: (String) -> Unit) {
     val visibleCategories = FloraCategory.entries.filter { it != FloraCategory.OTHER }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -205,10 +207,15 @@ fun ReferenceCategories(onClickCategory: (String) -> Unit) {
         visibleCategories.chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEach { category ->
+                    val imageId = remember(category.imageName) {
+                        context.resources.getIdentifier(
+                            category.imageName, "drawable", context.packageName
+                        )
+                    }
                     TypeFlora(
                         modifier = Modifier.weight(1f),
                         nameTypes = stringResource(category.stringRes),
-                        nameImage = category.imageName,
+                        imageId = imageId,
                         onClickType = { onClickCategory(category.key) }
                     )
                 }
@@ -217,17 +224,13 @@ fun ReferenceCategories(onClickCategory: (String) -> Unit) {
     }
 }
 
-@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun TypeFlora(
     modifier: Modifier,
     nameTypes: String,
-    nameImage: String,
+    imageId: Int,
     onClickType: () -> Unit
 ) {
-    val context = LocalContext.current
-    val imageId = context.resources.getIdentifier(nameImage, "drawable", context.packageName)
-
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(15.dp),
@@ -256,11 +259,10 @@ fun TypeFlora(
     }
 }
 
-@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun HomeSeasonCard(
     modifier: Modifier = Modifier,
-    textImage: String,
+    imageName: String,           // ← теперь имя, а не id
     textName: String,
     endMonth: Int,
     reference: Reference,
@@ -268,7 +270,6 @@ fun HomeSeasonCard(
     onClickDetail: (Int) -> Unit,
 ) {
     val context = LocalContext.current
-    val imageId = context.resources.getIdentifier(textImage, "drawable", context.packageName)
 
     Card(
         modifier = modifier
@@ -280,14 +281,20 @@ fun HomeSeasonCard(
     ) {
         Column {
             Box {
-                Image(
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(
+                            context.resources.getIdentifier(
+                                imageName, "drawable", context.packageName
+                            ).takeIf { it != 0 } ?: R.drawable.ic_launcher_background
+                        )
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    painter = if (imageId != 0) painterResource(id = imageId)
-                    else painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
+                        .height(50.dp)
                 )
 
                 var selectedNotif by remember(reference.id) {

@@ -33,6 +33,7 @@ import java.util.Locale
 import javax.inject.Inject
 import com.google.firebase.firestore.ListenerRegistration
 import android.util.Log
+import com.liulkovich.florapoint.domain.LocationUtils
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -57,8 +58,10 @@ class MapViewModel @Inject constructor(
         getAllUserPointsUseCase()
             .onEach { userPoints ->
                 _state.update { it.copy(userPoints = userPoints) }
+                updateSortedPoints()
             }
             .launchIn(viewModelScope)
+
 
         getAllSpeciesUseCase()
             .onEach { speciesList ->
@@ -68,6 +71,7 @@ class MapViewModel @Inject constructor(
 
         observePublicPoints()
         updateMissingWeatherData()
+
     }
 
     private var publicPointsListener: ListenerRegistration? = null
@@ -75,6 +79,9 @@ class MapViewModel @Inject constructor(
     private fun observePublicPoints() {
         publicPointsListener = firestoreRepository.observePublicPoints(
             onUpdate = { points ->
+                points.forEach {
+                    Log.d("PUBLIC", "cloudId=${it.cloudId}, owner=${it.ownerUid}")
+                }
                 _state.update { it.copy(publicPoints = points) }
             },
             onError = { e ->
@@ -99,6 +106,7 @@ class MapViewModel @Inject constructor(
     fun updateCurrentLocation(lat: Double, lon: Double) {
         _state.update { it.copy(currentUserLocation = lat to lon) }
         loadCurrentWeather(lat, lon)
+        updateSortedPoints()
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -424,6 +432,7 @@ class MapViewModel @Inject constructor(
                 showOnlyMyPoints = !it.showOnlyMyPoints
             )
         }
+        updateSortedPoints()
     }
     private var lastMapWeatherTime = 0L
 
@@ -452,6 +461,32 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun updateSortedPoints() {
+        val currentState = state.value
+        val allPoints = if (currentState.showOnlyMyPoints) {
+            currentState.userPoints
+        } else {
+            val myCloudIds = currentState.userPoints.mapNotNull { it.cloudId }.toSet()
+            val myUid = authManager.getCurrentUserId()
+            currentState.userPoints + currentState.publicPoints.filter {
+                it.cloudId !in myCloudIds && it.ownerUid != myUid
+            }
+        }
+
+        val currentLat = currentState.currentUserLocation?.first
+        val currentLon = currentState.currentUserLocation?.second
+
+        val pointsWithDistance = allPoints.map { point ->
+            val distance = if (currentLat != null && currentLon != null) {
+                LocationUtils.calculateDistance(currentLat, currentLon, point.latitude, point.longitude)
+            } else null
+            point to distance
+        }.sortedBy { it.second ?: Double.MAX_VALUE }
+
+        _state.update { it.copy(sortedPointsWithDistance = pointsWithDistance) }
+
     }
 }
 
@@ -498,7 +533,8 @@ data class MapScreenState(
     val deepLinkName: String = "",
     val deepLinkCategory: String = "",
     val showOnlyMyPoints: Boolean = true,
-    val currentWeather: CurrentWeather? = null
+    val currentWeather: CurrentWeather? = null,
+    val sortedPointsWithDistance: List<Pair<UserPoints, Double?>> = emptyList()
 )
 
 data class CurrentWeather(

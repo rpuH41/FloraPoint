@@ -217,7 +217,7 @@ fun SettingsScreen(
 
             HorizontalDivider(modifier = Modifier.padding(start = 52.dp))
 
-            Box {
+                Box {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

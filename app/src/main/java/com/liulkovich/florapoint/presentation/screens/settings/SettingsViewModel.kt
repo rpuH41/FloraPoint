@@ -148,7 +148,13 @@ class SettingsViewModel @Inject constructor(
 
     private val _currentLanguage = MutableStateFlow(
         AppCompatDelegate.getApplicationLocales().let {
-            if (it.isEmpty) "system" else it[0]?.language ?: "system"
+            when {
+                !it.isEmpty -> it[0]?.language ?: "ru"
+                else -> {
+                    val systemLang = java.util.Locale.getDefault().language
+                    if (systemLang == "ru") "ru" else "en"
+                }
+            }
         }
     )
     val currentLanguage = _currentLanguage.asStateFlow()
