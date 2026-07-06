@@ -59,6 +59,9 @@ class MapViewModel @Inject constructor(
             .onEach { userPoints ->
                 _state.update { it.copy(userPoints = userPoints) }
                 updateSortedPoints()
+                if (userPoints.any { it.avgTemp5Days == null || it.avgHumidity5Days == null }) {
+                    updateMissingWeatherData()
+                }
             }
             .launchIn(viewModelScope)
 
@@ -70,7 +73,6 @@ class MapViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         observePublicPoints()
-        updateMissingWeatherData()
 
     }
 
@@ -79,9 +81,6 @@ class MapViewModel @Inject constructor(
     private fun observePublicPoints() {
         publicPointsListener = firestoreRepository.observePublicPoints(
             onUpdate = { points ->
-                points.forEach {
-                    Log.d("PUBLIC", "cloudId=${it.cloudId}, owner=${it.ownerUid}")
-                }
                 _state.update { it.copy(publicPoints = points) }
             },
             onError = { e ->
