@@ -48,13 +48,22 @@ class GetForecastUseCase @Inject constructor(
                 distanceKm(currentLat, currentLon, it.latitude, it.longitude)
             } ?: 999.0
 
-            ForecastItem(
+            /*ForecastItem(
                 reference = species,
                 score = score,
                 hasNearbyPoint = nearbyPoint != null && distanceKm <= 80.0,
                 nearbyPointId = nearbyPoint?.id,
                 nearbyLat = nearbyPoint?.latitude,
                 nearbyLon = nearbyPoint?.longitude
+            )*/
+            ForecastItem(
+                reference = species,
+                score = score,
+                hasNearbyPoint = nearbyPoint != null,
+                nearbyPointId = nearbyPoint?.id,
+                nearbyLat = nearbyPoint?.latitude,
+                nearbyLon = nearbyPoint?.longitude,
+                nearbyDistanceKm = distanceKm.takeIf { nearbyPoint != null }
             )
         }
             .sortedByDescending { it.score }

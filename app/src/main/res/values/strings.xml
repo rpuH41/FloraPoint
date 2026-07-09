@@ -194,4 +194,6 @@
     <string name="system">Системный</string>
     <string name="russian">Русский</string>
     <string name="english">English</string>
+    <string name="update_ready">Обновление готово к установке</string>
+    <string name="restart">Перезапустить</string>
 </resources>

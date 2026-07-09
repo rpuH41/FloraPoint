@@ -24,7 +24,7 @@ android {
         applicationId = "com.liulkovich.florapoint"
         minSdk = 24
         targetSdk = 36
-        versionCode = 14
+        versionCode = 16
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -113,6 +113,7 @@ dependencies {
     //Google
     implementation(libs.play.services.auth)
     implementation(libs.app.update.ktx)
+    implementation(libs.material)
     //Coil
     implementation(libs.coil.compose)
 

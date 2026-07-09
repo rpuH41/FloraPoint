@@ -40,6 +40,7 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.ForecastItem
 import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.screens.map.CurrentWeather
+import com.liulkovich.florapoint.domain.LocationUtils
 
 @Composable
 fun ForecastScreen(
@@ -223,13 +224,24 @@ private fun ForecastCard(
             }
 
             if (item.hasNearbyPoint) {
-                IconButton(onClick = onLocationClick) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Показать на карте",
-                        tint = Color(0xFF4CAF50),
-                        modifier = Modifier.size(26.dp)
-                    )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(onClick = onLocationClick) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+                    item.nearbyDistanceKm?.let { distance ->
+                        Text(
+                            text = LocationUtils.formatDistance(distance),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF4CAF50)
+                        )
+                    }
                 }
             }
         }

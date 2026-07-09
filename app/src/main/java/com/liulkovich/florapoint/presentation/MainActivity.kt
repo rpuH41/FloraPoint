@@ -9,14 +9,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.liulkovich.florapoint.presentation.auth.AuthManager
 import com.liulkovich.florapoint.presentation.navigation.NavGraph
 import com.liulkovich.florapoint.presentation.screens.home.HomeViewModel
+import com.liulkovich.florapoint.presentation.splash.SplashScreen
 import com.liulkovich.florapoint.presentation.ui.theme.FloraPointTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -45,13 +53,21 @@ class MainActivity : AppCompatActivity() {
         AppUpdateManagerFactory.create(this)
     }
 
+    private val installStateUpdatedListener = InstallStateUpdatedListener { state ->
+        if (state.installStatus() == InstallStatus.DOWNLOADED) {
+            showRestartSnackbar()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
+        appUpdateManager.registerListener(installStateUpdatedListener)
         checkForUpdate()
+
 
         splashScreen.setKeepOnScreenCondition {
             val state = homeViewModel.state.value
@@ -76,6 +92,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        appUpdateManager.unregisterListener(installStateUpdatedListener)
+    }
 
     private fun checkForUpdate() {
         appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
@@ -87,10 +107,22 @@ class MainActivity : AppCompatActivity() {
                     updateLauncher,
                     AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
                 )
+            } else if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                showRestartSnackbar()
             }
         }.addOnFailureListener {
             Log.d("UPDATE", "Update check failed: $it")
         }
+    }
+
+    private fun showRestartSnackbar() {
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            getString(com.liulkovich.florapoint.R.string.update_ready),
+            Snackbar.LENGTH_INDEFINITE
+        ).setAction(getString(com.liulkovich.florapoint.R.string.restart)) {
+            appUpdateManager.completeUpdate()
+        }.show()
     }
 
     private fun requestNotificationPermission() {

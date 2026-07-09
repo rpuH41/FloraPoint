@@ -6,5 +6,6 @@ data class ForecastItem(
     val hasNearbyPoint: Boolean = false,
     val nearbyPointId: Int? = null,
     val nearbyLat: Double? = null,
-    val nearbyLon: Double? = null
+    val nearbyLon: Double? = null,
+    val nearbyDistanceKm: Double? = null //
 )

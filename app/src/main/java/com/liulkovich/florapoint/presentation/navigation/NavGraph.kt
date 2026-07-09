@@ -179,10 +179,18 @@ fun NavGraph() {
                 ),
                 deepLinks = listOf(
                     navDeepLink {
-                        uriPattern =
-                            "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
+                        uriPattern = "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
+                    },
+                    navDeepLink {
+                        uriPattern = "https://rpuh41.github.io/forestpoint-privacy/point?lat={lat}&lon={lon}&name={name}&category={category}"
                     }
                 )
+//                deepLinks = listOf(
+//                    navDeepLink {
+//                        uriPattern =
+//                            "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
+//                    }
+//                )
             ) { backStackEntry ->
                 val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull() ?: 0.0
                 val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull() ?: 0.0
