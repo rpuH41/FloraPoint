@@ -97,7 +97,38 @@ fun EditPointSheetContent(
             .format(Date(point.timestamp * 1000L))
     }
 
-    SheetContent(title = stringResource(R.string.edit_point)) {
+    SheetContent(
+        title = stringResource(R.string.edit_point),
+        bottomBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(
+                    onClick = {
+                        val matched = selectedSpecies
+                            ?: filteredSpecies.find {
+                                it.localizedName().equals(searchText.trim(), ignoreCase = true)
+                            }
+                        onSave(
+                            matched?.id,
+                            searchText.trim(),
+                            description.trim(),
+                            selectedCategory.key,
+                            isPublic
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    enabled = searchText.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            }
+        }
+    ) {
         Text(
             text = stringResource(R.string.added, dateStr),
             style = MaterialTheme.typography.labelSmall,
@@ -240,38 +271,6 @@ fun EditPointSheetContent(
                         onOpenSettings()
                     }
                 )
-            }
-        }
-
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-            Button(
-                onClick = {
-                    val matched = selectedSpecies
-                        ?: filteredSpecies.find {
-                            it.localizedName().equals(searchText.trim(), ignoreCase = true)
-                        }
-                    onSave(
-                        matched?.id,
-                        searchText.trim(),
-                        description.trim(),
-                        selectedCategory.key,
-                        isPublic
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                enabled = searchText.isNotBlank()
-            ) {
-                Text(stringResource(R.string.save))
             }
         }
     }

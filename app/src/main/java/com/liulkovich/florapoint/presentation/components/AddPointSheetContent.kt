@@ -79,7 +79,40 @@ fun AddPointSheetContent(
         }
     }
 
-    SheetContent(title = stringResource(R.string.new_location)) {
+    SheetContent(
+        title = stringResource(R.string.new_location),
+        bottomBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(
+                    onClick = {
+                        val finalSpeciesId: Int? = when {
+                            selectedSpecies != null -> selectedSpecies!!.id
+                            else -> filteredSpecies.find {
+                                it.localizedName().equals(searchText.trim(), ignoreCase = true)
+                            }?.id
+                        }
+                        onSave(
+                            finalSpeciesId,
+                            searchText.trim(),
+                            description.trim(),
+                            selectedCategory.key,
+                            isPublic
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    enabled = searchText.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            }
+        }
+    ) {
 
         ExposedDropdownMenuBox(
             expanded = typeDropdownExpanded,
@@ -227,34 +260,5 @@ fun AddPointSheetContent(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.cancel))
-            }
-            Button(
-                onClick = {
-                    val finalSpeciesId: Int? = when {
-                        selectedSpecies != null -> selectedSpecies!!.id
-                        else -> filteredSpecies.find {
-                            it.localizedName().equals(searchText.trim(), ignoreCase = true)
-                        }?.id
-                    }
-                    onSave(
-                        finalSpeciesId,
-                        searchText.trim(),
-                        description.trim(),
-                        selectedCategory.key,
-                        isPublic
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                enabled = searchText.isNotBlank()
-            ) {
-                Text(stringResource(R.string.save))
-            }
-        }
     }
 }

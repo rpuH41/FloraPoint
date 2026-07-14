@@ -300,13 +300,10 @@ class MapViewModel @Inject constructor(
         category: String,
         isPublic: Boolean
     ) {
-
         viewModelScope.launch {
-
             state.value.userPoints
                 .find { it.id == pointId }
                 ?.let { old ->
-
                     val updatedPoint = old.copy(
                         speciesId = speciesId,
                         userName = userName,
@@ -317,22 +314,21 @@ class MapViewModel @Inject constructor(
 
                     editPointUseCase(updatedPoint)
 
-                    if (
-                        updatedPoint.isPublic &&
-                        updatedPoint.cloudId != null &&
-                        authManager.isAuthorized()
-                    ) {
-
-                        firestoreRepository.updatePoint(updatedPoint)
-                    }
-
-                    if (
-                        updatedPoint.isPublic &&
-                        authManager.isAuthorized()
-                    ) {
-
-                        runCatching {
-                            firestoreRepository.uploadPoint(updatedPoint)
+                    if (updatedPoint.isPublic && authManager.isAuthorized()) {
+                        if (updatedPoint.cloudId != null) {
+                            firestoreRepository.updatePoint(updatedPoint)
+                        } else {
+                            val result = firestoreRepository.uploadPoint(updatedPoint)
+                            result.onSuccess { cloudId ->
+                                editPointUseCase(
+                                    updatedPoint.copy(cloudId = cloudId, syncState = "SYNCED")
+                                )
+                            }
+                            result.onFailure {
+                                editPointUseCase(
+                                    updatedPoint.copy(syncState = "UPLOAD_FAILED")
+                                )
+                            }
                         }
                     }
                 }

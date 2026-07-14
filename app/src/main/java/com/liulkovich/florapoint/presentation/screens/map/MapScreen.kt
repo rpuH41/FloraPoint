@@ -72,6 +72,8 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -326,6 +328,17 @@ fun MapScreen(
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                     placeholder = {
                         Text(stringResource(R.string.search_places), fontSize = 13.sp)
+                    },
+                    trailingIcon = {
+                        if (state.searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.clear),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),

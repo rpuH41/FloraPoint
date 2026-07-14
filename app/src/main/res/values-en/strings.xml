@@ -197,4 +197,5 @@
     <string name="english">English</string>
     <string name="update_ready">Update ready to install</string>
     <string name="restart">Restart</string>
+    <string name="clear">Clear</string>
 </resources>

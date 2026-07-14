@@ -23,9 +23,9 @@ class FloraRepositoryImpl @Inject constructor(
 
     override fun getSpeciesByCategories(categories: Set<String>): Flow<List<Reference>> = referenceDao.getByCategories(categories)
 
-    override fun getByCategoriesAndName(categories: Set<String>, speciesName: String): Flow<List<Reference>> = referenceDao.getByCategoriesAndName(categories, speciesName)
+    override fun getByCategoriesAndName(categories: Set<String>, speciesName: String): Flow<List<Reference>> = referenceDao.getByCategoriesAndName(categories, speciesName.trim())
 
-    override fun getSpeciesByName(speciesName: String): Flow<List<Reference>> = referenceDao.getByName(speciesName)
+    override fun getSpeciesByName(speciesName: String): Flow<List<Reference>> = referenceDao.getByName(speciesName.trim())
 
     override fun getById(referenceId: Int): Flow<Reference?> = referenceDao.getById(referenceId)
 

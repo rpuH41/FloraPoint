@@ -97,20 +97,22 @@ fun NavGraph() {
                 BottomBar(
                     currentRoute = currentRoute ?: Screen.Home.rout,
                     onNavigate = { route ->
-                        if (currentRoute == Screen.Forecast.rout) {
-                            navController.popBackStack()
-                        }
+
                         navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = false
+                                saveState = true
                             }
                             launchSingleTop = true
-                            restoreState = false
+                            restoreState = true
                         }
                     },
                     onForecastClick = {
                         navController.navigate(Screen.Forecast.rout) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
@@ -185,12 +187,7 @@ fun NavGraph() {
                         uriPattern = "https://rpuh41.github.io/forestpoint-privacy/point?lat={lat}&lon={lon}&name={name}&category={category}"
                     }
                 )
-//                deepLinks = listOf(
-//                    navDeepLink {
-//                        uriPattern =
-//                            "florapoint://point?lat={lat}&lon={lon}&name={name}&category={category}"
-//                    }
-//                )
+
             ) { backStackEntry ->
                 val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull() ?: 0.0
                 val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull() ?: 0.0
@@ -252,7 +249,6 @@ fun NavGraph() {
                     onBack = { navController.popBackStack() }
                 )
             }
-
             composable(Screen.Forecast.rout) {
                 val weather by weatherViewModel.currentWeather.collectAsStateWithLifecycle()
                 val location by weatherViewModel.currentLocation.collectAsStateWithLifecycle()
@@ -268,7 +264,13 @@ fun NavGraph() {
                         if (pointId != null) {
                             mapFocusHolder.request(pointId)
                         }
-                        navController.navigate(Screen.Map.rout)
+                        navController.navigate(Screen.Map.rout) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -288,9 +290,7 @@ sealed class Screen(val rout: String) {
     data object Settings : Screen("Settings")
     data object Notifications : Screen("Notifications")
     data object Detail : Screen("Detail/{speciesId}")
-
     data object OfflineRegions : Screen("OfflineRegions")
     data object DownloadArea : Screen("DownloadArea")
-
     data object Forecast : Screen("Forecast")
 }

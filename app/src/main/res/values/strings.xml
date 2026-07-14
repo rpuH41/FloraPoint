@@ -196,4 +196,5 @@
     <string name="english">English</string>
     <string name="update_ready">Обновление готово к установке</string>
     <string name="restart">Перезапустить</string>
+    <string name="clear">Очистить</string>
 </resources>

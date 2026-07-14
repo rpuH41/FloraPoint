@@ -57,7 +57,8 @@ import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.localizedName
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.IconButton
 
 @Composable
 fun GuideScreen(
@@ -163,7 +164,19 @@ private fun SearchBar(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         },
-        shape = RoundedCornerShape(10.dp)
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.clear),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        shape = RoundedCornerShape(10.dp),
+        singleLine = true
     )
 }
 

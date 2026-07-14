@@ -81,7 +81,7 @@ class GuideViewModel @Inject constructor(
 
                 is GuideCommand.InputSearchQuery -> {
 
-                    query.update { command.query.trim() }
+                    query.update { command.query } //.trim()
                 }
 
                 is GuideCommand.CheckCategory -> {
