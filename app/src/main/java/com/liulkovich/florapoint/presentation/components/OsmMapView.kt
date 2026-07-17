@@ -3,6 +3,8 @@ package com.liulkovich.florapoint.presentation.components
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,6 +35,7 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.UserPoints
 import com.liulkovich.florapoint.domain.localizedName
+import com.liulkovich.florapoint.presentation.screens.map.CurrentWeather
 import com.liulkovich.florapoint.presentation.screens.map.utils.createShapeMarkerBitmap
 import com.liulkovich.florapoint.presentation.screens.map.utils.isOnline
 import org.osmdroid.events.MapEventsReceiver
@@ -43,11 +46,6 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import androidx.compose.foundation.layout.Column
-import com.liulkovich.florapoint.presentation.screens.map.CurrentWeather
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
@@ -157,7 +155,7 @@ fun OsmMapView(
                 mv.overlays.add(MapEventsOverlay(object : MapEventsReceiver {
                     override fun singleTapConfirmedHelper(p: GeoPoint?) = false
                     override fun longPressHelper(p: GeoPoint?): Boolean {
-                       return false
+                        return false
                     }
                 }))
 
@@ -202,41 +200,52 @@ fun OsmMapView(
                     shape = RoundedCornerShape(8.dp),
                     color = Color(0xCC000000)
                 ) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.weather_now),
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = "☀️ ${currentWeather.temperature.toInt()}°",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = "💧 ${currentWeather.humidity}%",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = stringResource(R.string.weather_last_5days),
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = "🌡️ ${currentWeather.avgTemp5Days.toInt()}°",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = "💧 ${currentWeather.avgHumidity5Days}%",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.weather_now),
+                                color = Color.White.copy(alpha = 0.7f),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "☀️ ${currentWeather.temperature.toInt()}°",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "💧 ${currentWeather.humidity}%",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.weather_last_5days),
+                                color = Color.White.copy(alpha = 0.7f),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "🌡️ ${currentWeather.avgTemp5Days.toInt()}°",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "💧 ${currentWeather.avgHumidity5Days}%",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
                 }
             }
