@@ -20,5 +20,8 @@ data class Reference(
     @ColumnInfo(name = "start_month") val startMonth: Int,
     @ColumnInfo(name = "end_month") val endMonth: Int,
     @ColumnInfo(name = "image_name") val imageName: String,
-    @ColumnInfo(name = "is_notif_enabled") val isNotifEnabled: Int
+    @ColumnInfo(name = "is_notif_enabled") val isNotifEnabled: Int,
+    @ColumnInfo(name = "is_reference_only") val isReferenceOnly: Int = 0,
+    @ColumnInfo(name = "differences_ru") val differencesRu: String? = null,
+    @ColumnInfo(name = "differences_en") val differencesEn: String? = null,
 )

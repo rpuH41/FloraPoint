@@ -47,6 +47,7 @@ class HomeViewModel @Inject constructor(
 
                 val filtered = species.filter { item ->
                     item.category != "other" &&
+                            item.isReferenceOnly != 1 &&
                             if (item.startMonth <= item.endMonth) {
                                 currentMonth in item.startMonth..item.endMonth
                             } else {

@@ -328,9 +328,11 @@ fun HomeSeasonCard(
             )
 
             Text(
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                modifier = Modifier.padding(start = 8.dp, /*bottom = 2.dp,*/ end = 8.dp),
                 text = stringResource(R.string.days_left, countDay(endMonth)),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

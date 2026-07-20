@@ -232,7 +232,10 @@ fun NavGraph() {
                         viewModel.toggleNotification(enabled)
                     },
                     onSpeciesClick = { id ->
-                        navController.navigate("Detail/$id")
+                        navController.navigate("Detail/$id") {
+                            popUpTo(Screen.Detail.rout) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
                 )
             }

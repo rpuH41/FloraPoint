@@ -17,3 +17,9 @@ fun Reference.localizedLookAlikes(): String =
 fun Reference.localizedDescription(): String =
     if (Locale.getDefault().language == "en") descriptionEn?.takeIf { it.isNotBlank() } ?: descriptionRu
     else descriptionRu
+
+fun Reference.localizedDifferences(): String {
+    val isRu = Locale.getDefault().language != "en"
+    val ru = differencesRu ?: ""
+    return if (isRu) ru else differencesEn?.takeIf { it.isNotBlank() } ?: ru
+}

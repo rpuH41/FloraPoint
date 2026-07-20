@@ -197,4 +197,5 @@
     <string name="update_ready">Обновление готово к установке</string>
     <string name="restart">Перезапустить</string>
     <string name="clear">Очистить</string>
+    <string name="differences_from_original">Чем отличается</string>
 </resources>

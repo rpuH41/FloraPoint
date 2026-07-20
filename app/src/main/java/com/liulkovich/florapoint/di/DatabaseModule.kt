@@ -3,6 +3,7 @@ package com.liulkovich.florapoint.di
 import android.content.Context
 import androidx.room.Room
 import com.liulkovich.florapoint.data.AppDatabase
+import com.liulkovich.florapoint.data.MIGRATION_17_18
 import com.liulkovich.florapoint.data.OfflineRegionDao
 import com.liulkovich.florapoint.data.ReferenceDao
 import com.liulkovich.florapoint.data.SpeciesConditionsDao
@@ -28,8 +29,7 @@ object DatabaseModule {
             "flora.db"
         )
             .createFromAsset("flora.db")
-            //.fallbackToDestructiveMigration()
-            //.fallbackToDestructiveMigrationFrom(true)
+            .addMigrations(MIGRATION_17_18)
             .build()
     }
 

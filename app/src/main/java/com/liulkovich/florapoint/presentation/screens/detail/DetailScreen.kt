@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import com.liulkovich.florapoint.domain.localizedDifferences
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.DateRange
@@ -67,9 +67,11 @@ import com.liulkovich.florapoint.R
 import com.liulkovich.florapoint.domain.Reference
 import com.liulkovich.florapoint.domain.localizedDescription
 import com.liulkovich.florapoint.domain.localizedHabitat
-import com.liulkovich.florapoint.domain.localizedLookAlikes
 import com.liulkovich.florapoint.domain.localizedName
 import com.liulkovich.florapoint.presentation.screens.guide.numberInString
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +84,18 @@ fun DetailScreen(
     onSpeciesClick: (Int) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+
+    val listState = rememberLazyListState()
+    val isScrolled by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
+        }
+    }
+    val topBarContainerColor by animateColorAsState(
+        targetValue = if (isScrolled) MaterialTheme.colorScheme.surface else Color.Transparent,
+        label = "topBarBackground"
+    )
+
     Scaffold(
 
         topBar = {
@@ -134,14 +148,15 @@ fun DetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    containerColor = topBarContainerColor
                 ),
-                modifier = Modifier.background(Color.Transparent)
+                modifier = Modifier.background(topBarContainerColor)
             )
         }
     ) { innerPadding ->
         state.species?.let { species ->
             LazyColumn(
+                state = listState,
                 contentPadding = innerPadding
             ) {
                 item { HeroImage(species.imageName, species.localizedName()) }
@@ -262,6 +277,14 @@ fun InfoSection(
             isHighlighted = isHighlighted,
             onSpeciesClick = onLookAlikeClick
         )
+        if (!species.differencesRu.isNullOrBlank()) {
+            InfoBlock(
+                icon = Icons.Default.Info,
+                title = stringResource(R.string.differences_from_original),
+                text = species.localizedDifferences(),
+                isHighlighted = isHighlighted,
+            )
+        }
         InfoBlock(
             icon = Icons.Default.DateRange,
             title = stringResource(R.string.harvest_period),
