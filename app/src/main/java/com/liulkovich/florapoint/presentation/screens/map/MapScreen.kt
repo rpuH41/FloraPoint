@@ -28,6 +28,8 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -602,14 +604,22 @@ fun LegendGroupBox(
         Text(
             text = title,
             fontSize = 12.sp,
+            lineHeight = 12.sp,
             color = Color.Black,
+            style = LocalTextStyle.current.copy(
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both
+                )
+            ),
             modifier = Modifier
                 .padding(start = 12.dp)
                 .background(
                     color = Color.White.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(4.dp)
                 )
-                //.padding(horizontal = 1.dp, vertical = 1.dp)
+                .padding(horizontal = 1.dp, vertical = 0.dp)
                 .align(Alignment.TopStart)
         )
     }

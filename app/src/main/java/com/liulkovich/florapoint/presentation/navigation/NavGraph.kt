@@ -83,12 +83,17 @@ fun NavGraph() {
     }
     val screensWithoutBottomBar = listOf(Screen.Detail.rout)
     val showBottomBar = currentRoute !in screensWithoutBottomBar
+    val normalizedRoute = if (currentRoute?.startsWith("Map") == true) {
+        Screen.Map.rout
+    } else {
+        currentRoute
+    }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 BottomBar(
-                    currentRoute = currentRoute ?: Screen.Home.rout,
+                    currentRoute = normalizedRoute ?: Screen.Home.rout,
                     onNavigate = { route ->
 
                         navController.navigate(route) {
@@ -301,8 +306,15 @@ sealed class Screen(val rout: String) {
     data object Forecast : Screen("Forecast")
 }
 
+private var lastLocationRequestTime = 0L
+private const val LOCATION_REQUEST_INTERVAL = 10 * 60 * 1000L
+
 @SuppressLint("MissingPermission")
 private fun requestFreshLocation(context: Context, weatherViewModel: WeatherViewModel) {
+    val now = System.currentTimeMillis()
+    if (now - lastLocationRequestTime < LOCATION_REQUEST_INTERVAL) return
+    lastLocationRequestTime = now
+
     val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
     fusedClient.lastLocation.addOnSuccessListener { location ->

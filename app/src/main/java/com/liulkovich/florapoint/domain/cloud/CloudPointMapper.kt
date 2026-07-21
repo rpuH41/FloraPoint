@@ -31,7 +31,7 @@ fun UserPoints.toCloudPoint(): CloudPoint {
     )
 }
 
-fun CloudPoint.toUserPoint(): UserPoints {
+fun CloudPoint.toUserPoint(isPublic: Boolean): UserPoints {
 
     return UserPoints(
         id = 0,
@@ -59,7 +59,7 @@ fun CloudPoint.toUserPoint(): UserPoints {
 
         weatherTimestamp = null,
 
-        isPublic = true,
+        isPublic = isPublic,
         ownerUid = ownerUid,
         cloudId = cloudId,
 

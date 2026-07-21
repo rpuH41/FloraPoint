@@ -128,7 +128,7 @@ class FirestoreRepository @Inject constructor() {
 
                     doc.toObject<CloudPoint>()
                         ?.copy(cloudId = doc.id)
-                        ?.toUserPoint()
+                        ?.toUserPoint(isPublic = true)
                 }
 
         } catch (e: Exception) {
@@ -147,7 +147,7 @@ class FirestoreRepository @Inject constructor() {
                 .mapNotNull { doc ->
                     doc.toObject<CloudPoint>()
                         ?.copy(cloudId = doc.id)
-                        ?.toUserPoint()
+                        ?.toUserPoint(isPublic = true)
                 }
         } catch (e: Exception) {
             emptyList()
@@ -192,7 +192,7 @@ class FirestoreRepository @Inject constructor() {
                 .mapNotNull { doc ->
                     doc.toObject<CloudPoint>()
                         ?.copy(cloudId = doc.id)
-                        ?.toUserPoint()
+                        ?.toUserPoint(isPublic = false)
                 }
         } catch (e: Exception) {
             emptyList()
@@ -244,7 +244,7 @@ class FirestoreRepository @Inject constructor() {
                     ?.mapNotNull { doc ->
                         doc.toObject<CloudPoint>()
                             ?.copy(cloudId = doc.id)
-                            ?.toUserPoint()
+                            ?.toUserPoint(isPublic = true)
                     } ?: emptyList()
                 onUpdate(points)
             }

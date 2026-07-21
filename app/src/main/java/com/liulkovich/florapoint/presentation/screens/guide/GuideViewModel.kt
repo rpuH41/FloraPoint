@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.liulkovich.florapoint.domain.localizedName
 import javax.inject.Inject
 
 
@@ -67,7 +68,9 @@ class GuideViewModel @Inject constructor(
             .onEach { speciesList ->
                 _state.update {
                     it.copy(
-                        species = speciesList.filter { it.category != FloraCategory.OTHER.key },
+                        species = speciesList
+                            .filter { it.category != FloraCategory.OTHER.key }
+                            .sortedBy { it.localizedName() },
                         isLoading = false
                     )
                 }
