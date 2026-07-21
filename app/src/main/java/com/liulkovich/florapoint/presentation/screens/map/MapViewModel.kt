@@ -442,7 +442,8 @@ class MapViewModel @Inject constructor(
                 weather.temperature != null &&
                 weather.humidity != null &&
                 weather.avgTemp5Days != null &&
-                weather.avgHumidity5Days != null
+                weather.avgHumidity5Days != null &&
+                weather.rainSum5Days != null
             ) {
                 _state.update {
                     it.copy(
@@ -450,7 +451,8 @@ class MapViewModel @Inject constructor(
                             temperature = weather.temperature,
                             humidity = weather.humidity,
                             avgTemp5Days = weather.avgTemp5Days,
-                            avgHumidity5Days = weather.avgHumidity5Days
+                            avgHumidity5Days = weather.avgHumidity5Days,
+                            rainSum5Days = weather.rainSum5Days
                         )
                     )
                 }
@@ -536,5 +538,6 @@ data class CurrentWeather(
     val temperature: Double,
     val humidity: Int,
     val avgTemp5Days: Double,
-    val avgHumidity5Days: Int
+    val avgHumidity5Days: Int,
+    val rainSum5Days: Double
 )

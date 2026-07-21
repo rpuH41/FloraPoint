@@ -46,6 +46,7 @@ import com.liulkovich.florapoint.domain.LocationUtils
 fun ForecastScreen(
     viewModel: ForecastViewModel = hiltViewModel(),
     currentWeather: CurrentWeather?,
+    isWeatherLoading: Boolean,
     currentLat: Double,
     currentLon: Double,
     onNavigateToDetail: (Int) -> Unit,
@@ -54,7 +55,7 @@ fun ForecastScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(currentWeather) {
-        viewModel.load(currentWeather, currentLat, currentLon)
+        viewModel.load(currentWeather, isWeatherLoading, currentLat, currentLon)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

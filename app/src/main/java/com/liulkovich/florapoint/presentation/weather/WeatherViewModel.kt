@@ -22,6 +22,9 @@ class WeatherViewModel @Inject constructor(
     private val _currentWeather = MutableStateFlow<CurrentWeather?>(null)
     val currentWeather = _currentWeather.asStateFlow()
 
+    private val _isLoadingWeather = MutableStateFlow(false)
+    val isLoadingWeather = _isLoadingWeather.asStateFlow()
+
     private var lastWeatherRequestTime = 0L
     private val WEATHER_CACHE_DURATION = 60 * 60 * 1000L
 
@@ -37,19 +40,23 @@ class WeatherViewModel @Inject constructor(
 
     private fun loadWeather(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoadingWeather.value = true
             val weather = weatherService.getWeatherData(lat, lon)
             if (weather?.temperature != null &&
                 weather.humidity != null &&
                 weather.avgTemp5Days != null &&
-                weather.avgHumidity5Days != null
+                weather.avgHumidity5Days != null &&
+                weather.rainSum5Days != null
             ) {
                 _currentWeather.value = CurrentWeather(
                     temperature = weather.temperature,
                     humidity = weather.humidity,
                     avgTemp5Days = weather.avgTemp5Days,
-                    avgHumidity5Days = weather.avgHumidity5Days
+                    avgHumidity5Days = weather.avgHumidity5Days,
+                    rainSum5Days = weather.rainSum5Days
                 )
             }
+            _isLoadingWeather.value = false
         }
     }
 }

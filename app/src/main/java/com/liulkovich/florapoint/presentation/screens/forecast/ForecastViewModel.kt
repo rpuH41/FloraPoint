@@ -23,7 +23,12 @@ class ForecastViewModel @Inject constructor(
     private val _state = MutableStateFlow(ForecastScreenState())
     val state = _state.asStateFlow()
 
-    fun load(weather: CurrentWeather?, currentLat: Double, currentLon: Double) {
+    fun load(weather: CurrentWeather?, isWeatherLoading: Boolean, currentLat: Double, currentLon: Double) {
+        if (weather == null && isWeatherLoading) {
+            _state.update { it.copy(isLoading = true, noWeather = false) }
+            return
+        }
+
         if (weather == null) {
             _state.update { it.copy(isLoading = false, noWeather = true) }
             return
@@ -40,6 +45,7 @@ class ForecastViewModel @Inject constructor(
                 humidity = weather.humidity,
                 avgTemp = weather.avgTemp5Days,
                 avgHumidity = weather.avgHumidity5Days,
+                rainSum5Days = weather.rainSum5Days,
                 currentMonth = currentMonth,
                 currentLat = currentLat,
                 currentLon = currentLon,

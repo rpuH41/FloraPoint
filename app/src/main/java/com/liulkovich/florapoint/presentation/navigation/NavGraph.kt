@@ -1,11 +1,13 @@
 package com.liulkovich.florapoint.presentation.navigation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +41,7 @@ import com.liulkovich.florapoint.presentation.screens.settings.DownloadAreaScree
 import com.liulkovich.florapoint.presentation.screens.settings.OfflineRegionsScreen
 import com.liulkovich.florapoint.presentation.screens.settings.SettingsScreen
 import com.liulkovich.florapoint.presentation.weather.WeatherViewModel
+import com.google.android.gms.location.Priority
 
 @Composable
 fun NavGraph() {
@@ -54,12 +57,7 @@ fun NavGraph() {
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (granted) {
-            val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    weatherViewModel.updateLocation(location.latitude, location.longitude)
-                }
-            }
+            requestFreshLocation(context, weatherViewModel)
         }
     }
 
@@ -72,12 +70,7 @@ fun NavGraph() {
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-                fusedClient.lastLocation.addOnSuccessListener { location ->
-                    if (location != null) {
-                        weatherViewModel.updateLocation(location.latitude, location.longitude)
-                    }
-                }
+                requestFreshLocation(context, weatherViewModel)
             } else {
                 locationPermissionLauncher.launch(
                     arrayOf(
@@ -126,7 +119,15 @@ fun NavGraph() {
         ) {
             composable(Screen.Home.rout) {
                 HomeScreen(
-                    onClickMap = { navController.navigate(Screen.Map.rout) },
+                    onClickMap = {
+                        navController.navigate(Screen.Map.rout) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onClickCategory = { category ->
                         navController.navigate(Screen.Guide.createRoute(category))
                     },
@@ -254,10 +255,12 @@ fun NavGraph() {
             }
             composable(Screen.Forecast.rout) {
                 val weather by weatherViewModel.currentWeather.collectAsStateWithLifecycle()
+                val isWeatherLoading by weatherViewModel.isLoadingWeather.collectAsStateWithLifecycle()
                 val location by weatherViewModel.currentLocation.collectAsStateWithLifecycle()
 
                 ForecastScreen(
                     currentWeather = weather,
+                    isWeatherLoading = isWeatherLoading,
                     currentLat = location?.first ?: 0.0,
                     currentLon = location?.second ?: 0.0,
                     onNavigateToDetail = { speciesId ->
@@ -296,4 +299,27 @@ sealed class Screen(val rout: String) {
     data object OfflineRegions : Screen("OfflineRegions")
     data object DownloadArea : Screen("DownloadArea")
     data object Forecast : Screen("Forecast")
+}
+
+@SuppressLint("MissingPermission")
+private fun requestFreshLocation(context: Context, weatherViewModel: WeatherViewModel) {
+    val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+
+    fusedClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+            weatherViewModel.updateLocation(location.latitude, location.longitude)
+        } else {
+            if (ActivityCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null)
+                    .addOnSuccessListener { freshLocation ->
+                        if (freshLocation != null) {
+                            weatherViewModel.updateLocation(freshLocation.latitude, freshLocation.longitude)
+                        }
+                    }
+            }
+        }
+    }
 }

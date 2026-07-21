@@ -15,6 +15,7 @@ class GetForecastUseCase @Inject constructor(
         humidity: Int,
         avgTemp: Double,
         avgHumidity: Int,
+        rainSum5Days: Double,
         currentMonth: Int,
         currentLat: Double,
         currentLon: Double,
@@ -31,6 +32,7 @@ class GetForecastUseCase @Inject constructor(
             val score = calculateScore(
                 avgTemp = avgTemp,
                 avgHumidity = avgHumidity,
+                rainSum5Days = rainSum5Days,
                 currentMonth = currentMonth,
                 species = species,
                 conditions = conditions
@@ -48,14 +50,6 @@ class GetForecastUseCase @Inject constructor(
                 distanceKm(currentLat, currentLon, it.latitude, it.longitude)
             } ?: 999.0
 
-            /*ForecastItem(
-                reference = species,
-                score = score,
-                hasNearbyPoint = nearbyPoint != null && distanceKm <= 80.0,
-                nearbyPointId = nearbyPoint?.id,
-                nearbyLat = nearbyPoint?.latitude,
-                nearbyLon = nearbyPoint?.longitude
-            )*/
             ForecastItem(
                 reference = species,
                 score = score,
@@ -72,30 +66,38 @@ class GetForecastUseCase @Inject constructor(
     private fun calculateScore(
         avgTemp: Double,
         avgHumidity: Int,
+        rainSum5Days: Double,
         currentMonth: Int,
         species: Reference,
         conditions: SpeciesConditions
     ): Int {
-        var score = 0
-
         val inSeason = if (species.startMonth <= species.endMonth) {
             currentMonth in species.startMonth..species.endMonth
         } else {
             currentMonth >= species.startMonth || currentMonth <= species.endMonth
         }
         if (!inSeason) return 0
-        score += 45
 
-        score += when {
+        val tempScore = when {
             avgTemp < conditions.tempMin - 4 || avgTemp > conditions.tempMax + 4 -> 0
             avgTemp in (conditions.tempMin.toDouble())..(conditions.tempMax.toDouble()) -> 35
             else -> 15
         }
 
-        score += when {
+        val humidityScore = when {
             avgHumidity < conditions.humidityMin - 12 || avgHumidity > conditions.humidityMax + 12 -> 0
             avgHumidity in conditions.humidityMin..conditions.humidityMax -> 25
             else -> 12
+        }
+
+        var score = 45 + tempScore + humidityScore
+
+        if (tempScore == 0 || humidityScore == 0) {
+            score = score.coerceAtMost(79)
+        }
+
+        if (rainSum5Days <= 0.0) {
+            score = score.coerceAtMost(79)
         }
 
         return score.coerceIn(0, 100)
