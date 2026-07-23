@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.liulkovich.florapoint.data.AppDatabase
 import com.liulkovich.florapoint.data.MIGRATION_17_18
+import com.liulkovich.florapoint.data.MIGRATION_18_19
 import com.liulkovich.florapoint.data.OfflineRegionDao
 import com.liulkovich.florapoint.data.ReferenceDao
 import com.liulkovich.florapoint.data.SpeciesConditionsDao
@@ -29,7 +30,7 @@ object DatabaseModule {
             "flora.db"
         )
             .createFromAsset("flora.db")
-            .addMigrations(MIGRATION_17_18)
+            .addMigrations(MIGRATION_17_18, MIGRATION_18_19)
             .build()
     }
 

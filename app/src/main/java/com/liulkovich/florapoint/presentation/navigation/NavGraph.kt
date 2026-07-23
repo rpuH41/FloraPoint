@@ -95,13 +95,13 @@ fun NavGraph() {
                 BottomBar(
                     currentRoute = normalizedRoute ?: Screen.Home.rout,
                     onNavigate = { route ->
-
                         navController.navigate(route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+
                         }
                     },
                     onForecastClick = {
@@ -134,7 +134,13 @@ fun NavGraph() {
                         }
                     },
                     onClickCategory = { category ->
-                        navController.navigate(Screen.Guide.createRoute(category))
+                        navController.navigate(Screen.Guide.createRoute(category)) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            //restoreState = true
+                        }
                     },
                     onClickDetail = { navController.navigate("Detail/$it") }
                 )
@@ -161,7 +167,12 @@ fun NavGraph() {
                 MapScreen(
                     weatherViewModel = weatherViewModel,
                     mapFocusHolder = mapFocusHolder,
-                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
+                    onOpenSettings = {
+                        navController.navigate(Screen.Settings.rout) {
+                            popUpTo(Screen.Settings.rout) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -207,7 +218,12 @@ fun NavGraph() {
                     deepLinkName = name,
                     deepLinkCategory = category,
                     mapFocusHolder = mapFocusHolder,
-                    onOpenSettings = { navController.navigate(Screen.Settings.rout) }
+                    onOpenSettings = {
+                        navController.navigate(Screen.Settings.rout) {
+                            popUpTo(Screen.Settings.rout) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -215,9 +231,23 @@ fun NavGraph() {
                 SettingsScreen(
                     onNavigateToNotifications = {
                         navController.navigate(Screen.Notifications.rout)
+                        {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+
                     },
                     onNavigateToOfflineRegions = {
-                        navController.navigate(Screen.OfflineRegions.rout)
+                        navController.navigate(Screen.OfflineRegions.rout){
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -248,7 +278,13 @@ fun NavGraph() {
             composable(Screen.OfflineRegions.rout) {
                 OfflineRegionsScreen(
                     onNavigateToDownload = {
-                        navController.navigate(Screen.DownloadArea.rout)
+                        navController.navigate(Screen.DownloadArea.rout){
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }

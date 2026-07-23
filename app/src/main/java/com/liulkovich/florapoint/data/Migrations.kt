@@ -135,3 +135,17 @@ val MIGRATION_17_18 = object : Migration(17, 18) {
         )
     }
 }
+
+val MIGRATION_18_19 = object : Migration(18, 19) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+
+        db.execSQL(
+            """
+            UPDATE reference_table
+            SET look_alikes_ru = 'Шампиньон лесной, Сыроежка зелёная',
+                look_alikes_en = 'Wood mushroom, Green russula'
+            WHERE id = 26
+            """.trimIndent()
+        )
+    }
+}

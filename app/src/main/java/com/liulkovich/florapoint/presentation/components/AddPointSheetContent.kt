@@ -245,19 +245,20 @@ fun AddPointSheetContent(
                 onCheckedChange = { isPublic = it },
                 enabled = isAuthorized
             )
-            if (!isAuthorized) {
-                Spacer(Modifier.height(6.dp))
 
-                Text(
-                    text = stringResource(R.string.sign_in_to_publish),
-                    textDecoration = TextDecoration.Underline,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable {
-                        onOpenSettings()
-                    }
-                )
-            }
+        }
+        if (!isAuthorized) {
+            //Spacer(Modifier.height(6.dp))
+
+            Text(
+                text = stringResource(R.string.sign_in_to_publish),
+                textDecoration = TextDecoration.Underline,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    onOpenSettings()
+                }
+            )
         }
 
     }
