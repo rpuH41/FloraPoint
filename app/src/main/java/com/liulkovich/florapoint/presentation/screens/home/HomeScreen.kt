@@ -29,6 +29,9 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -94,7 +97,19 @@ fun HomeScreen(
                 ReferenceCategories(onClickCategory = onClickCategory)
             }
 
-            item { Title(name = stringResource(R.string.season_now)) }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Title(name = stringResource(R.string.season_now))
+                    SeasonCategoryDropdown(
+                        selectedCategory = state.selectedSeasonCategory,
+                        onCategorySelected = { viewModel.onSeasonCategorySelected(it) }
+                    )
+                }
+            }
             item {
                 SeasonSection(
                     state = state,
@@ -124,14 +139,14 @@ fun SeasonSection(
 ) {
     val context = LocalContext.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(225.dp)
-            .padding(horizontal = 16.dp)
-    ) {
-        when {
-            state.isLoading -> {
+    when {
+        state.isLoading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(225.dp)
+                    .padding(horizontal = 16.dp)
+            ) {
                 LazyHorizontalGrid(
                     rows = GridCells.Fixed(2),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -141,25 +156,56 @@ fun SeasonSection(
                     items(4) { SeasonCardSkeleton() }
                 }
             }
+        }
 
-            state.species.isEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_active_seasons),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+        state.species.isEmpty() -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.no_active_seasons),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        state.species.size <= 2 -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(108.dp)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                state.species.forEach { speciesItem ->
+                    HomeSeasonCard(
+                        imageName = speciesItem.imageName,
+                        textName = speciesItem.localizedName(),
+                        endMonth = speciesItem.endMonth,
+                        reference = speciesItem,
+                        onNotificationChange = { isChecked ->
+                            viewModel.toggleNotification(speciesItem.id, isChecked)
+                        },
+                        onClickDetail = { onClickDetail(speciesItem.id) },
                     )
                 }
             }
+        }
 
-            else -> {
-                val rows = if (state.species.size <= 2) 1 else 2
-
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(225.dp)
+                    .padding(horizontal = 16.dp)
+            ) {
                 LazyHorizontalGrid(
-                    rows = GridCells.Fixed(rows),
+                    rows = GridCells.Fixed(2),
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -167,7 +213,7 @@ fun SeasonSection(
                 ) {
                     items(state.species, key = { it.id }) { speciesItem ->
                         HomeSeasonCard(
-                            imageName = speciesItem.imageName,   // ← передаём имя
+                            imageName = speciesItem.imageName,
                             textName = speciesItem.localizedName(),
                             endMonth = speciesItem.endMonth,
                             reference = speciesItem,
@@ -285,7 +331,7 @@ fun TypeFlora(
 @Composable
 fun HomeSeasonCard(
     modifier: Modifier = Modifier,
-    imageName: String,           // ← теперь имя, а не id
+    imageName: String,
     textName: String,
     endMonth: Int,
     reference: Reference,
@@ -445,4 +491,59 @@ fun countDay(endMonth: Int): Long {
     }
     val diffDays = (endCal.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)
     return if (diffDays < 0) 0 else diffDays
+}
+
+@Composable
+fun SeasonCategoryDropdown(
+    selectedCategory: String?,
+    onCategorySelected: (String?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val categories = FloraCategory.entries.filter { it != FloraCategory.OTHER }
+    val currentLabel = categories.find { it.key == selectedCategory }
+        ?.let { stringResource(it.stringRes) }
+        ?: stringResource(R.string.all_seasons)
+
+    Box {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { expanded = true }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = currentLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.all_seasons)) },
+                onClick = {
+                    onCategorySelected(null)
+                    expanded = false
+                }
+            )
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    text = { Text("${category.emoji} ${stringResource(category.stringRes)}") },
+                    onClick = {
+                        onCategorySelected(category.key)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

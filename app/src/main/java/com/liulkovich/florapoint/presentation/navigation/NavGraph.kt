@@ -8,10 +8,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -92,6 +94,8 @@ fun NavGraph() {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
+                val configuration = LocalConfiguration.current
+                val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
                 BottomBar(
                     currentRoute = normalizedRoute ?: Screen.Home.rout,
                     onNavigate = { route ->
@@ -112,7 +116,8 @@ fun NavGraph() {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }
+                    },
+                    compact = isLandscape
                 )
             }
         }

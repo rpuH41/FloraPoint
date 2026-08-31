@@ -19,20 +19,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-
     private val getAllSpeciesUseCase: GetAllSpeciesUseCase,
     private val getRandomTipUseCase: GetRandomTipUseCase,
     private val updateNotificationUseCase: UpdateNotificationUseCase,
     private val authManager: AuthManager,
     private val firestoreRepository: FirestoreRepository,
     private val repository: FloraRepository
-
 ): ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state = _state.asStateFlow()
+
+    private val selectedCategory = MutableStateFlow<String?>(null)
 
     init {
         loadSpecies()
@@ -40,33 +41,40 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadSpecies() {
-        getAllSpeciesUseCase()
-            .onEach { species ->
-                val today = Calendar.getInstance()
-                val currentMonth = today.get(Calendar.MONTH) + 1
+        combine(getAllSpeciesUseCase(), selectedCategory) { species, category ->
+            val today = Calendar.getInstance()
+            val currentMonth = today.get(Calendar.MONTH) + 1
 
-                val filtered = species.filter { item ->
-                    item.category != "other" &&
-                            item.isReferenceOnly != 1 &&
-                            if (item.startMonth <= item.endMonth) {
-                                currentMonth in item.startMonth..item.endMonth
-                            } else {
-                                currentMonth >= item.startMonth || currentMonth <= item.endMonth
-                            }
-                }.sortedBy { item ->
-                    val endCal = Calendar.getInstance().apply {
-                        set(Calendar.MONTH, item.endMonth - 1)
-                        set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-                        set(Calendar.HOUR_OF_DAY, 23)
-                        set(Calendar.MINUTE, 59)
-                        set(Calendar.SECOND, 59)
-                        if (before(today)) add(Calendar.YEAR, 1)
-                    }
-                    endCal.timeInMillis - today.timeInMillis
+            species.filter { item ->
+                item.category != "other" &&
+                        item.isReferenceOnly != 1 &&
+                        (category == null || item.category == category) &&
+                        if (item.startMonth <= item.endMonth) {
+                            currentMonth in item.startMonth..item.endMonth
+                        } else {
+                            currentMonth >= item.startMonth || currentMonth <= item.endMonth
+                        }
+            }.sortedBy { item ->
+                val endCal = Calendar.getInstance().apply {
+                    set(Calendar.MONTH, item.endMonth - 1)
+                    set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+                    set(Calendar.HOUR_OF_DAY, 23)
+                    set(Calendar.MINUTE, 59)
+                    set(Calendar.SECOND, 59)
+                    if (before(today)) add(Calendar.YEAR, 1)
                 }
+                endCal.timeInMillis - today.timeInMillis
+            }
+        }
+            .onEach { filtered ->
                 _state.update { it.copy(species = filtered, isLoading = false) }
             }
             .launchIn(viewModelScope)
+    }
+
+    fun onSeasonCategorySelected(category: String?) {
+        selectedCategory.value = category
+        _state.update { it.copy(selectedSeasonCategory = category) }
     }
 
     private fun loadTips() {
@@ -98,8 +106,8 @@ class HomeViewModel @Inject constructor(
 
 data class HomeScreenState(
     val species: List<Reference> = listOf(),
-    //val species: Reference? = null,
     val tip: Tip? = null,
     val isLoading: Boolean = true,
-    val isTipLoading: Boolean = true
+    val isTipLoading: Boolean = true,
+    val selectedSeasonCategory: String? = null
 )

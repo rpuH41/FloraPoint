@@ -34,8 +34,9 @@
 # ============ Firebase ============
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
--keep class com.liulkovich.florapoint.domain.** { *; }
--keep class com.liulkovich.florapoint.domain.cloud.** { *; }
+#-keep class com.liulkovich.florapoint.domain.** { *; }
+#-keep class com.liulkovich.florapoint.domain.cloud.** { *; }
+-keep class com.liulkovich.florapoint.domain.SyncState { *; }
 
 
 # ============ Kotlin Serialization ============
