@@ -61,3 +61,14 @@
 # ============ Отладка крашей ============
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Сохраняем ресурсы и R-классы
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
+
+# Если используешь Coil / Glide
+-keep class coil.** { *; }
+-keep class com.bumptech.glide.** { *; }
+-dontwarn coil.**
+-dontwarn com.bumptech.glide.**

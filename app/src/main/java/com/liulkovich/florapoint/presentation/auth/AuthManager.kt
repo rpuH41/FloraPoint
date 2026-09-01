@@ -92,7 +92,7 @@ class AuthManager @Inject constructor() {
     }
     fun getGoogleSignInIntent(context: Context): Intent {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))  // ← важно!
+            .requestIdToken(context.getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="
+        @drawable/ic_*,
+        @drawable/img_*,
+        @drawable/mushroom_*,
+        @drawable/species_*,
+        @mipmap/*,
+        @raw/*
+    " />
