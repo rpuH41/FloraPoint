@@ -42,28 +42,15 @@ class HomeViewModel @Inject constructor(
 
     private fun loadSpecies() {
         combine(getAllSpeciesUseCase(), selectedCategory) { species, category ->
-            val today = Calendar.getInstance()
-            val currentMonth = today.get(Calendar.MONTH) + 1
+            val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
 
             species.filter { item ->
                 item.category != "other" &&
                         item.isReferenceOnly != 1 &&
                         (category == null || item.category == category) &&
-                        if (item.startMonth <= item.endMonth) {
-                            currentMonth in item.startMonth..item.endMonth
-                        } else {
-                            currentMonth >= item.startMonth || currentMonth <= item.endMonth
-                        }
+                        isInSeason(item, currentMonth)
             }.sortedBy { item ->
-                val endCal = Calendar.getInstance().apply {
-                    set(Calendar.MONTH, item.endMonth - 1)
-                    set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-                    set(Calendar.HOUR_OF_DAY, 23)
-                    set(Calendar.MINUTE, 59)
-                    set(Calendar.SECOND, 59)
-                    if (before(today)) add(Calendar.YEAR, 1)
-                }
-                endCal.timeInMillis - today.timeInMillis
+                daysUntilSeasonEnd(item.endMonth, currentMonth)
             }
         }
             .onEach { filtered ->
@@ -100,6 +87,25 @@ class HomeViewModel @Inject constructor(
                     repository.insertPoint(point)
                 }
             }
+        }
+    }
+
+    private fun isInSeason(item: Reference, currentMonth: Int): Boolean {
+        return if (item.startMonth <= item.endMonth) {
+            currentMonth in item.startMonth..item.endMonth
+        } else {
+            currentMonth >= item.startMonth || currentMonth <= item.endMonth
+        }
+    }
+
+    private fun daysUntilSeasonEnd(endMonth: Int, currentMonth: Int): Int {
+        val end = endMonth.coerceIn(1, 12)
+        val current = currentMonth.coerceIn(1, 12)
+
+        return if (end >= current) {
+            (end - current) * 31
+        } else {
+            (12 - current + end) * 31
         }
     }
 }

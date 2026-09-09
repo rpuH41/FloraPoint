@@ -24,7 +24,7 @@ android {
         applicationId = "com.liulkovich.florapoint"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
+        versionCode = 26
         versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,7 +41,7 @@ android {
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
-           isShrinkResources = true
+           isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
